@@ -46,8 +46,6 @@ android {
     productFlavors {
 
         create("production") {
-            applicationIdSuffix = ".prod"
-            versionNameSuffix = "-prod"
             versionCode = 1
             versionName = "1.0"
             buildConfigField(
@@ -63,7 +61,6 @@ android {
         }
         create("staging") {
             applicationIdSuffix = ".staging"
-            versionNameSuffix = "-staging"
             versionCode = 1
             versionName = "1.0"
             buildConfigField(
@@ -155,6 +152,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
 
-kapt{
+kapt {
     correctErrorTypes = true
 }

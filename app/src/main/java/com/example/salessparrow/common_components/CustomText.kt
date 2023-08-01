@@ -7,7 +7,7 @@ import androidx.compose.ui.text.TextStyle
 @Composable
 fun CustomText(
     text: String,
-    customTextStyle: TextStyle = TextStyle.Default
+    customTextStyle: TextStyle = TextStyle.Default,
 ) {
     Text(
         text = text,
