@@ -19,3 +19,5 @@ staging.properties
 /app/staging.properties
 app/dev.properties
 dev.properties
+app/src/staging/google-services.json
+app/src/prod/google-services.json
