@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "204351648468",
+    "project_id": "sales-sparrow-12268",
+    "storage_bucket": "sales-sparrow-12268.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:204351648468:android:f533962288f4431ac88141",
+        "android_client_info": {
+          "package_name": "com.example.salessparrow"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "204351648468-j156bkvpmp0s7d9v9ig18idb7d1usgcr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjtKCINQb1kTfPf13K9GHG760aXORcpY8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "204351648468-j156bkvpmp0s7d9v9ig18idb7d1usgcr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
