@@ -55,7 +55,7 @@ android {
                 "BASE_URL",
                 "\"${
                     getPropertyValueFromPropertiesFile(
-                        file("production.properties"),
+                        file("prod.properties"),
                         "PRODUCTION_API_URL"
                     )
                 }\""
