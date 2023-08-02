@@ -4,6 +4,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
@@ -38,7 +39,7 @@ fun TermsAndConditionComponent(
                     fontFamily = FontFamily(Font(R.font.nunito_regular)),
                     fontWeight = FontWeight(600),
                     color = Color(0xFFDD1A77),
-                    textDecoration = TextDecoration.Underline
+                    textDecoration = TextDecoration.Underline,
                 )
             ) {
 

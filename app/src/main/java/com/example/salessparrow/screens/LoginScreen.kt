@@ -16,29 +16,39 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.salessparrow.R
 import com.example.salessparrow.common_components.CustomButton
 import com.example.salessparrow.common_components.CustomText
 import com.example.salessparrow.common_components.CustomTextWithImage
 import com.example.salessparrow.common_components.HorizontalBar
 import com.example.salessparrow.common_components.TermsAndConditionComponent
+import com.example.salessparrow.viewmodals.AuthenticationViewModal
 
 
-@Preview(showBackground = true)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LogInScreen() {
+
+    val authenticationViewModal: AuthenticationViewModal = viewModel()
+    val context = LocalContext.current;
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFF1F1F2)
@@ -164,7 +174,9 @@ fun LogInScreen() {
                         textAlign = TextAlign.Center,
                         letterSpacing = 0.64.sp
                     ),
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        authenticationViewModal.connectWithSalesForce(context);
+                    },
                     imageId = R.drawable.salesforce_connect,
                     imageContentDescription = "salesforce_logo",
                     imageModifier = Modifier
@@ -172,7 +184,11 @@ fun LogInScreen() {
                         .height(18.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(46.dp),
+                        .height(46.dp)
+                        .semantics {
+                            testTagsAsResourceId = true;
+                            testTag = "salesforce_button"
+                        },
                     isLoadingProgressBar = false,
                     buttonShape = RoundedCornerShape(size = 5.dp),
                 )

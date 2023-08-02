@@ -58,6 +58,16 @@ android {
                     )
                 }\""
             )
+            buildConfigField(
+                "String",
+                "SALESFORCE_LOGIN_URL",
+                "\"${
+                    getPropertyValueFromPropertiesFile(
+                        file("prod.properties"),
+                        "SALESFORCE_LOGIN_URL"
+                    )
+                }\""
+            )
         }
         create("staging") {
             applicationIdSuffix = ".staging"
@@ -70,6 +80,16 @@ android {
                     getPropertyValueFromPropertiesFile(
                         file("staging.properties"),
                         "STAGING_API_URL"
+                    )
+                }\""
+            )
+            buildConfigField(
+                "String",
+                "SALESFORCE_LOGIN_URL",
+                "\"${
+                    getPropertyValueFromPropertiesFile(
+                        file("staging.properties"),
+                        "SALESFORCE_LOGIN_URL"
                     )
                 }\""
             )
@@ -140,7 +160,11 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.44")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
 
-
+    //Network Calls Library
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.11")
 
 
     testImplementation("junit:junit:4.13.2")

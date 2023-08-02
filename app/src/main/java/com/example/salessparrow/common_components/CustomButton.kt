@@ -1,6 +1,7 @@
 package com.example.salessparrow.common_components
 
 
+import android.nfc.Tag
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,12 +32,14 @@ fun CustomButton(
     modifier: Modifier = Modifier,
     buttonShape: Shape?,
     buttonTextModifier: Modifier? = Modifier,
+    isButtonEnabled: Boolean = true,
 ) {
     if (buttonShape != null) {
         Button(
             onClick = onClick,
             modifier = modifier,
             shape = buttonShape,
+            enabled = isButtonEnabled
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
