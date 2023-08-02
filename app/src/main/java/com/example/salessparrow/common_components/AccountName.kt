@@ -19,6 +19,7 @@ import com.example.salessparrow.ui.theme.port_gore
 
 @Composable
 fun AccountName(
+    name : String,
     showAddNote: Boolean = false,
 ) {
     Box(
@@ -29,7 +30,7 @@ fun AccountName(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             CustomText(
-                text = "Account Name", Typography.labelSmall, color = port_gore
+                text = name, Typography.labelSmall, color = port_gore
             )
             Spacer(Modifier.weight(1f))
             if (showAddNote) {
@@ -51,5 +52,5 @@ fun AccountName(
 @Composable
 @Preview(showBackground = true)
 fun AccountNamePreview() {
-    AccountName()
+    AccountName("SalseSparrow")
 }

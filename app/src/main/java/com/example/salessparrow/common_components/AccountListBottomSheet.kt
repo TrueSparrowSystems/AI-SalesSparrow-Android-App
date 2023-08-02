@@ -79,11 +79,13 @@ fun CustomBottomSheetContainer() {
         },
     ) {
         Column(modifier = Modifier.padding(it)) {
-            AccountName()
-            AccountName(showAddNote = true)
-            AccountName(showAddNote = true)
-            AccountName(showAddNote = true)
-            AccountName(showAddNote = true)
+            val accountNames = listOf(
+                "Google", "Microsoft", "Apple", "Amazon", "Facebook",
+                "IBM", "Oracle", "Adobe", "Intel", "Nvidia"
+            )
+            accountNames.forEach { name ->
+                AccountName(name = name, true)
+            }
         }
     }
 }
