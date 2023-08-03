@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.salessparrow.R
 import com.example.salessparrow.common_components.CustomButton
@@ -45,9 +47,8 @@ import com.example.salessparrow.viewmodals.AuthenticationViewModal
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LogInScreen() {
-
-    val authenticationViewModal: AuthenticationViewModal = viewModel()
     val context = LocalContext.current;
+    val authenticationViewModal: AuthenticationViewModal = hiltViewModel();
 
     Surface(
         modifier = Modifier.fillMaxSize(),
