@@ -10,28 +10,27 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-fun getAccountList(context: Context) {
+suspend fun getAccountList(context: Context) {
     val apiService = ApiService(context)
     val catApiService = apiService.createServiceClass(CatApiService::class.java)
     Log.i("MyApp", "Making API call - 2")
-    val call: Call<CatImage> = catApiService.getCatImage()
+    val call: Call<List<CatImage>> = catApiService.getCatImages()
     Log.i("MyApp", "Making API call - 3")
 
-    call.enqueue(object : Callback<CatImage> {
-        override fun onResponse(call: Call<CatImage>, response: Response<CatImage>) {
+    call.enqueue(object : Callback<List<CatImage>> {
+        override fun onResponse(call: Call<List<CatImage>>, response: Response<List<CatImage>>) {
             if (response.isSuccessful) {
-                val catImageData = response.body()
-                val gson = Gson()
-                val catImageJson = gson.toJson(catImageData)
-                Log.i("MyApp", "responseData: $catImageJson")
+                val catImages = response.body()
+                Log.i("MyApp", "Response: $catImages")
+                // Process the catImages list here
             } else {
-                println("Error: ${response.code()}")
+                // Handle error response
             }
         }
 
-        override fun onFailure(call: Call<CatImage>, t: Throwable) {
-            t.printStackTrace()
-            Log.i("MyApp", "Making API call - 5")
+        override fun onFailure(call: Call<List<CatImage>>, t: Throwable) {
+            // Handle network call failure
+            Log.e("MyApp", "API call failed: ${t.message}")
         }
     })
 }

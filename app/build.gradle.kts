@@ -150,6 +150,12 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:5.0.0-alpha.11")
     implementation ("androidx.core:core-ktx:1.10.1")
 
+    //Dagger - Hilt
+    implementation ("com.google.dagger:hilt-android:2.47")
+    implementation ("androidx.fragment:fragment-ktx:1.4.0")
+    implementation ("com.google.devtools.ksp:symbol-processing-api:1.9.0-1.0.11")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

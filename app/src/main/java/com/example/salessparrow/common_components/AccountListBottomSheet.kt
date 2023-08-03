@@ -7,11 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.salessparrow.api.getAccountList
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.salessparrow.ui.theme.white
+import com.example.salessparrow.viewmodals.AccountListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,8 +19,8 @@ fun AccountListBottomSheet(
     bottomSheetVisible: () -> Unit,
 ) {
 
-    val context = LocalContext.current
-    getAccountList(context)
+//    val context = LocalContext.current
+//    getAccountList(context)
 
     ModalBottomSheet(
         modifier = Modifier.fillMaxSize(),
