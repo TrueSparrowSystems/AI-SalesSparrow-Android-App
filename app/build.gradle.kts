@@ -173,12 +173,6 @@ dependencies {
     annotationProcessor("androidx.room:room-compiler:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
 
-    implementation("androidx.fragment:fragment-ktx:1.5.7")
-
-    //Live Data & View Mod
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.1")
-
 
     //Test Libraries
     testImplementation("junit:junit:4.13.2")
