@@ -66,7 +66,7 @@ fun CustomBottomSheetContainer() {
     ) {
         Column(modifier = Modifier.padding(it)) {
             LaunchedEffect(true) {
-                accountListViewModel.getCatImages(
+                accountListViewModel.getAccountList(
                     callback = { catImages ->
                         catImages?.let {
                             catImagesState = it
