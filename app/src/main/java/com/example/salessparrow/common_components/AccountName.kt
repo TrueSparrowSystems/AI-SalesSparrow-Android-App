@@ -19,7 +19,7 @@ import com.example.salessparrow.ui.theme.port_gore
 
 @Composable
 fun AccountName(
-    name : String,
+    name: String,
     showAddNote: Boolean = false,
 ) {
     Box(
