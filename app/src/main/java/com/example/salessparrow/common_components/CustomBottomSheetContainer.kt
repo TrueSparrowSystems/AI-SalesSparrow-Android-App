@@ -1,5 +1,6 @@
 package com.example.salessparrow.common_components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,13 +67,14 @@ fun CustomBottomSheetContainer() {
     ) {
         Column(modifier = Modifier.padding(it)) {
             LaunchedEffect(true) {
-                accountListViewModel.getAccountList(
-                    callback = { catImages ->
-                        catImages?.let {
-                            catImagesState = it
+                accountListViewModel.getCatImage(
+                    callback = { catImage ->
+                        catImage?.let {
+                            // Handle the cat image
                         }
                     },
                     errorCallback = { error ->
+                        Log.i("CustomBottomSheetContainer", "CustomBottomSheetContainer: $error")
                         // Handle error
                     }
                 )
