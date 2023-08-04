@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
+import com.example.salessparrow.BuildConfig
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
@@ -38,16 +39,16 @@ class ApiService(private val context: Context) {
 
         val okHttpClient = OkHttpClient.Builder().addInterceptor(interceptor).build();
 
-        retrofit = Retrofit.Builder().baseUrl("https://api.thecatapi.com/").client(okHttpClient)
+        val baseUrl = BuildConfig.BASE_URL;
+
+        retrofit = Retrofit.Builder().baseUrl(baseUrl).client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson)).build()
 
     }
 
-
     fun <T> createServiceClass(serviceClass: Class<T>): T {
         return retrofit.create(serviceClass)
     }
-
 
     private fun isInternetConnected(): Boolean {
         val connectivityManager =

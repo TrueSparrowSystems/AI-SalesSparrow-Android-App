@@ -7,7 +7,6 @@ import javax.inject.Inject
 
 class AccountListRepository @Inject constructor(private val apiService: ApiService) {
 
-
     suspend fun getCatImages(callback: (List<CatImage>?) -> Unit, errorCallback: (String) -> Unit) {
         try {
             val catImages = apiService.getCatImages()

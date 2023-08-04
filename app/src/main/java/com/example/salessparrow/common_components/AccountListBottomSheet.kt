@@ -16,11 +16,10 @@ import com.example.salessparrow.ui.theme.white
 fun AccountListBottomSheet(
     bottomSheetVisible: () -> Unit,
 ) {
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded  = true)
     ModalBottomSheet(
         modifier = Modifier.fillMaxSize(),
-        sheetState = rememberSheetState(
-            skipHalfExpanded = true
-        ),
+        sheetState = bottomSheetState,
         containerColor = white,
         onDismissRequest = {
             bottomSheetVisible()
