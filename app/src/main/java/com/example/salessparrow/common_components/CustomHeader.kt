@@ -26,13 +26,20 @@ fun CustomHeader(
     leftButtonAction: () -> Unit,
     isLeftTextButton: Boolean = false,
     leftButtonShape: Shape,
+    leftButtonTextStyle: TextStyle? = TextStyle.Default,
+    leftIconModifier: Modifier? = Modifier,
+
     isRightButtonPresent: Boolean = false,
     rightIcon: Int? = null,
     rightButtonText: String,
     rightButtonAction: () -> Unit,
     isRightTextButton: Boolean = false,
     rightButtonShape: Shape,
-) {
+    rightButtonTextStyle: TextStyle? = TextStyle.Default,
+    rightIconModifier: Modifier? = Modifier,
+
+
+    ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -48,18 +55,21 @@ fun CustomHeader(
                     buttonText = leftButtonText,
                     buttonAction = leftButtonAction,
                     imageId = leftIcon,
+                    buttonTextStyle = leftButtonTextStyle,
+                    imageModifier = leftIconModifier,
                 )
             } else {
                 CustomButton(
                     buttonText = leftButtonText,
-                    buttonTextStyle = TextStyle(color = Color.White, fontSize = 18.sp),
+                    buttonTextStyle = leftButtonTextStyle,
                     onClick = leftButtonAction,
                     isLoadingProgressBar = false,
                     imageId = leftIcon,
                     imageContentDescription = "Button Icon",
-                    imageModifier = Modifier.size(24.dp),
+                    imageModifier = leftIconModifier,
                     buttonShape = leftButtonShape,
-                    buttonTextModifier = Modifier.padding(horizontal = 8.dp)
+                    buttonTextModifier = Modifier.padding(horizontal = 8.dp),
+
                 )
             }
         }
@@ -70,12 +80,14 @@ fun CustomHeader(
                     buttonText = rightButtonText,
                     buttonAction = rightButtonAction,
                     imageId = rightIcon,
+                    buttonTextStyle = rightButtonTextStyle,
+                    imageModifier = rightIconModifier,
                 )
 
             } else {
                 CustomButton(
                     buttonText = rightButtonText,
-                    buttonTextStyle = TextStyle(color = Color.White, fontSize = 18.sp),
+                    buttonTextStyle = rightButtonTextStyle,
                     onClick = rightButtonAction,
                     isLoadingProgressBar = false,
                     imageId = rightIcon,
