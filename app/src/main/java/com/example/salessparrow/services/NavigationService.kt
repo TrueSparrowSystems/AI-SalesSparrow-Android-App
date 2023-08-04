@@ -1,6 +1,10 @@
 package com.example.salessparrow.services
 
+import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
@@ -61,6 +65,10 @@ object NavigationService {
      * Navigates to the appropriate screen based on the user's login status.
      */
     fun navigateBasedOnLoginStatus() {
+        Log.i(
+            "NavigationService",
+            "navigateBasedOnLoginStatus : ${authenticationViewModal.isUserLoggedIn()}"
+        )
         if (authenticationViewModal.isUserLoggedIn()) {
             navigateWithPopUp(Screens.HomeScreen.route, Screens.SplashScreen.route)
         } else {
@@ -72,8 +80,9 @@ object NavigationService {
 }
 
 @Composable
-fun NavigationService(authenticationViewModal: AuthenticationViewModal) {
+fun NavigationService() {
     val navController = rememberNavController()
+    val authenticationViewModal: AuthenticationViewModal = viewModel()
     NavigationService.initialize(navController, authenticationViewModal)
 
     NavHost(navController = navController, startDestination = Screens.SplashScreen.route) {
