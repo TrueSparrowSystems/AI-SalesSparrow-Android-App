@@ -46,8 +46,6 @@ android {
     productFlavors {
 
         create("production") {
-            applicationIdSuffix = ".prod"
-            versionNameSuffix = "-prod"
             versionCode = 1
             versionName = "1.0"
             buildConfigField(
@@ -126,6 +124,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3:1.1.0-alpha06")
+    implementation("androidx.compose.material:material:$1.4.3")
 
     //Firebase Library
     implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
@@ -143,7 +142,18 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.44")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
 
+    //Network calls library
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.11")
+    implementation("androidx.core:core-ktx:1.10.1")
 
+    //Dagger - Hilt
+    implementation("com.google.dagger:hilt-android:2.47")
+    implementation("androidx.fragment:fragment-ktx:1.4.0")
+    implementation("com.google.devtools.ksp:symbol-processing-api:1.9.0-1.0.11")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
 
     testImplementation("junit:junit:4.13.2")
@@ -155,6 +165,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
 
-kapt{
+kapt {
     correctErrorTypes = true
 }
