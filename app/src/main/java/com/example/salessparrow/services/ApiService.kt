@@ -17,6 +17,7 @@ class ApiService(private val context: Context) {
     private val retrofit: Retrofit;
 
     init {
+        //In Gson, the lenient mode allows parsing of malformed or unexpected JSON.
         val gson: Gson = GsonBuilder().setLenient().create();
 
         val interceptor = Interceptor { chain ->
@@ -37,16 +38,13 @@ class ApiService(private val context: Context) {
         }
 
         val okHttpClient = OkHttpClient.Builder().addInterceptor(interceptor).build();
+
         val baseUrl = BuildConfig.BASE_URL;
 
         retrofit = Retrofit.Builder().baseUrl(baseUrl).client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson)).build()
 
     }
-
-
-    //Help in Writing a function that would initialize the service class and return the retrofit instance to be used in the view model
-
 
     fun <T> createServiceClass(serviceClass: Class<T>): T {
         return retrofit.create(serviceClass)
@@ -65,7 +63,6 @@ class ApiService(private val context: Context) {
             networkInfo?.isConnected ?: false
         }
     }
-
 
     class NoInternetException : IOException("No Internet connection");
 

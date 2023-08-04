@@ -143,7 +143,8 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3:1.1.1")
+    implementation("androidx.compose.material:material:$1.4.3")
 
     //Firebase Library
     implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
@@ -167,11 +168,20 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.11")
+    implementation("androidx.core:core-ktx:1.10.1")
+
+    //Dagger - Hilt
+    implementation("com.google.dagger:hilt-android:2.47")
+    implementation("androidx.fragment:fragment-ktx:1.4.0")
+    implementation("com.google.devtools.ksp:symbol-processing-api:1.9.0-1.0.11")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation("androidx.core:core-ktx:1.10.1")
 
     //Room Database
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
+
 
 
     //Test Libraries
