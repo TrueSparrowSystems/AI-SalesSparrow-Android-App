@@ -1,5 +1,6 @@
 package com.example.salessparrow.common_components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,7 +34,10 @@ fun CustomHeader(
     rightButtonShape: Shape,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color(0xFFF1F1F2))
+            .padding(top = 10.dp),
         horizontalArrangement = if (isLeftButtonPresent) Arrangement.SpaceBetween else Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
 
