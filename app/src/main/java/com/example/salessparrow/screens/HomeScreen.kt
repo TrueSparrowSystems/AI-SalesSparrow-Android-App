@@ -27,13 +27,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.salessparrow.R
 import com.example.salessparrow.common_components.AccountCard
 import com.example.salessparrow.common_components.AccountListBottomSheet
 import com.example.salessparrow.common_components.CustomHeader
 import com.example.salessparrow.services.NavigationService
 import com.example.salessparrow.util.Screens
+import com.example.salessparrow.ui.theme.Grey
+import com.example.salessparrow.ui.theme.lucky_point
 
 @Composable
 fun HomeScreen() {
@@ -46,7 +54,7 @@ fun HomeScreen() {
     val listState = rememberLazyListState()
 
     if (bottomSheetVisible) {
-        AccountListBottomSheet( toggleBottomSheet )
+        AccountListBottomSheet(toggleBottomSheet)
     }
 
 
@@ -68,12 +76,25 @@ fun HomeScreen() {
                 leftButtonAction = { /* Add your action here */ },
                 isLeftTextButton = true,
                 leftButtonShape = CircleShape,
+                leftButtonTextStyle = TextStyle(
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight(600),
+                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                    color = lucky_point,
+                    letterSpacing = 0.64.sp
+                ),
+                leftIconModifier = Modifier
+                    .width(28.dp)
+                    .height(28.dp),
                 isRightButtonPresent = true,
                 rightIcon = R.drawable.search_icon,
                 rightButtonText = "",
                 rightButtonAction = toggleBottomSheet,
                 isRightTextButton = true,
-                rightButtonShape = CircleShape
+                rightButtonShape = CircleShape,
+                rightIconModifier = Modifier
+                    .width(24.dp)
+                    .height(24.dp),
             )
         },
         content = { innerPadding ->
