@@ -32,6 +32,8 @@ import com.example.salessparrow.R
 import com.example.salessparrow.common_components.AccountCard
 import com.example.salessparrow.common_components.AccountListBottomSheet
 import com.example.salessparrow.common_components.CustomHeader
+import com.example.salessparrow.services.NavigationService
+import com.example.salessparrow.util.Screens
 
 @Composable
 fun HomeScreen() {
@@ -121,7 +123,7 @@ fun HomeScreen() {
 @Composable
 fun Fab() {
     FloatingActionButton(
-        onClick = { /*TODO*/ },
+        onClick = { NavigationService.navigateTo(Screens.NotesScreen.route) },
         shape = RoundedCornerShape(4.dp),
         containerColor = Color(0xFF212653)
     ) {

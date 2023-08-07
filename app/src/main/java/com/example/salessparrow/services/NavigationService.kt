@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.salessparrow.screens.HomeScreen
 import com.example.salessparrow.screens.SplashScreen
 import com.example.salessparrow.screens.LogInScreen
+import com.example.salessparrow.screens.NotesScreen
 import com.example.salessparrow.util.Screens
 import com.example.salessparrow.viewmodals.AuthenticationViewModal
 
@@ -91,6 +92,7 @@ fun NavigationService() {
         composable(route = Screens.SplashScreen.route) {
             NavigationService.navigateBasedOnLoginStatus();
         }
+        composable(route = Screens.NotesScreen.route) { NotesScreen() }
     }
 }
 

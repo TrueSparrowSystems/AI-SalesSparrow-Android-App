@@ -20,3 +20,4 @@ val whisper = Color(0xFFE9E9E9)
 val port_gore = Color(0xFF444A62)
 val ghost_white = Color(0xFFF6F6F8)
 val Grey = Color(0x1A2A2E4F);
+val luck_point = Color(0xFF212653)
