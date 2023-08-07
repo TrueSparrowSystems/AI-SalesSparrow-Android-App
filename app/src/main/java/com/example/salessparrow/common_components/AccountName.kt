@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.example.salessparrow.ui.theme.Typography
 import com.example.salessparrow.ui.theme.eastBay_70
 import com.example.salessparrow.ui.theme.port_gore
+import com.example.salessparrow.ui.theme.ruby
+import com.example.salessparrow.ui.theme.walkaway_gray
 
 @Composable
 fun AccountName(
@@ -30,12 +32,12 @@ fun AccountName(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             CustomText(
-                text = name, Typography.labelSmall, color = port_gore
+                text = name, Typography.labelMedium, color = walkaway_gray
             )
             Spacer(Modifier.weight(1f))
             if (showAddNote) {
                 CustomText(
-                    text = "Add Note", Typography.labelSmall, color = port_gore
+                    text = "Add Note", Typography.labelSmall, color = ruby
                 )
             }
         }
@@ -52,5 +54,5 @@ fun AccountName(
 @Composable
 @Preview(showBackground = true)
 fun AccountNamePreview() {
-    AccountName("SalseSparrow")
+    AccountName("SalseSparrow", true)
 }

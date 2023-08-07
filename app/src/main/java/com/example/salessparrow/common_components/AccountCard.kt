@@ -1,6 +1,6 @@
 package com.example.salessparrow.common_components
 
-import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -9,7 +9,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,12 +34,15 @@ fun AccountCard() {
     Card(
         modifier = Modifier
             .padding(14.dp)
-            .fillMaxWidth()
-            .border(1.dp, whisper, RoundedCornerShape(4.dp))
-            .shadow(2.dp, shape = RoundedCornerShape(4.dp), clip = true),
+            .fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp
+        ),
         colors = CardDefaults.cardColors(
             containerColor = white,
         ),
+        shape = RoundedCornerShape(size = 4.dp),
+        border = BorderStroke(width = 1.dp, color = whisper)
     ) {
         Column(Modifier.padding(14.dp)) {
             CustomText(
