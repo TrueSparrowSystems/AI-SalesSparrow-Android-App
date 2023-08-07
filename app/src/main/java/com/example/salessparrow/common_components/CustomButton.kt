@@ -16,6 +16,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.graphics.Color
 
 import androidx.compose.ui.unit.dp
+import com.example.salessparrow.R
 
 @Composable
 fun CustomButton(
@@ -30,6 +31,9 @@ fun CustomButton(
     buttonShape: Shape?,
     buttonTextModifier: Modifier? = Modifier,
     isButtonEnabled: Boolean = true,
+    loadingButtonText: String? = null,
+    loadingButtonTextStyle: TextStyle? = null,
+    loadingButtonTextModifier: Modifier? = null,
 ) {
     if (buttonShape != null) {
         Button(
@@ -44,13 +48,19 @@ fun CustomButton(
             ) {
 
                 if (isLoadingProgressBar == true) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(size = 25.dp),
-                        strokeWidth = 1.dp,
-                        color = Color(0xFF)
+                    Image(
+                        painter = painterResource(id = R.drawable.loader),
+                        contentDescription = "loader",
+                        modifier = Modifier.size(12.dp)
                     )
+                    if (loadingButtonText != null) {
+                        Text(
+                            text = loadingButtonText,
+                            style = loadingButtonTextStyle!!,
+                            modifier = loadingButtonTextModifier!!
+                        )
+                    }
                 } else {
-
 
                     if (imageId != null) {
                         Image(

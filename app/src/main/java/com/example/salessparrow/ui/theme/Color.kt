@@ -21,4 +21,3 @@ val port_gore = Color(0xFF444A62)
 val ghost_white = Color(0xFFF6F6F8)
 val Grey = Color(0x1A2A2E4F);
 val lucky_point= Color(0xFF2A2E4F)
-
