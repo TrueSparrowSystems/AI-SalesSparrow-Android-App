@@ -9,7 +9,6 @@ class AccountListRepository @Inject constructor(private val apiService: ApiServi
 
     suspend fun getCatImage(callback: (CatImage?) -> Unit, errorCallback: (String) -> Unit) {
         try {
-            Log.i("MyApp", "getCatImage: ");
             val response = apiService.getCatImages() // Call the correct API method
             val catImage = response.body()
             Log.i("MyApp", "Response: $catImage")

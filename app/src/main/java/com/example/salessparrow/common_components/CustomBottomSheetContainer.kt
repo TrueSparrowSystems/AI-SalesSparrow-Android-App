@@ -70,7 +70,7 @@ fun CustomBottomSheetContainer() {
                 accountListViewModel.getCatImage(
                     callback = { catImage ->
                         catImage?.let {
-                            // Handle the cat image
+                            catImagesState = catImagesState + it
                         }
                     },
                     errorCallback = { error ->
@@ -82,20 +82,11 @@ fun CustomBottomSheetContainer() {
 
             LazyColumn {
                 items(catImagesState) { catImage ->
-                    AccountName(name = "hiii", true)
+                    val id = catImage.id
+                    AccountName(name = id, true)
                 }
             }
-
-
-//            val accountNames = listOf(
-//                "Google", "Microsoft", "Apple", "Amazon", "Facebook",
-//                "IBM", "Oracle", "Adobe", "Intel", "Nvidia"
-//            )
-//            accountNames.forEach { name ->
-//                AccountName(name = name, true)
-//            }
         }
     }
 }
-
 
