@@ -8,7 +8,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.salessparrow.R
 
-private val customFontFamily = FontFamily(
+val customFontFamily = FontFamily(
     Font(R.font.nunito_medium),
     Font(R.font.nunito_bold),
     Font(R.font.nunito_light),
