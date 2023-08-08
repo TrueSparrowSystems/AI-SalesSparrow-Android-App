@@ -18,6 +18,7 @@ import androidx.compose.material.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.Scaffold
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -116,6 +117,7 @@ fun HomeScreen() {
         bottomBar = {
             Box {
                 BottomAppBar(
+                    containerColor = Color(0xFFF1F1F2),
                     modifier = Modifier
                         .shadow(
                             elevation = 7.dp,
@@ -129,8 +131,7 @@ fun HomeScreen() {
                             )
                         )
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .background(color = Color(0xFFF1F1F2)),
+                        .height(60.dp),
                     content = {},
                     contentColor = Color(0xFFF1F1F2),
                 )

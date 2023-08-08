@@ -90,7 +90,7 @@ fun NavigationService() {
         composable(route = Screens.LoginScreen.route) { LogInScreen() }
         composable(route = Screens.HomeScreen.route) { HomeScreen() }
         composable(route = Screens.SplashScreen.route) {
-            NavigationService.navigateBasedOnLoginStatus();
+            SplashScreen()
         }
         composable(route = Screens.NotesScreen.route) { NotesScreen() }
     }
