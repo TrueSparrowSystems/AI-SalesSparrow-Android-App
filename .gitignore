@@ -47,5 +47,5 @@ build/
 .navigation
 captures/
 output.json
-
+.idea/
 .idea/androidTestResultsUserPreferences.xml
