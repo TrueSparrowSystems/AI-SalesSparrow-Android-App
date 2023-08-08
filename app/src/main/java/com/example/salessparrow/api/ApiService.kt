@@ -7,4 +7,6 @@ import retrofit2.http.GET
 interface ApiService {
     @GET("v1/images/0XYvRd7oD")
     suspend fun getCatImages(): Response<CatImage>
+    @GET("v1/images/0XYvRd7oD")
+    suspend fun getAccounts(): Response<Record>
 }

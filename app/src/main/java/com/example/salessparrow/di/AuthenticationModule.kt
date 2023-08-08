@@ -1,5 +1,6 @@
 package com.example.salessparrow.di
 
+import com.example.salessparrow.repository.SearchAccountRepository
 import com.example.salessparrow.api.ApiService
 import android.content.Context
 import com.example.salessparrow.BuildConfig
@@ -44,5 +45,10 @@ object AuthenticationModule {
     @Provides
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
         return AppDatabase.getDatabase(context)
+    }
+
+    @Provides
+    fun provideSearchAccountRepository(): SearchAccountRepository {
+        return SearchAccountRepository()
     }
 }
