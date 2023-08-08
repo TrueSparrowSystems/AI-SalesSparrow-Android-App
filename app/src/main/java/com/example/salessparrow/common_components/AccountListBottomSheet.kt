@@ -15,8 +15,9 @@ import com.example.salessparrow.ui.theme.white
 @Composable
 fun AccountListBottomSheet(
     bottomSheetVisible: () -> Unit,
-) {
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded  = true)
+    showAddNote: Boolean = false,
+    ) {
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         modifier = Modifier.fillMaxSize(),
         sheetState = bottomSheetState,
@@ -28,7 +29,7 @@ fun AccountListBottomSheet(
             topStart = 10.dp, topEnd = 10.dp
         ),
     ) {
-        CustomBottomSheetContainer()
+        CustomBottomSheetContainer(showAddNote)
     }
 }
 
