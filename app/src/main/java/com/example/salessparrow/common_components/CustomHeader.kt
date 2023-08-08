@@ -28,6 +28,7 @@ fun CustomHeader(
     leftButtonShape: Shape,
     leftButtonTextStyle: TextStyle? = TextStyle.Default,
     leftIconModifier: Modifier? = Modifier,
+    isLeftButtonEnabled : Boolean = true,
 
     isRightButtonPresent: Boolean = false,
     rightIcon: Int? = null,
@@ -37,8 +38,7 @@ fun CustomHeader(
     rightButtonShape: Shape,
     rightButtonTextStyle: TextStyle? = TextStyle.Default,
     rightIconModifier: Modifier? = Modifier,
-
-
+    isRightButtonEnabled : Boolean = true,
     ) {
     Row(
         modifier = Modifier
@@ -57,6 +57,7 @@ fun CustomHeader(
                     imageId = leftIcon,
                     buttonTextStyle = leftButtonTextStyle,
                     imageModifier = leftIconModifier,
+                    isButtonEnabled = isLeftButtonEnabled
                 )
             } else {
                 CustomButton(
@@ -69,6 +70,7 @@ fun CustomHeader(
                     imageModifier = leftIconModifier,
                     buttonShape = leftButtonShape,
                     buttonTextModifier = Modifier.padding(horizontal = 8.dp),
+                    isButtonEnabled = isLeftButtonEnabled
 
                 )
             }
@@ -82,6 +84,7 @@ fun CustomHeader(
                     imageId = rightIcon,
                     buttonTextStyle = rightButtonTextStyle,
                     imageModifier = rightIconModifier,
+                    isButtonEnabled = isRightButtonEnabled
                 )
 
             } else {
@@ -94,7 +97,8 @@ fun CustomHeader(
                     imageContentDescription = "Button Icon",
                     imageModifier = Modifier.size(24.dp),
                     buttonShape = rightButtonShape,
-                    buttonTextModifier = Modifier.padding(horizontal = 8.dp)
+                    buttonTextModifier = Modifier.padding(horizontal = 8.dp),
+                    isButtonEnabled = isRightButtonEnabled
                 )
             }
         }

@@ -16,9 +16,10 @@ fun CustomTextButton(
     buttonAction: () -> Unit,
     imageId: Int? = null,
     imageModifier: Modifier? = Modifier,
+    isButtonEnabled: Boolean = true,
     buttonTextStyle: TextStyle? = TextStyle.Default,
 ) {
-    TextButton(onClick = buttonAction) {
+    TextButton(onClick = buttonAction, enabled = isButtonEnabled) {
         if (imageId != null) {
             Image(
                 painter = painterResource(id = imageId),
