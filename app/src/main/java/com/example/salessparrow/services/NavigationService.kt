@@ -87,11 +87,11 @@ fun NavigationService() {
     NavigationService.initialize(navController, authenticationViewModal)
 
     NavHost(navController = navController, startDestination = Screens.SplashScreen.route) {
-        composable(route = Screens.LoginScreen.route) { LogInScreen() }
-        composable(route = Screens.HomeScreen.route) { HomeScreen() }
         composable(route = Screens.SplashScreen.route) {
             SplashScreen()
         }
+        composable(route = Screens.LoginScreen.route) { LogInScreen() }
+        composable(route = Screens.HomeScreen.route) { HomeScreen() }
         composable(route = Screens.NotesScreen.route) { NotesScreen() }
     }
 }
