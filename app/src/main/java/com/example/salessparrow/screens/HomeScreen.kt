@@ -53,7 +53,7 @@ fun HomeScreen() {
     val listState = rememberLazyListState()
 
     if (bottomSheetVisible) {
-        AccountListBottomSheet(toggleBottomSheet, false)
+        AccountListBottomSheet(toggleBottomSheet, true)
     }
 
 
