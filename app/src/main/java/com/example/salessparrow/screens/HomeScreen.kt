@@ -53,7 +53,7 @@ fun HomeScreen() {
     val listState = rememberLazyListState()
 
     if (bottomSheetVisible) {
-        AccountListBottomSheet(toggleBottomSheet, false)
+        AccountListBottomSheet(toggleBottomSheet, true)
     }
 
 
@@ -85,6 +85,8 @@ fun HomeScreen() {
                 leftIconModifier = Modifier
                     .width(28.dp)
                     .height(28.dp),
+                isLeftButtonEnabled = false,
+
                 isRightButtonPresent = true,
                 rightIcon = R.drawable.search_icon,
                 rightButtonText = "",
@@ -94,6 +96,7 @@ fun HomeScreen() {
                 rightIconModifier = Modifier
                     .width(24.dp)
                     .height(24.dp),
+                isRightButtonEnabled = true,
             )
         },
         content = { innerPadding ->
