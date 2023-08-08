@@ -45,7 +45,9 @@ import com.example.salessparrow.viewmodals.SearchAccountViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomBottomSheetContainer() {
+fun CustomBottomSheetContainer(
+    showAddNote: Boolean = false,
+) {
     val searchAccountViewModal: SearchAccountViewModel = hiltViewModel()
     var searchQuery by remember { mutableStateOf("") }
     var filteredRecords by remember { mutableStateOf<List<Record>?>(null) }
@@ -140,7 +142,7 @@ fun CustomBottomSheetContainer() {
                     }
                 } else {
                     items(filteredRecordInfoList) { recordInfo ->
-                        AccountName(name = recordInfo.name, true, attributes = recordInfo.attributes)
+                        AccountName(name = recordInfo.name, showAddNote, attributes = recordInfo.attributes)
                     }
                 }
             }
