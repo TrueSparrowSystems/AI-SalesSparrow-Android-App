@@ -3,12 +3,14 @@
   <component name="AndroidTestResultsUserPreferences">
     <option name="androidTestResultsTableState">
       <map>
-        <entry key="-1815627557">
+        <entry key="-507028949">
           <value>
             <AndroidTestResultsTableState>
               <option name="preferredColumnWidths">
                 <map>
                   <entry key="Duration" value="90" />
+                  <entry key="Tests" value="360" />
+                  <entry key="samsung SM-G998B" value="120" />
                   <entry key="Pixel_5_API_33" value="120" />
                   <entry key="Tests" value="360" />
                 </map>

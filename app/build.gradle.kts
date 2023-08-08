@@ -50,6 +50,16 @@ android {
             versionName = "1.0"
             buildConfigField(
                 "String",
+                "IS_MOCK",
+                "\"${
+                    getPropertyValueFromPropertiesFile(
+                        file("prod.properties"),
+                        "IS_MOCK"
+                    )
+                }\""
+            )
+            buildConfigField(
+                "String",
                 "BASE_URL",
                 "\"${
                     getPropertyValueFromPropertiesFile(
@@ -73,6 +83,16 @@ android {
             applicationIdSuffix = ".staging"
             versionCode = 1
             versionName = "1.0"
+            buildConfigField(
+                "String",
+                "IS_MOCK",
+                "\"${
+                    getPropertyValueFromPropertiesFile(
+                        file("staging.properties"),
+                        "IS_MOCK"
+                    )
+                }\""
+            )
             buildConfigField(
                 "String",
                 "BASE_URL",
@@ -167,7 +187,7 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.10.1")
-    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.11")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("androidx.core:core-ktx:1.10.1")
 
     //Dagger - Hilt
@@ -183,8 +203,9 @@ dependencies {
     kapt("androidx.room:room-compiler:$room_version")
 
 
-
     //Test Libraries
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.10.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
