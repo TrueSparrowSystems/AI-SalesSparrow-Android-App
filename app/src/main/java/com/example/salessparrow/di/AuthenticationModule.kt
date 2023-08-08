@@ -22,7 +22,10 @@ object AuthenticationModule {
     @Singleton
     @Provides
     fun provideAuthenticationRepository(appDatabase: AppDatabase): AuthenticationRepository {
-        return AuthenticationRepository(appDatabase.authorizationDao())
+        return AuthenticationRepository(
+            appDatabase.authorizationDao(),
+            provideApiService(retrofit = providesRetrofit())
+        )
     }
 
     @Singleton

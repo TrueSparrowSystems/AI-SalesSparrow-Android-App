@@ -1,5 +1,6 @@
 package com.example.salessparrow.screens
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.salessparrow.BuildConfig
 import com.example.salessparrow.R
 import com.example.salessparrow.common_components.CustomButton
 import com.example.salessparrow.common_components.CustomText
@@ -50,6 +52,7 @@ import com.example.salessparrow.viewmodals.AuthenticationViewModal
 fun LogInScreen() {
     val context = LocalContext.current;
     val authenticationViewModal: AuthenticationViewModal = hiltViewModel();
+    val logInUrl : String = BuildConfig.SALESFORCE_LOGIN_URL;
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -177,7 +180,7 @@ fun LogInScreen() {
                         letterSpacing = 0.64.sp
                     ),
                     onClick = {
-                        authenticationViewModal.connectWithSalesForce(context);
+                        authenticationViewModal.connectWithSalesForce(context, Uri.parse(logInUrl) );
                     },
                     imageId = R.drawable.salesforce_connect,
                     imageContentDescription = "salesforce_logo",
