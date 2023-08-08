@@ -1,33 +1,24 @@
 package com.example.salessparrow.screens
 
+import android.os.Build.VERSION.SDK_INT
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalContext
+import coil.ImageLoader
+import coil.compose.rememberAsyncImagePainter
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import com.example.salessparrow.R
 import com.example.salessparrow.services.NavigationService
-import com.example.salessparrow.ui.theme.Pink80
-import com.example.salessparrow.ui.theme.Purple80
-import com.example.salessparrow.ui.theme.PurpleGrey80
-import com.example.salessparrow.ui.theme.Typography
-import com.example.salessparrow.ui.theme.black
 import com.example.salessparrow.util.Screens
-import com.example.salessparrow.viewmodals.AuthenticationViewModal
 import kotlinx.coroutines.delay
 
 @Composable
@@ -45,13 +36,18 @@ fun SplashScreen() {
                 .background(brush = gradientBrush)
         ) {
 
+            val imageLoader = ImageLoader.Builder(LocalContext.current).components {
+                    if (SDK_INT >= 28) {
+                        add(ImageDecoderDecoder.Factory())
+                    } else {
+                        add(GifDecoder.Factory())
+                    }
+                }.build()
+
             Image(
-//                TODO : Replace the Gif
-                painter = painterResource(id = R.drawable.buildings),
-                contentDescription = "Splash screen",
-                modifier = Modifier
-                    .size(72.dp)
-                    .align(Alignment.Center)
+                painter = rememberAsyncImagePainter(R.drawable.splash_screen, imageLoader),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize()
             )
         }
 
@@ -69,6 +65,4 @@ fun SplashScreen() {
 
         }
     }
-
-
 }
