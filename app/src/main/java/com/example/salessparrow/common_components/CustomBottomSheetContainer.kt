@@ -108,7 +108,11 @@ fun CustomBottomSheetContainer(
                         )
                     }
                 }
-                Divider(color = Color.Black, thickness = 1.dp)
+                Divider(
+                    color = Color(0.36f, 0.40f, 0.55f, 0.60f),
+                    thickness = 1.dp,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         },
     ) {
@@ -142,7 +146,11 @@ fun CustomBottomSheetContainer(
                     }
                 } else {
                     items(filteredRecordInfoList) { recordInfo ->
-                        AccountName(name = recordInfo.name, showAddNote, attributes = recordInfo.attributes)
+                        AccountName(
+                            name = recordInfo.name,
+                            showAddNote,
+                            attributes = recordInfo.attributes
+                        )
                     }
                 }
             }
