@@ -1,5 +1,6 @@
 package com.example.salessparrow.common_components
 
+import android.os.Build
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -14,9 +15,15 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 
 import androidx.compose.ui.unit.dp
+import coil.ImageLoader
+import coil.compose.rememberAsyncImagePainter
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import com.example.salessparrow.R
+
 
 @Composable
 fun CustomButton(
@@ -35,6 +42,14 @@ fun CustomButton(
     loadingButtonTextStyle: TextStyle? = null,
     loadingButtonTextModifier: Modifier? = null,
 ) {
+    val imageLoader = ImageLoader.Builder(LocalContext.current).components {
+        if (Build.VERSION.SDK_INT >= 28) {
+            add(ImageDecoderDecoder.Factory())
+        } else {
+            add(GifDecoder.Factory())
+        }
+    }.build()
+
     if (buttonShape != null) {
         Button(
             onClick = onClick,
@@ -49,7 +64,7 @@ fun CustomButton(
 
                 if (isLoadingProgressBar == true) {
                     Image(
-                        painter = painterResource(id = R.drawable.loader),
+                        painter = rememberAsyncImagePainter(R.drawable.loader, imageLoader),
                         contentDescription = "loader",
                         modifier = Modifier.size(12.dp)
                     )

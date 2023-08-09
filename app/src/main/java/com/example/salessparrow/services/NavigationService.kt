@@ -66,15 +66,15 @@ object NavigationService {
      * Navigates to the appropriate screen based on the user's login status.
      */
     fun navigateBasedOnLoginStatus() {
-        Log.i(
-            "NavigationService",
-            "navigateBasedOnLoginStatus : ${authenticationViewModal.isUserLoggedIn()}"
-        )
-        if (authenticationViewModal.isUserLoggedIn()) {
-            navigateWithPopUp(Screens.HomeScreen.route, Screens.SplashScreen.route)
-        } else {
-            navigateWithPopUp(Screens.LoginScreen.route, Screens.SplashScreen.route);
-        }
+//        Log.i(
+//            "NavigationService",
+//            "navigateBasedOnLoginStatus : ${authenticationViewModal.isUserLoggedIn()}"
+//        )
+//        if (authenticationViewModal.isUserLoggedIn()) {
+//            navigateWithPopUp(Screens.HomeScreen.route, Screens.SplashScreen.route)
+//        } else {
+//            navigateWithPopUp(Screens.LoginScreen.route, Screens.SplashScreen.route);
+//        }
     }
 
 

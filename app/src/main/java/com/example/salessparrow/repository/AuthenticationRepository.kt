@@ -1,59 +1,98 @@
 package com.example.salessparrow.repository
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import com.example.salessparrow.BuildConfig
 import com.example.salessparrow.api.ApiService
-import com.example.salessparrow.dao.AuthorizationDao
-import com.example.salessparrow.entity.AuthorizationEntity
-import java.util.concurrent.Executors
+import com.example.salessparrow.models.CurrentUser
+import com.example.salessparrow.models.RedirectUrl
+
 import javax.inject.Inject
 
 class AuthenticationRepository @Inject constructor(
-    private val authorizationDao: AuthorizationDao,
-    private val apiService: ApiService,
+    private val apiService: ApiService
 ) {
 
-    fun isLoggedIn(): Boolean {
-        return true
-//        val authCode = getAuthorizationCode()
-//        return !authCode.isNullOrEmpty()
+    suspend fun isLoggedIn(): Boolean {
+        val currentUser = getCurrentUser()
+        Log.i("Authentication getCurrentUser", "isUserLoggedIn: ${currentUser?.id !== null}")
+        if (currentUser != null) {
+            return currentUser.id !== null
+        }
+        return false
     }
 
-    fun connectWithSalesForce(): String {
-        val salesForceConnectURl = BuildConfig.SALESFORCE_LOGIN_URL
-        Log.i("SalesForceConnectURl", salesForceConnectURl)
-        return salesForceConnectURl
-    }
 
     suspend fun getConnectWithSalesForceUrl(
-    ): String {
+        redirectUri: String
+    ): RedirectUrl? {
         return try {
-            val response = apiService.getSalesForceConnectUrl();
-            val loginUrl = response.body();
+            val response = apiService.getSalesForceRedirectUrl(redirectUri)
+            val redirectUrl = response.body()
             if (response.isSuccessful) {
-                loginUrl.toString()
+                redirectUrl
             } else {
-                "Error fetching logIn url: ${response.errorBody()}"
+                null
             }
-
         } catch (e: Exception) {
-            ("Error fetching cat image: ${e.message}")
+            null
         }
     }
 
-    fun insertAuthorization(authorizationEntity: AuthorizationEntity) {
-        val executor = Executors.newSingleThreadExecutor()
-        executor.execute { authorizationDao.insertAuthorization(authorizationEntity) }
+    suspend fun salesForceConnect(
+        code: String,
+        redirectUri: String
+    ): CurrentUser? {
+        return try {
+            val response = apiService.salesForceConnect(code,  redirectUri);
+            val currentUser = response.body()
+            Log.i("MyApp", "Response: $currentUser")
+            if (response.isSuccessful) {
+                currentUser
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.i("MyApp", "Error salesForceConnect: $e")
+             null
+        }
     }
 
-    fun getAuthorization(): LiveData<AuthorizationEntity> {
-        return authorizationDao.getAuthorization()
+    suspend fun getCurrentUser(): CurrentUser? {
+        return try {
+            Log.i("Authentication inside", "getCurrentUser: ")
+            val response = apiService.getCurrentUser();
+            Log.i("Authentication after response", "getCurrentUser: ${response}")
+            val currentUser = response.body()
+
+            Log.i("Authentication resoponse body", "getCurrentUser: $currentUser")
+
+            if (response.isSuccessful) {
+                currentUser!!
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.i("Authentication exception", "getCurrentUser: $e")
+            null
+        }
     }
 
-    private fun getAuthorizationCode(): String? {
-        val authorizationEntity = authorizationDao.getAuthorization().value
-        return authorizationEntity?.authCode
+    suspend fun logout(): Boolean {
+        return try {
+            val response = apiService.logout();
+            response.isSuccessful
+        } catch (e: Exception) {
+            false
+        }
     }
+
+    suspend fun disconnectSalesForce(): Boolean {
+        return try {
+            val response = apiService.disconnectSalesForce();
+            response.isSuccessful
+        } catch (e: Exception) {
+            false
+        }
+    }
+
 
 }
