@@ -110,7 +110,10 @@ fun HomeScreen() {
             ) {
                 for (index in 0 until 100) {
                     item {
-                        AccountCard()
+                        AccountCard(onAccountCardClick = {
+                            NavigationService.navigateTo(Screens.AccountDetailsScreen.route)
+                        }
+                        )
                     }
                 }
             }

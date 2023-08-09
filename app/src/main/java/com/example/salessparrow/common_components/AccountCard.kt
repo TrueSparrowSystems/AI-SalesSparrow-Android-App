@@ -2,12 +2,14 @@ package com.example.salessparrow.common_components
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,8 +36,9 @@ object AccountCardData {
     val linkUrl = "https://chat.openai.com/"
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AccountCard() {
+fun AccountCard(onAccountCardClick: () -> Unit = {}){
     val context = LocalContext.current
 
     Card(
@@ -49,7 +52,11 @@ fun AccountCard() {
             containerColor = white,
         ),
         shape = RoundedCornerShape(size = 4.dp),
-        border = BorderStroke(width = 1.dp, color = whisper)
+        border = BorderStroke(width = 1.dp, color = whisper),
+        onClick = {
+            Log.i("AccountCard", "AccountCard Clicked")
+            onAccountCardClick()
+        }
     ) {
         Column(Modifier.padding(14.dp)) {
             CustomText(

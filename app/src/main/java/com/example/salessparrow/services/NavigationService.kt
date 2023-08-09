@@ -8,6 +8,7 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.salessparrow.screens.AccountDetails
 import com.example.salessparrow.screens.HomeScreen
 import com.example.salessparrow.screens.SplashScreen
 import com.example.salessparrow.screens.LogInScreen
@@ -101,8 +102,14 @@ fun NavigationService() {
             val accountName = it.arguments?.getString("accountName") ?: ""
             val isAccountSelectionEnabled =
                 it.arguments?.getString("isAccountSelectionEnabled")?.toBoolean() ?: false
-            Log.i("NavigationService", "accountId : $accountId accoutName : $accountName isAccountSelectionEnabled : $isAccountSelectionEnabled");
+            Log.i(
+                "NavigationService",
+                "accountId : $accountId accoutName : $accountName isAccountSelectionEnabled : $isAccountSelectionEnabled"
+            );
             NotesScreen(accountName, accountId, isAccountSelectionEnabled)
+        }
+        composable(route = Screens.AccountDetailsScreen.route) {
+            AccountDetails()
         }
     }
 }
