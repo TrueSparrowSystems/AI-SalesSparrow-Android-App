@@ -38,6 +38,7 @@ import com.example.salessparrow.R
 import com.example.salessparrow.common_components.AccountCard
 import com.example.salessparrow.common_components.AccountListBottomSheet
 import com.example.salessparrow.common_components.CustomHeader
+import com.example.salessparrow.common_components.Fab
 import com.example.salessparrow.services.NavigationService
 import com.example.salessparrow.util.Screens
 import com.example.salessparrow.ui.theme.lucky_point
@@ -86,7 +87,7 @@ fun HomeScreen() {
                     .width(28.dp)
                     .height(28.dp),
                 isLeftButtonEnabled = false,
-
+                rightButtonTestId = "btn_search_account",
                 isRightButtonPresent = true,
                 rightIcon = R.drawable.search_icon,
                 rightButtonText = "",
@@ -143,22 +144,4 @@ fun HomeScreen() {
     )
 }
 
-@Composable
-fun Fab() {
-    FloatingActionButton(
-        onClick = { NavigationService.navigateTo(Screens.NotesScreen.route) },
-        shape = RoundedCornerShape(4.dp),
-        containerColor = Color(0xFF212653)
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.plus),
-            contentDescription = "Add Notes",
-            tint = Color.White,
-            modifier = Modifier
-                .padding(1.dp)
-                .width(18.dp)
-                .height(18.dp)
-        )
-    }
 
-}

@@ -16,6 +16,7 @@ import com.example.salessparrow.ui.theme.white
 fun AccountListBottomSheet(
     bottomSheetVisible: () -> Unit,
     showAddNote: Boolean = false,
+    isAccountSelectionEnabled: Boolean = false
     ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -29,13 +30,7 @@ fun AccountListBottomSheet(
             topStart = 10.dp, topEnd = 10.dp
         ),
     ) {
-        CustomBottomSheetContainer(showAddNote)
+        CustomBottomSheetContainer(showAddNote, isAccountSelectionEnabled, bottomSheetVisible)
     }
 }
 
-
-@Composable
-@Preview(showBackground = true)
-fun CustomBottomSheetContainerPreview() {
-    CustomBottomSheetContainer()
-}

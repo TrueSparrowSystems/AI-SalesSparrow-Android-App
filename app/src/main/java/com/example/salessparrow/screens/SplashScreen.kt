@@ -51,7 +51,7 @@ fun SplashScreen() {
 
 
     LaunchedEffect(key1 = true) {
-        delay(2000);
+        delay(1000);
         authenticationViewModal.checkUserLoggedIn()
 
     }

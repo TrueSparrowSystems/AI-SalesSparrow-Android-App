@@ -9,15 +9,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.salessparrow.R
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CustomHeader(
     isLeftButtonPresent: Boolean = false,
@@ -39,6 +44,7 @@ fun CustomHeader(
     rightButtonTextStyle: TextStyle? = TextStyle.Default,
     rightIconModifier: Modifier? = Modifier,
     isRightButtonEnabled : Boolean = true,
+    rightButtonTestId: String? = null
     ) {
     Row(
         modifier = Modifier
@@ -98,7 +104,14 @@ fun CustomHeader(
                     imageModifier = Modifier.size(24.dp),
                     buttonShape = rightButtonShape,
                     buttonTextModifier = Modifier.padding(horizontal = 8.dp),
-                    isButtonEnabled = isRightButtonEnabled
+                    isButtonEnabled = isRightButtonEnabled,
+                    modifier = Modifier.semantics {
+                        testTagsAsResourceId = true
+                        if (rightButtonTestId != null) {
+                            testTag = rightButtonTestId
+                        }
+                    }
+
                 )
             }
         }
