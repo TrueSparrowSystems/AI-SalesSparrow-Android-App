@@ -2,6 +2,7 @@ package com.example.salessparrow.api
 
 import com.example.salessparrow.models.CurrentUser
 import com.example.salessparrow.models.RedirectUrl
+import com.example.salessparrow.models.SaveNote
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Headers
@@ -28,9 +29,16 @@ interface ApiService {
     @Headers("$MOCK_RESPONSE_HEADER: CurrentUserResponse.json")
     suspend fun getCurrentUser(): Response<CurrentUser>
 
+    @GET("/v1/accounts/{account_id}/note")
+    @Headers("$MOCK_RESPONSE_HEADER: SaveNoteResponse.json")
+    suspend fun saveNote(
+        @Query("text") text: String,
+    ): Response<SaveNote>
+
     @POST("./v1/auth/logout")
     suspend fun logout(): Response<Unit>
 
     @POST("./v1/auth/disconnect")
     suspend fun disconnectSalesForce(): Response<Unit>
+    
 }

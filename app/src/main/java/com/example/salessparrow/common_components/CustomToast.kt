@@ -56,7 +56,7 @@ fun CustomToast(
                     verticalAlignment = Alignment.Top,
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.check),
+                        painter = painterResource(id = R.drawable.success_toast_check),
                         contentDescription = "Success",
                         modifier = Modifier
                             .height(24.dp)
