@@ -14,15 +14,19 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*;
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -34,10 +38,13 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.salessparrow.R
 import com.example.salessparrow.common_components.AccountListBottomSheet
+import com.example.salessparrow.common_components.CustomToast
 import com.example.salessparrow.common_components.EditableTextField
+import com.example.salessparrow.common_components.ToastState
 import com.example.salessparrow.services.NavigationService
 import com.example.salessparrow.ui.theme.customFontFamily
 import com.example.salessparrow.viewmodals.NotesViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -48,6 +55,28 @@ fun NotesScreen(
 ) {
 
     var note by remember { mutableStateOf("") }
+    val snackbarState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    Log.i("NotesScreen", "statusBarHeight: $statusBarHeight")
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = statusBarHeight)
+    ) {
+        SnackbarHost(modifier = Modifier.align(Alignment.TopStart), hostState = snackbarState) {
+            CustomToast(
+                toastState = ToastState.SUCCESS,
+                message = "Note is saved to your Salesforce Account"
+            )
+        }
+
+
+    }
+
+
+
     Column(modifier = Modifier.padding(vertical = 30.dp, horizontal = 16.dp)) {
         Header(note = note, accountName = accountName)
         NotesHeader(
@@ -63,6 +92,28 @@ fun NotesScreen(
                 testTag = "et_create_note"
                 testTagsAsResourceId = true
             })
+        EditableTextField(
+            note = note,
+            onValueChange = {
+                note = it
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    testTag = "et_create_note"
+                    testTagsAsResourceId = true
+                }
+        )
+
+        Button(onClick = {
+            coroutineScope.launch {
+                snackbarState.showSnackbar("")
+            }
+        }) {
+            Text(text = "Show Success Snackbar")
+        }
+
+
     }
 }
 
