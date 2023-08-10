@@ -54,6 +54,12 @@ object NavigationService {
         }
     }
 
+    fun navigateWithPopUpClearingAllStack(screenName: String){
+        navController.navigate(screenName) {
+            popUpTo(0)
+        }
+    }
+
     /**
      * Navigates to the specified screen using its screen name along with arguments.
      */

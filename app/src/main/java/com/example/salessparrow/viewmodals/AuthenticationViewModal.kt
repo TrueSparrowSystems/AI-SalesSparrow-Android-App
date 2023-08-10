@@ -76,7 +76,7 @@ class AuthenticationViewModal @Inject constructor(private val authenticationRepo
     fun logout() {
         viewModelScope.launch {
             authenticationRepository.logout()
-            NavigationService.navigateTo(Screens.LoginScreen.route);
+            NavigationService.navigateWithPopUpClearingAllStack( Screens.LoginScreen.route)
         }
     }
 
