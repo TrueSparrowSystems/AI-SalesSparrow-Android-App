@@ -84,14 +84,7 @@ fun NotesScreen(
             accountId = accountId,
             isAccountSelectionEnabled = isAccountSelectionEnabled
         )
-        EditableTextField(note = note, onValueChange = {
-            note = it
-        }, modifier = Modifier
-            .fillMaxWidth()
-            .semantics {
-                testTag = "et_create_note"
-                testTagsAsResourceId = true
-            })
+
         EditableTextField(
             note = note,
             onValueChange = {
