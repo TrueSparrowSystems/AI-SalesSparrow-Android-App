@@ -61,7 +61,15 @@ fun SettingsScreen() {
 
             ) {
             UserAvatar(id = "1", firstName = "John", lastName = "Doe", size = 30.dp)
-            Text(text = "John Doe")
+            Text(
+                text = "John Doe", style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                    fontWeight = FontWeight(500),
+                    color = Color(0xFF545A71),
+                    letterSpacing = 0.56.sp,
+                )
+            )
         }
 
         Spacer(modifier = Modifier.padding(top = 20.dp))

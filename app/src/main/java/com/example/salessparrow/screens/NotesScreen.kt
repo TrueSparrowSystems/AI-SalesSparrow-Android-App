@@ -1,5 +1,6 @@
 package com.example.salessparrow.screens
 
+import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,7 +18,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*;
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -35,6 +36,11 @@ import androidx.compose.ui.text.font.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.ImageLoader
+import coil.compose.AsyncImagePainter.State.Empty.painter
+import coil.compose.rememberAsyncImagePainter
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import com.example.salessparrow.R
 import com.example.salessparrow.common_components.AccountListBottomSheet
 import com.example.salessparrow.common_components.CustomToast
@@ -56,6 +62,9 @@ fun NotesScreen(
     var note by remember { mutableStateOf("") }
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val snackbarState = remember { SnackbarHostState() }
+
+
+
 
 
     Box(
@@ -242,9 +251,17 @@ fun Header(note: String, accountName: String?, snackbarState: SnackbarHostState)
                 verticalAlignment = Alignment.CenterVertically
 
             ) {
+                val imageLoader = ImageLoader.Builder(LocalContext.current).components {
+                    if (Build.VERSION.SDK_INT >= 28) {
+                        add(ImageDecoderDecoder.Factory())
+                    } else {
+                        add(GifDecoder.Factory())
+                    }
+                }.build()
+
                 Image(
                     painter = if (saveNoteApiInProgress) {
-                        painterResource(id = R.drawable.save_note_loader)
+                      rememberAsyncImagePainter(R.drawable.loader, imageLoader)
                     } else if (saveNoteApiIsSuccess) {
                         painterResource(id = R.drawable.check)
                     } else {
