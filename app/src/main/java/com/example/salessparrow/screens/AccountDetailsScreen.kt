@@ -1,6 +1,10 @@
 package com.example.salessparrow.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,15 +30,20 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.salessparrow.R
 import com.example.salessparrow.common_components.AccountCard
 import com.example.salessparrow.common_components.CustomTextWithImage
+import com.example.salessparrow.common_components.NotesCard
+import com.example.salessparrow.common_components.UserAvatar
 import com.example.salessparrow.services.NavigationService
+import com.google.firebase.crashlytics.internal.model.CrashlyticsReport.Session.User
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AccountDetails() {
     Column(
@@ -45,12 +55,15 @@ fun AccountDetails() {
         AccountCard()
         NotesDetailsHeader()
         EmptyScreen()
-
+        NotesCard(
+            firsName = "John",
+            lastName = "Doe",
+            username = "johndoe",
+            notes = "Pre for Presentation on how we would get prepare and plan a migration from PHP to Ruby. Get number of teams members and detailed estimates for Smagic.  Jaydon to lead this.",
+            date = "2019-10-12T07:20:50.52Z"
+        )
     }
 }
-
-
-
 
 
 fun Modifier.dashedBorder(width: Dp, radius: Dp, color: Color) =
@@ -66,8 +79,8 @@ fun Modifier.dashedBorder(width: Dp, radius: Dp, color: Color) =
             it.drawRoundRect(
                 width.toPx(),
                 width.toPx(),
-                size.width - width.toPx()/2,
-                size.height - width.toPx()/2,
+                size.width - width.toPx() / 2,
+                size.height - width.toPx() / 2,
                 radius.toPx(),
                 radius.toPx(),
                 paint
@@ -103,8 +116,6 @@ fun EmptyScreen() {
     }
 
 }
-
-
 
 
 @Composable
@@ -174,7 +185,7 @@ fun AccountDetailsHeader() {
             color = Color(0xFF212653),
         ),
         onClick = {
-          NavigationService.navigateBack();
+            NavigationService.navigateBack();
         }
     )
 }
