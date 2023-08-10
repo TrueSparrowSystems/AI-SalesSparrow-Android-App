@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,14 +29,15 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.*;
 import androidx.compose.ui.text.font.*
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.salessparrow.R
 import com.example.salessparrow.common_components.AccountListBottomSheet
 import com.example.salessparrow.common_components.EditableTextField
 import com.example.salessparrow.services.NavigationService
 import com.example.salessparrow.ui.theme.customFontFamily
+import com.example.salessparrow.viewmodals.NotesViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -45,28 +47,22 @@ fun NotesScreen(
     isAccountSelectionEnabled: Boolean = false
 ) {
 
-    Log.i("NotesScreen", "accountName: $accountName $accountId $isAccountSelectionEnabled")
-
     var note by remember { mutableStateOf("") }
     Column(modifier = Modifier.padding(vertical = 30.dp, horizontal = 16.dp)) {
-        Header()
+        Header(note = note, accountName = accountName)
         NotesHeader(
             accountName = accountName,
             accountId = accountId,
             isAccountSelectionEnabled = isAccountSelectionEnabled
         )
-        EditableTextField(
-            note = note,
-            onValueChange = {
-                note = it
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics {
-                    testTag = "et_create_note"
-                    testTagsAsResourceId = true
-                }
-        )
+        EditableTextField(note = note, onValueChange = {
+            note = it
+        }, modifier = Modifier
+            .fillMaxWidth()
+            .semantics {
+                testTag = "et_create_note"
+                testTagsAsResourceId = true
+            })
     }
 }
 
@@ -97,13 +93,10 @@ fun NotesHeader(accountName: String?, accountId: String?, isAccountSelectionEnab
             Image(
                 painter = painterResource(id = R.drawable.buildings),
                 contentDescription = "Buildings",
-                modifier = Modifier
-                    .size(size = 14.dp)
+                modifier = Modifier.size(size = 14.dp)
             )
             Text(
-                text = "Account",
-                color = Color(0xff212653),
-                style = TextStyle(
+                text = "Account", color = Color(0xff212653), style = TextStyle(
                     fontSize = 14.sp,
                     fontFamily = customFontFamily,
                 )
@@ -127,8 +120,7 @@ fun NotesHeader(accountName: String?, accountId: String?, isAccountSelectionEnab
                 elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 interactionSource = remember { MutableInteractionSource() },
-            )
-            {
+            ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.Start),
                     verticalAlignment = Alignment.CenterVertically,
@@ -156,16 +148,25 @@ fun NotesHeader(accountName: String?, accountId: String?, isAccountSelectionEnab
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun Header() {
+fun Header(note: String, accountName: String?) {
+    val notesViewModel: NotesViewModel = hiltViewModel()
+    var saveNoteSuccess by remember { mutableStateOf(false) }
+    var saveNoteApiInProgress by remember { mutableStateOf(false) }
+    var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
+
+
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
 
         Text(
-            text = "Cancel",
+            text = if (saveNoteApiIsSuccess) {
+                "Done"
+            } else {
+                "Cancel"
+            },
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_regular)),
@@ -177,15 +178,18 @@ fun Header() {
         )
 
         Button(
-            onClick = { },
+            onClick = {
+                saveNoteApiInProgress = true
+                saveNoteSuccess = true
+            },
+            enabled = !(saveNoteApiInProgress || note.isEmpty() || accountName!!.isEmpty() ),
             contentPadding = PaddingValues(all = 8.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent,
-                contentColor = Color.White
+                containerColor = Color.Transparent, contentColor = Color.White
             ),
             modifier = Modifier
                 .background(color = Color(0xFF212653))
-                .width(82.dp)
+                .width(92.dp)
                 .height(46.dp)
                 .clip(shape = RoundedCornerShape(size = 5.dp))
 
@@ -197,7 +201,13 @@ fun Header() {
 
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.cloud),
+                    painter = if (saveNoteApiInProgress) {
+                        painterResource(id = R.drawable.save_note_loader)
+                    } else if (saveNoteApiIsSuccess) {
+                        painterResource(id = R.drawable.check)
+                    } else {
+                        painterResource(id = R.drawable.cloud)
+                    },
                     contentDescription = "cloud",
                     colorFilter = ColorFilter.tint(Color.White),
                     modifier = Modifier
@@ -205,9 +215,13 @@ fun Header() {
                         .height(height = 12.dp)
                 )
                 Text(
-                    text = "Save",
-                    color = Color.White,
-                    style = TextStyle(
+                    text = if (saveNoteApiInProgress) {
+                        "Saving..."
+                    } else if (saveNoteApiIsSuccess) {
+                        "Saved"
+                    } else {
+                        "Save"
+                    }, color = Color.White, style = TextStyle(
                         fontSize = 12.sp,
                         fontFamily = FontFamily(Font(R.font.nunito_regular)),
                         fontWeight = FontWeight(500),
@@ -218,4 +232,19 @@ fun Header() {
             }
         }
     }
+    LaunchedEffect(saveNoteSuccess) {
+        if (saveNoteSuccess) {
+            val success = notesViewModel.saveNote(note)
+            saveNoteApiInProgress = false
+            if (success) {
+                Log.i("MyApp", "Saved success")
+                saveNoteApiIsSuccess = true
+            } else {
+                Log.i("MyApp", "Save failed")
+            }
+            saveNoteSuccess = false
+        }
+    }
 }
+
+
