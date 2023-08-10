@@ -35,6 +35,7 @@ interface ApiService {
         @Query("text") text: String,
     ): Response<SaveNote>
 
+    @Headers("$MOCK_RESPONSE_HEADER: LogoutResponse.json")
     @POST("./v1/auth/logout")
     suspend fun logout(): Response<Unit>
 

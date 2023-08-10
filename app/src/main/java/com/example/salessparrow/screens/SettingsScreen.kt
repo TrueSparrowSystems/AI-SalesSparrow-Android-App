@@ -38,15 +38,18 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.salessparrow.BuildConfig
 import com.example.salessparrow.R
 import com.example.salessparrow.common_components.UserAvatar
 import com.example.salessparrow.services.NavigationService
+import com.example.salessparrow.viewmodals.AuthenticationViewModal
 
 
 @Composable
 fun SettingsScreen() {
     var switchCheckedState by remember { mutableStateOf(false) }
+    val authenticationViewModal: AuthenticationViewModal = hiltViewModel();
 
     Column(
         modifier = Modifier
@@ -147,6 +150,9 @@ fun SettingsScreen() {
                 .height(40.dp)
                 .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp))
                 .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
+                .clickable(onClick = {
+                    authenticationViewModal.logout()
+                })
         ) {
             Image(painterResource(id = R.drawable.sign_out), contentDescription = "sign_out")
             Spacer(modifier = Modifier.padding(start = 8.dp))
