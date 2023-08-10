@@ -187,7 +187,8 @@ fun LogInScreen() {
                     ),
                     onClick = {
                         isLogInProgress.value = true;
-                        val redirectUri = "sales-sparrow://oauth2/success";
+                        //TODO:Read from environment config
+                        val redirectUri = "salessparrowdev://oauth/success";
                         salesForceConnectUrl =
                             authenticationViewModal.getConnectWithSalesForceUrl(redirectUri, context)
                         Log.i("salesForceConnectUrl", salesForceConnectUrl!!.url);

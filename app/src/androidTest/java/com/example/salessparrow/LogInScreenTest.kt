@@ -30,8 +30,6 @@ class LogInScreenTest {
         composeTestRule.onNodeWithTag("salesforce_button")
             .assertExists()
             .assertIsDisplayed()
-
-        // You can add more interactions and assertions as needed
     }
 
 }

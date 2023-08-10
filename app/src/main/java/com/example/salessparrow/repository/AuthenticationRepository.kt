@@ -42,7 +42,7 @@ class AuthenticationRepository @Inject constructor(
         redirectUri: String
     ): CurrentUser? {
         return try {
-            val response = apiService.salesForceConnect(code,  redirectUri);
+            val response = apiService.salesForceConnect(code, redirectUri);
             val currentUser = response.body()
             Log.i("MyApp", "Response: $currentUser")
             if (response.isSuccessful) {
@@ -52,7 +52,7 @@ class AuthenticationRepository @Inject constructor(
             }
         } catch (e: Exception) {
             Log.i("MyApp", "Error salesForceConnect: $e")
-             null
+            null
         }
     }
 
