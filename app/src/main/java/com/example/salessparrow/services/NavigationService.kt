@@ -1,6 +1,8 @@
 package com.example.salessparrow.services
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -13,6 +15,7 @@ import com.example.salessparrow.screens.HomeScreen
 import com.example.salessparrow.screens.SplashScreen
 import com.example.salessparrow.screens.LogInScreen
 import com.example.salessparrow.screens.NotesScreen
+import com.example.salessparrow.screens.SettingsScreen
 import com.example.salessparrow.util.Screens
 import com.example.salessparrow.viewmodals.AuthenticationViewModal
 
@@ -83,6 +86,7 @@ object NavigationService {
 
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationService() {
     val navController = rememberNavController()
@@ -102,14 +106,13 @@ fun NavigationService() {
             val accountName = it.arguments?.getString("accountName") ?: ""
             val isAccountSelectionEnabled =
                 it.arguments?.getString("isAccountSelectionEnabled")?.toBoolean() ?: false
-            Log.i(
-                "NavigationService",
-                "accountId : $accountId accoutName : $accountName isAccountSelectionEnabled : $isAccountSelectionEnabled"
-            );
             NotesScreen(accountName, accountId, isAccountSelectionEnabled)
         }
         composable(route = Screens.AccountDetailsScreen.route) {
             AccountDetails()
+        }
+        composable(route = Screens.SettingsScreen.route) {
+            SettingsScreen()
         }
     }
 }

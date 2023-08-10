@@ -5,7 +5,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.salessparrow.util.Screens
+import com.example.salessparrow.BuildConfig
 import com.example.salessparrow.viewmodals.AuthenticationViewModal
 
 
@@ -18,7 +18,7 @@ fun handleDeepLink(intent: Intent?) {
                 val authCode = deepLinkUri.getQueryParameter("code")
                 val authenticationViewModal: AuthenticationViewModal = viewModel();
                 Log.i("SalesSparow", "handleDeepLink authCode: $authCode")
-                val redirectUri = "salessparrow://callback"
+                val redirectUri = BuildConfig.REDIRECT_URI;
                 authenticationViewModal.salesForceConnect(
                     authCode!!,
                     redirectUri

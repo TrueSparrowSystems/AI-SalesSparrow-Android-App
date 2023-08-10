@@ -47,7 +47,7 @@ android {
 
         create("production") {
             versionCode = 1
-            versionName = "1.0"
+            versionName = "0.0"
             buildConfigField(
                 "String",
                 "IS_MOCK",
@@ -78,11 +78,21 @@ android {
                     )
                 }\""
             )
+            buildConfigField(
+                "String",
+                "REDIRECT_URI",
+                "\"${
+                    getPropertyValueFromPropertiesFile(
+                        file("prod.properties"),
+                        "REDIRECT_URI"
+                    )
+                }\""
+            )
         }
         create("staging") {
             applicationIdSuffix = ".staging"
             versionCode = 1
-            versionName = "1.0"
+            versionName = "0.1"
             buildConfigField(
                 "String",
                 "IS_MOCK",
@@ -110,6 +120,16 @@ android {
                     getPropertyValueFromPropertiesFile(
                         file("staging.properties"),
                         "SALESFORCE_LOGIN_URL"
+                    )
+                }\""
+            )
+            buildConfigField(
+                "String",
+                "REDIRECT_URI",
+                "\"${
+                    getPropertyValueFromPropertiesFile(
+                        file("staging.properties"),
+                        "REDIRECT_URI"
                     )
                 }\""
             )
@@ -189,6 +209,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("androidx.core:core-ktx:1.10.1")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.47")
