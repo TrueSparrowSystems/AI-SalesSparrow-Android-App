@@ -25,9 +25,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -43,10 +47,12 @@ import com.example.salessparrow.ui.theme.walkaway_gray
 import com.example.salessparrow.ui.theme.white
 import com.example.salessparrow.viewmodals.SearchAccountViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun CustomBottomSheetContainer(
     showAddNote: Boolean = false,
+    isAccountSelectionEnabled: Boolean = false,
+    bottomSheetVisible: () -> Unit
 ) {
     val searchAccountViewModal: SearchAccountViewModel = hiltViewModel()
     var searchQuery by remember { mutableStateOf("") }
@@ -78,7 +84,7 @@ fun CustomBottomSheetContainer(
                                 fontSize = 16.sp,
                                 lineHeight = 25.sp,
                                 letterSpacing = 0.48.sp,
-                                color = walkaway_gray
+                                color = walkaway_gray,
                             ),
                             value = searchQuery, onValueChange = { newText ->
                                 searchQuery = newText
@@ -103,7 +109,12 @@ fun CustomBottomSheetContainer(
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent
                             ),
-                            modifier = Modifier.background(Color.Transparent),
+                            modifier = Modifier
+                                .background(Color.Transparent)
+                                .semantics {
+                                    testTagsAsResourceId = true
+                                    testTag = "text_field_search_account"
+                                },
                             maxLines = 1
                         )
                     }
@@ -149,7 +160,16 @@ fun CustomBottomSheetContainer(
                         AccountName(
                             name = recordInfo.name,
                             showAddNote,
-                            attributes = recordInfo.attributes
+                            accountRowTestId = "btn_search_account_name_${recordInfo.name}",
+                            addNoteButtonTestId = "btn_search_account_add_note_${recordInfo.name}",
+                            onAccountRowClick = {
+                                searchAccountViewModal.onAccountRowClicked(recordInfo.name, 1, isAccountSelectionEnabled)
+                                bottomSheetVisible()
+                            },
+                            onAddNoteClick = {
+                                searchAccountViewModal.onAddNoteClicked(recordInfo.name, 1, isAccountSelectionEnabled)
+                                bottomSheetVisible()
+                            }
                         )
                     }
                 }

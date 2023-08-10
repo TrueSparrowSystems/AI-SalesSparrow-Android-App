@@ -4,52 +4,86 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.salessparrow.entity.AuthorizationEntity
+import com.example.salessparrow.models.CurrentUser
+import com.example.salessparrow.models.RedirectUrl
 import com.example.salessparrow.repository.AuthenticationRepository
+import com.example.salessparrow.services.NavigationService
+import com.example.salessparrow.util.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import retrofit2.http.Url
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthenticationViewModal @Inject constructor(private val authenticationRepository: AuthenticationRepository) :
     ViewModel() {
+    open val currentUser = mutableStateOf(CurrentUser(email = "", id = null, name = ""))
 
-
-    fun isUserLoggedIn() = authenticationRepository.isLoggedIn()
-
-    fun connectWithSalesForce(context: Context, url: Uri) {
-        Log.i("SalesForceConnectURl", url.toString())
-        if (url != null) {
-            val intent = Intent(Intent.ACTION_VIEW, url);
-            context.startActivity(intent);
-        }
-    }
-
-    fun getConnectWithSalesForceUrl(): String {
-        val loginUrl = mutableStateOf("")
+    fun checkUserLoggedIn() {
         viewModelScope.launch {
-            loginUrl.value = authenticationRepository.getConnectWithSalesForceUrl()
+            val isUserLoggedIn = authenticationRepository.isLoggedIn()
+            if (isUserLoggedIn) {
+                NavigationService.navigateWithPopUp(
+                    Screens.HomeScreen.route, Screens.SplashScreen.route
+                );
+            } else {
+                NavigationService.navigateWithPopUp(
+                    Screens.LoginScreen.route, Screens.SplashScreen.route
+                );
+
+            }
         }
-        return loginUrl.value;
     }
 
-    private val authorizationLiveData: LiveData<AuthorizationEntity> =
-        authenticationRepository.getAuthorization()
-
-    fun getAuthorizationLiveData(): LiveData<AuthorizationEntity> {
-        return authorizationLiveData
+    fun salesForceConnect(code: String, redirectUri: String): CurrentUser {
+        viewModelScope.launch {
+            currentUser.value = authenticationRepository.salesForceConnect(code, redirectUri)!!
+            println("currentUser: ${currentUser.value}")
+            if (currentUser.value.id.toString().isNotEmpty()) {
+                NavigationService.navigateWithPopUp(
+                    Screens.HomeScreen.route, Screens.LoginScreen.route
+                );
+            }
+        }
+        return currentUser.value;
     }
 
-    fun saveAuthorization(authCode: String) {
-        val authorizationEntity = AuthorizationEntity(authCode)
-        authenticationRepository.insertAuthorization(authorizationEntity)
+    fun getCurrentUser(): CurrentUser {
+        return currentUser.value;
+    }
+
+    fun getConnectWithSalesForceUrl(redirectUri: String, context: Context): RedirectUrl {
+        val redirectUrl = mutableStateOf(RedirectUrl(url = ""))
+        Log.i("AuthenticationViewModal", "getConnectWithSalesForceUrl: $redirectUri")
+        viewModelScope.launch {
+            redirectUrl.value = authenticationRepository.getConnectWithSalesForceUrl(redirectUri)!!
+            Log.i(
+                "AuthenticationViewModal",
+                "getConnectWithSalesForceUrl: ${redirectUrl.value.url}"
+            )
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl.value.url));
+            context.startActivity(intent);
+
+        }
+        Log.i("AuthenticationViewModal", "getConnectWithSalesForceUrl: ${redirectUrl.value}")
+        return redirectUrl.value;
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            authenticationRepository.logout()
+            NavigationService.navigateTo(Screens.LoginScreen.route);
+        }
+    }
+
+    fun disconnectSalesForce() {
+        viewModelScope.launch {
+            authenticationRepository.disconnectSalesForce()
+            NavigationService.navigateTo(Screens.LoginScreen.route);
+        }
     }
 }

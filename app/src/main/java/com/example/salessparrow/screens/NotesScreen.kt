@@ -1,18 +1,16 @@
 package com.example.salessparrow.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
@@ -25,6 +23,9 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*;
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.*;
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,63 +33,46 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.salessparrow.R
 import com.example.salessparrow.common_components.AccountListBottomSheet
+import com.example.salessparrow.common_components.EditableTextField
 import com.example.salessparrow.services.NavigationService
 import com.example.salessparrow.ui.theme.customFontFamily
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun NotesScreen() {
+fun NotesScreen(
+    accountName: String? = null,
+    accountId: String? = null,
+    isAccountSelectionEnabled: Boolean = false
+) {
+
+    Log.i("NotesScreen", "accountName: $accountName $accountId $isAccountSelectionEnabled")
+
     var note by remember { mutableStateOf("") }
     Column(modifier = Modifier.padding(vertical = 30.dp, horizontal = 16.dp)) {
         Header()
-        NotesHeader();
+        NotesHeader(
+            accountName = accountName,
+            accountId = accountId,
+            isAccountSelectionEnabled = isAccountSelectionEnabled
+        )
         EditableTextField(
             note = note,
             onValueChange = {
                 note = it
-            }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics {
+                    testTag = "et_create_note"
+                    testTagsAsResourceId = true
+                }
         )
     }
 }
 
-@Composable
-fun EditableTextField(note: String, onValueChange: (String) -> Unit) {
-    TextField(
-        value = note,
-        onValueChange = { onValueChange(it) },
-        textStyle = TextStyle(
-            fontSize = 18.sp,
-            lineHeight = 24.sp,
-            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-            fontWeight = FontWeight(500),
-            color = Color(0xFF545A71),
-        ),
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = Color(0xCC545A71),
-            backgroundColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-        ),
-        modifier = Modifier.fillMaxWidth(),
-        placeholder = {
-            Text(
-                text = "Add a note",
-                style = TextStyle(
-                    fontSize = 18.sp,
-                    lineHeight = 24.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                    fontWeight = FontWeight(400),
-                    fontStyle = FontStyle.Italic,
-                    color = Color(0xCC545A71),
-                    letterSpacing = 0.72.sp
-                )
-            )
-        }
-    )
-}
-
 
 @Composable
-fun NotesHeader() {
+fun NotesHeader(accountName: String?, accountId: String?, isAccountSelectionEnabled: Boolean) {
     var bottomSheetVisible by remember { mutableStateOf(false) }
 
     val toggleBottomSheet: () -> Unit = {
@@ -96,7 +80,7 @@ fun NotesHeader() {
     }
 
     if (bottomSheetVisible) {
-        AccountListBottomSheet(toggleBottomSheet, false)
+        AccountListBottomSheet(toggleBottomSheet, false, isAccountSelectionEnabled)
     }
 
 
@@ -135,7 +119,11 @@ fun NotesHeader() {
 
         ) {
             Button(
-                onClick = toggleBottomSheet,
+                onClick = {
+                    if (isAccountSelectionEnabled) {
+                        toggleBottomSheet()
+                    }
+                },
                 elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 interactionSource = remember { MutableInteractionSource() },
@@ -146,7 +134,7 @@ fun NotesHeader() {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Smagic",
+                        text = accountName ?: "Select Account",
                         color = Color(0xffdd1a77),
                         style = TextStyle(
                             fontSize = 14.sp,
@@ -166,16 +154,8 @@ fun NotesHeader() {
 }
 
 
-
-@Composable
-@Preview(showBackground = true)
-fun NotesHeaderPreview() {
-    NotesHeader()
-}
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-
 fun Header() {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -208,6 +188,7 @@ fun Header() {
                 .width(82.dp)
                 .height(46.dp)
                 .clip(shape = RoundedCornerShape(size = 5.dp))
+
 
         ) {
             Row(
