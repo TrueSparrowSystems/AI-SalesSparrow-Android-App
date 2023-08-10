@@ -26,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*;
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -55,10 +54,9 @@ fun NotesScreen(
 ) {
 
     var note by remember { mutableStateOf("") }
-    val snackbarState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    Log.i("NotesScreen", "statusBarHeight: $statusBarHeight")
+    val snackbarState = remember { SnackbarHostState() }
+
 
     Box(
         modifier = Modifier
@@ -71,14 +69,12 @@ fun NotesScreen(
                 message = "Note is saved to your Salesforce Account"
             )
         }
-
-
     }
 
 
 
     Column(modifier = Modifier.padding(vertical = 30.dp, horizontal = 16.dp)) {
-        Header(note = note, accountName = accountName)
+        Header(note = note, accountName = accountName, snackbarState)
         NotesHeader(
             accountName = accountName,
             accountId = accountId,
@@ -97,16 +93,6 @@ fun NotesScreen(
                     testTagsAsResourceId = true
                 }
         )
-
-        Button(onClick = {
-            coroutineScope.launch {
-                snackbarState.showSnackbar("")
-            }
-        }) {
-            Text(text = "Show Success Snackbar")
-        }
-
-
     }
 }
 
@@ -192,12 +178,12 @@ fun NotesHeader(accountName: String?, accountId: String?, isAccountSelectionEnab
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun Header(note: String, accountName: String?) {
+fun Header(note: String, accountName: String?, snackbarState: SnackbarHostState) {
     val notesViewModel: NotesViewModel = hiltViewModel()
-    var saveNoteSuccess by remember { mutableStateOf(false) }
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
     var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
 
+    val coroutineScope = rememberCoroutineScope()
 
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -224,9 +210,21 @@ fun Header(note: String, accountName: String?) {
         Button(
             onClick = {
                 saveNoteApiInProgress = true
-                saveNoteSuccess = true
+                coroutineScope.launch {
+                    val success = notesViewModel.saveNote(note)
+
+                    saveNoteApiInProgress = false
+                    if (success) {
+                        saveNoteApiIsSuccess = true
+                        snackbarState.showSnackbar("Note is saved to your Salesforce Account.")
+                    } else {
+                        Log.i("MyApp", "Save failed")
+                    }
+                }
+
             },
-            enabled = !(saveNoteApiInProgress || note.isEmpty() || accountName!!.isEmpty() ),
+
+            enabled = !(saveNoteApiInProgress || note.isEmpty() || accountName!!.isEmpty()),
             contentPadding = PaddingValues(all = 8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent, contentColor = Color.White
@@ -276,19 +274,7 @@ fun Header(note: String, accountName: String?) {
             }
         }
     }
-    LaunchedEffect(saveNoteSuccess) {
-        if (saveNoteSuccess) {
-            val success = notesViewModel.saveNote(note)
-            saveNoteApiInProgress = false
-            if (success) {
-                Log.i("MyApp", "Saved success")
-                saveNoteApiIsSuccess = true
-            } else {
-                Log.i("MyApp", "Save failed")
-            }
-            saveNoteSuccess = false
-        }
-    }
+
 }
 
 
