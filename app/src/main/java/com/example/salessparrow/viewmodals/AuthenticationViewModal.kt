@@ -4,17 +4,16 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.salessparrow.BuildConfig
 import com.example.salessparrow.models.CurrentUser
 import com.example.salessparrow.models.RedirectUrl
 import com.example.salessparrow.repository.AuthenticationRepository
 import com.example.salessparrow.services.NavigationService
 import com.example.salessparrow.util.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -52,6 +51,21 @@ class AuthenticationViewModal @Inject constructor(private val authenticationRepo
         return currentUser.value;
     }
 
+    fun handleDeepLink(intent: Intent) {
+        Log.i("SalesSparow", "handleDeepLink authCode: $intent")
+        val uri = intent.data
+        if (uri != null) {
+            val code = uri.getQueryParameter("code")
+            Log.i("SalesSparow", "handleDeepLink authCode: $code")
+            val redirectUri = BuildConfig.REDIRECT_URI
+            if (code != null && redirectUri != null) {
+                salesForceConnect(code, redirectUri)
+
+            }
+        }
+
+    }
+
     fun getCurrentUser(): CurrentUser {
         return currentUser.value;
     }
@@ -67,7 +81,6 @@ class AuthenticationViewModal @Inject constructor(private val authenticationRepo
             )
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl.value.url));
             context.startActivity(intent);
-
         }
         Log.i("AuthenticationViewModal", "getConnectWithSalesForceUrl: ${redirectUrl.value}")
         return redirectUrl.value;
@@ -76,7 +89,7 @@ class AuthenticationViewModal @Inject constructor(private val authenticationRepo
     fun logout() {
         viewModelScope.launch {
             authenticationRepository.logout()
-            NavigationService.navigateWithPopUpClearingAllStack( Screens.LoginScreen.route)
+            NavigationService.navigateWithPopUpClearingAllStack(Screens.LoginScreen.route)
         }
     }
 

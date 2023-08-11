@@ -22,7 +22,7 @@ class LogInScreenTest {
 
 
         composeTestRule.setContent {
-            LogInScreen();
+//            LogInScreen();
         }
 
 

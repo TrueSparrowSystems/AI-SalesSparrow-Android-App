@@ -1,5 +1,6 @@
 package com.example.salessparrow.screens
 
+import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -50,7 +51,7 @@ import com.example.salessparrow.viewmodals.AuthenticationViewModal
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun LogInScreen() {
+fun LogInScreen(intent: Intent?) {
     val context = LocalContext.current;
     val authenticationViewModal: AuthenticationViewModal = hiltViewModel();
 
@@ -58,7 +59,18 @@ fun LogInScreen() {
 
     var isLogInProgress = remember { mutableStateOf(false) }
 
+    if (intent?.data != null) {
+        Log.i("SalesSparow", " LogInScreen onResume ;${intent} ${isLogInProgress.value}")
+        if (isLogInProgress.value) {
+            return;
+        }
+        val data = intent?.data
+        if (data != null) {
+            isLogInProgress.value = true;
+            authenticationViewModal.handleDeepLink(intent = intent)
+        }
 
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -190,7 +202,10 @@ fun LogInScreen() {
                         //TODO:Read from environment config
                         val redirectUri = "salessparrowdev://oauth/success";
                         salesForceConnectUrl =
-                            authenticationViewModal.getConnectWithSalesForceUrl(redirectUri, context)
+                            authenticationViewModal.getConnectWithSalesForceUrl(
+                                redirectUri,
+                                context
+                            )
                         Log.i("salesForceConnectUrl", salesForceConnectUrl!!.url);
                         if (!salesForceConnectUrl!!.url.isNullOrEmpty()) {
                             isLogInProgress.value = false;

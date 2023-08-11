@@ -9,6 +9,7 @@ import com.example.salessparrow.api.ResponseInterceptor
 import com.example.salessparrow.database.AppDatabase
 import com.example.salessparrow.repository.AuthenticationRepository
 import com.example.salessparrow.repository.SearchAccountRepository
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,14 +42,18 @@ object AuthenticationModule {
     @Provides
     fun providesRetrofit(interceptor: ResponseInterceptor): Retrofit {
         val logging = HttpLoggingInterceptor()
-        logging.setLevel(HttpLoggingInterceptor.Level.HEADERS)
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY)
         val client: OkHttpClient =
             OkHttpClient.Builder().addInterceptor(logging).addInterceptor(interceptor).build()
+        val gson = GsonBuilder()
+            .setLenient()
+            .create()
+
         val baseUrl = BuildConfig.BASE_URL;
         Log.i("okhttp.OkHttpClient", "Response: $baseUrl")
         return Retrofit.Builder()
             .baseUrl(baseUrl)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .client(client)
             .build()
     }
