@@ -1,9 +1,11 @@
 package com.example.salessparrow.api
 
+import com.example.salessparrow.data.SalesForceConnectRequest
 import com.example.salessparrow.models.CurrentUser
 import com.example.salessparrow.models.RedirectUrl
 import com.example.salessparrow.models.SaveNote
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
@@ -19,10 +21,9 @@ interface ApiService {
     suspend fun getSalesForceRedirectUrl(@Query("redirect_uri") redirectUri: String): Response<RedirectUrl>
 
     @POST("./v1/auth/salesforce/connect")
-    @Headers("$MOCK_RESPONSE_HEADER: salesForceConnectResponse.json")
+    @Headers("Content-Type: application/json")
     suspend fun salesForceConnect(
-        @Query("code") code: String,
-        @Query("redirect_uri") redirectUri: String
+        @Body request: SalesForceConnectRequest
     ): Response<CurrentUser>
 
     @GET("./v1/users/current")
@@ -41,5 +42,5 @@ interface ApiService {
 
     @POST("./v1/auth/disconnect")
     suspend fun disconnectSalesForce(): Response<Unit>
-    
+
 }

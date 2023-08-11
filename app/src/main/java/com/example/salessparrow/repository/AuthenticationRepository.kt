@@ -2,6 +2,7 @@ package com.example.salessparrow.repository
 
 import android.util.Log
 import com.example.salessparrow.api.ApiService
+import com.example.salessparrow.data.SalesForceConnectRequest
 import com.example.salessparrow.models.CurrentUser
 import com.example.salessparrow.models.RedirectUrl
 
@@ -42,7 +43,8 @@ class AuthenticationRepository @Inject constructor(
         redirectUri: String
     ): CurrentUser? {
         return try {
-            val response = apiService.salesForceConnect(code, redirectUri);
+            val request = SalesForceConnectRequest(code = code, redirect_uri = redirectUri)
+            val response = apiService.salesForceConnect(request);
             val currentUser = response.body()
             Log.i("MyApp", "Response: $currentUser")
             if (response.isSuccessful) {
