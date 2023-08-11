@@ -1,7 +1,7 @@
 package com.example.salessparrow.services
 
+import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -10,6 +10,8 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
+import com.example.salessparrow.BuildConfig
 import com.example.salessparrow.screens.AccountDetails
 import com.example.salessparrow.screens.HomeScreen
 import com.example.salessparrow.screens.SplashScreen
@@ -54,7 +56,7 @@ object NavigationService {
         }
     }
 
-    fun navigateWithPopUpClearingAllStack(screenName: String){
+    fun navigateWithPopUpClearingAllStack(screenName: String) {
         navController.navigate(screenName) {
             popUpTo(0)
         }
@@ -94,7 +96,7 @@ object NavigationService {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NavigationService() {
+fun NavigationService(intent: Intent?) {
     val navController = rememberNavController()
     val authenticationViewModal: AuthenticationViewModal = viewModel()
     NavigationService.initialize(navController, authenticationViewModal)
@@ -103,7 +105,14 @@ fun NavigationService() {
         composable(route = Screens.SplashScreen.route) {
             SplashScreen()
         }
-        composable(route = Screens.LoginScreen.route) { LogInScreen() }
+        composable(route = Screens.LoginScreen.route,
+            deepLinks = listOf(navDeepLink {
+                uriPattern = BuildConfig.REDIRECT_URI
+                action = Intent.ACTION_VIEW
+            })
+        ) {
+            LogInScreen(intent = intent)
+        }
         composable(route = Screens.HomeScreen.route) { HomeScreen() }
         composable(
             route = Screens.NotesScreen.route
