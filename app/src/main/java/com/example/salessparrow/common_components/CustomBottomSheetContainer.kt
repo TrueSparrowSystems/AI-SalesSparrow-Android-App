@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Observer
 import com.example.salessparrow.R
-import com.example.salessparrow.data.Record
+import com.example.salessparrow.models.Record
 import com.example.salessparrow.ui.theme.customFontFamily
 import com.example.salessparrow.ui.theme.walkaway_gray
 import com.example.salessparrow.ui.theme.white
@@ -222,8 +222,4 @@ fun CustomBottomSheetContainer(
             }
         }
     }
-}
-
-fun searchAccount(records: List<Record>?, searchValue: String): List<Record>? {
-    return records?.filter { it.name.contains(searchValue, ignoreCase = true) }
 }

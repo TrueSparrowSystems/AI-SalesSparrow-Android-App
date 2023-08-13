@@ -27,7 +27,7 @@ class SearchAccountViewModel @Inject constructor(
     }
 
     val searchAccountLiveDataData: LiveData<NetworkResponse<AccountListResponse>>
-    get() = repository.searchAccountLiveData
+        get() = repository.searchAccountLiveData
 
 
     fun onSearchQueryChanged(query: String) {
@@ -43,7 +43,7 @@ class SearchAccountViewModel @Inject constructor(
         isAccountSelectionEnabled: Boolean
     ) {
         Log.d("SearchAccountViewModel", "onAccountRowClicked: $accountName")
-        NavigationService.navigateTo(Screens.AccountDetailsScreen.route);
+        NavigationService.navigateTo("account_details_screen/${accountId}");
     }
 
 

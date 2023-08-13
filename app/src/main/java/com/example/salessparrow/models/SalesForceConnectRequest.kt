@@ -1,4 +1,4 @@
-package com.example.salessparrow.data
+package com.example.salessparrow.models
 
 data class SalesForceConnectRequest(
     val code: String,

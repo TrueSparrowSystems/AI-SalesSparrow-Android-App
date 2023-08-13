@@ -4,8 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.salessparrow.api.ApiService
-import com.example.salessparrow.data.SalesForceConnectRequest
-import com.example.salessparrow.models.CurrentUser
+import com.example.salessparrow.models.SalesForceConnectRequest
 import com.example.salessparrow.models.RedirectUrl
 import com.example.salessparrow.models.CurrentUserResponse
 import com.example.salessparrow.services.NavigationService

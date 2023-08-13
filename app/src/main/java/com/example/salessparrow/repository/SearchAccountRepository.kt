@@ -17,36 +17,20 @@ class SearchAccountRepository @Inject constructor(private val apiService: ApiSer
 
 
     suspend fun searchAccounts(query: String) {
-       try {
-           val result = apiService.getAccounts(query = query);
-
-           if (result.isSuccessful && result.body() != null) {
-               _searchAccountLiveData.postValue(NetworkResponse.Success(result.body()!!))
-           } else if (result.errorBody() != null) {
-               _searchAccountLiveData.postValue(NetworkResponse.Error("Error fetching records: ${result.errorBody()}"))
-           }
-           else {
-               _searchAccountLiveData.postValue(NetworkResponse.Error("Error fetching records: Error}"))
-           }
-       } catch (e: Exception) {
-           _searchAccountLiveData.postValue(NetworkResponse.Error("Error fetching records: ${e.message.toString()}"))
-       }
-
-    }
-
-    suspend fun getAccountRecords(
-        callback: (AccountListResponse?) -> Unit, errorCallback: (String) -> Unit
-    ) {
         try {
-            val response = apiService.getAccounts(query = "test")
-            Log.i("MyApp", "Response: $response")
-            if (response.isSuccessful && response.body() != null) {
-                callback(response.body())
+            _searchAccountLiveData.postValue(NetworkResponse.Loading())
+            val result = apiService.getAccounts(query = query);
+
+            if (result.isSuccessful && result.body() != null) {
+                _searchAccountLiveData.postValue(NetworkResponse.Success(result.body()!!))
+            } else if (result.errorBody() != null) {
+                _searchAccountLiveData.postValue(NetworkResponse.Error("Error fetching records: ${result.errorBody()}"))
             } else {
-                errorCallback("Error fetching records: Error}")
+                _searchAccountLiveData.postValue(NetworkResponse.Error("Error fetching records: Error}"))
             }
         } catch (e: Exception) {
-            errorCallback("Error fetching records: ${e.message}")
+            _searchAccountLiveData.postValue(NetworkResponse.Error("Error fetching records: ${e.message.toString()}"))
         }
+
     }
 }

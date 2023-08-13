@@ -27,6 +27,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*;
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -48,6 +49,7 @@ import com.example.salessparrow.common_components.EditableTextField
 import com.example.salessparrow.common_components.ToastState
 import com.example.salessparrow.services.NavigationService
 import com.example.salessparrow.ui.theme.customFontFamily
+import com.example.salessparrow.util.NetworkResponse
 import com.example.salessparrow.viewmodals.NotesViewModel
 import kotlinx.coroutines.launch
 
@@ -62,6 +64,32 @@ fun NotesScreen(
     var note by remember { mutableStateOf("") }
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val snackbarState = remember { SnackbarHostState() }
+
+    val notesViewModel: NotesViewModel = hiltViewModel()
+    var saveNoteApiInProgress by remember { mutableStateOf(false) }
+    var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
+
+    notesViewModel.notesLiveData.observe(LocalLifecycleOwner.current) { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                saveNoteApiInProgress = false;
+                saveNoteApiIsSuccess = true
+                Log.d("NotesScreen", "Success")
+
+            }
+
+            is NetworkResponse.Error -> {
+                saveNoteApiInProgress = false;
+                Log.d("NotesScreen", "Error : ${response.message}")
+            }
+
+            is NetworkResponse.Loading -> {
+                saveNoteApiInProgress = true;
+                Log.d("NotesScreen", "Loading")
+            }
+        }
+    }
+
 
 
 
@@ -83,7 +111,14 @@ fun NotesScreen(
 
 
     Column(modifier = Modifier.padding(vertical = 30.dp, horizontal = 16.dp)) {
-        Header(note = note, accountName = accountName, snackbarState)
+        Header(
+            note = note,
+            accountName = accountName,
+            accountId = accountId!!,
+            saveNoteApiInProgress = saveNoteApiInProgress,
+            saveNoteApiIsSuccess = saveNoteApiIsSuccess,
+            snackbarState
+        )
         NotesHeader(
             accountName = accountName,
             accountId = accountId,
@@ -187,12 +222,16 @@ fun NotesHeader(accountName: String?, accountId: String?, isAccountSelectionEnab
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun Header(note: String, accountName: String?, snackbarState: SnackbarHostState) {
+fun Header(
+    note: String,
+    accountName: String?,
+    accountId: String,
+    saveNoteApiInProgress: Boolean,
+    saveNoteApiIsSuccess: Boolean,
+    snackbarState: SnackbarHostState
+) {
     val notesViewModel: NotesViewModel = hiltViewModel()
-    var saveNoteApiInProgress by remember { mutableStateOf(false) }
-    var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
 
-    val coroutineScope = rememberCoroutineScope()
 
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -218,19 +257,10 @@ fun Header(note: String, accountName: String?, snackbarState: SnackbarHostState)
 
         Button(
             onClick = {
-                saveNoteApiInProgress = true
-                coroutineScope.launch {
-                    val success = notesViewModel.saveNote(note)
-
-                    saveNoteApiInProgress = false
-                    if (success) {
-                        saveNoteApiIsSuccess = true
-                        snackbarState.showSnackbar("Note is saved to your Salesforce Account.")
-                    } else {
-                        Log.i("MyApp", "Save failed")
-                    }
-                }
-
+                notesViewModel.saveNote(
+                    accountId = accountId!!,
+                    text = note,
+                )
             },
 
             enabled = !(saveNoteApiInProgress || note.isEmpty() || accountName!!.isEmpty()),
@@ -261,7 +291,7 @@ fun Header(note: String, accountName: String?, snackbarState: SnackbarHostState)
 
                 Image(
                     painter = if (saveNoteApiInProgress) {
-                      rememberAsyncImagePainter(R.drawable.loader, imageLoader)
+                        rememberAsyncImagePainter(R.drawable.loader, imageLoader)
                     } else if (saveNoteApiIsSuccess) {
                         painterResource(id = R.drawable.check)
                     } else {
