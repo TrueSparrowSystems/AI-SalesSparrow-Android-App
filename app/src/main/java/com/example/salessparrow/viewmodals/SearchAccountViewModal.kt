@@ -2,12 +2,14 @@ package com.example.salessparrow.viewmodals
 
 import com.example.salessparrow.repository.SearchAccountRepository
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
-import com.example.salessparrow.data.DataWrapper
+import com.example.salessparrow.models.AccountListResponse
 import com.example.salessparrow.services.NavigationService
+import com.example.salessparrow.util.NetworkResponse
 import com.example.salessparrow.util.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -17,15 +19,27 @@ import javax.inject.Inject
 class SearchAccountViewModel @Inject constructor(
     private val repository: SearchAccountRepository
 ) : ViewModel() {
-    fun getAccountList(callback: (DataWrapper?) -> Unit, errorCallback: (String) -> Unit) {
+
+    init {
         viewModelScope.launch {
-            repository.getAccountRecords(callback, errorCallback)
+            repository.searchAccounts("");
+        }
+    }
+
+    val searchAccountLiveDataData: LiveData<NetworkResponse<AccountListResponse>>
+    get() = repository.searchAccountLiveData
+
+
+    fun onSearchQueryChanged(query: String) {
+        Log.d("SearchAccountViewModel", "onSearchQueryChanged: $query")
+        viewModelScope.launch {
+            repository.searchAccounts(query);
         }
     }
 
     fun onAccountRowClicked(
         accountName: String,
-        accountId: Int,
+        accountId: String,
         isAccountSelectionEnabled: Boolean
     ) {
         Log.d("SearchAccountViewModel", "onAccountRowClicked: $accountName")
@@ -35,7 +49,7 @@ class SearchAccountViewModel @Inject constructor(
 
     fun onAddNoteClicked(
         accountName: String,
-        accountId: Int,
+        accountId: String,
         isAccountSelectionEnabled: Boolean
     ) {
         Log.d("SearchAccountViewModel", "onAddNoteClicked: $accountName")

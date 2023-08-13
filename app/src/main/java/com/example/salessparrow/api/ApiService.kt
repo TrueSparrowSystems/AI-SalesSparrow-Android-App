@@ -4,6 +4,8 @@ import com.example.salessparrow.data.SalesForceConnectRequest
 import com.example.salessparrow.models.CurrentUser
 import com.example.salessparrow.models.RedirectUrl
 import com.example.salessparrow.models.SaveNote
+import com.example.salessparrow.models.CurrentUserResponse
+import com.example.salessparrow.models.AccountListResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -14,7 +16,7 @@ import retrofit2.http.Query
 interface ApiService {
 
     @GET("./v1/accounts")
-    suspend fun getAccounts(): Response<Record>
+    suspend fun getAccounts(@Query("q") query: String): Response<AccountListResponse>
 
     @GET("./v1/auth/salesforce/redirect-url")
     @Headers("$MOCK_RESPONSE_HEADER: RedirectUri.json")
@@ -24,11 +26,11 @@ interface ApiService {
     @Headers("Content-Type: application/json")
     suspend fun salesForceConnect(
         @Body request: SalesForceConnectRequest
-    ): Response<CurrentUser>
+    ): Response<CurrentUserResponse>
 
     @GET("./v1/users/current")
     @Headers("$MOCK_RESPONSE_HEADER: CurrentUserResponse.json")
-    suspend fun getCurrentUser(): Response<CurrentUser>
+    suspend fun getCurrentUser(): Response<CurrentUserResponse>
 
     @GET("/v1/accounts/{account_id}/note")
     @Headers("$MOCK_RESPONSE_HEADER: SaveNoteResponse.json")

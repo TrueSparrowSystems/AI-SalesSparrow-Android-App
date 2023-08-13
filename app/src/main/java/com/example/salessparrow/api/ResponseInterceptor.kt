@@ -45,17 +45,5 @@ class ResponseInterceptor @Inject constructor(private val assetReader: JsonReade
             .addHeader("content-type", "application/json")
             .build()
 
-//        return newResponse
-//        val headers = chain.request().headers
-//        val responseString = assetReader.getJsonAsString(headers[MOCK_RESPONSE_HEADER])
-//        return chain.proceed(chain.request())
-//            .newBuilder()
-//            .code(SUCCESS_CODE)
-//            .body(
-//                responseString.toByteArray().toResponseBody("application/json".toMediaTypeOrNull())
-//            )
-//            .addHeader("content-type", "application/json")
-//            .message("OK")
-//            .build()
     }
 }

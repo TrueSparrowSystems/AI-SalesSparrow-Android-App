@@ -211,6 +211,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
+
     //Dagger - Hilt
     implementation("com.google.dagger:hilt-android:2.47")
     implementation("androidx.fragment:fragment-ktx:1.4.0")

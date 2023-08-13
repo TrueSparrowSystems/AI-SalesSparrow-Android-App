@@ -1,26 +1,27 @@
 package com.example.salessparrow.repository
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.example.salessparrow.api.ApiService
 import com.example.salessparrow.data.SalesForceConnectRequest
 import com.example.salessparrow.models.CurrentUser
 import com.example.salessparrow.models.RedirectUrl
+import com.example.salessparrow.models.CurrentUserResponse
+import com.example.salessparrow.services.NavigationService
+import com.example.salessparrow.util.CookieManager
+import com.example.salessparrow.util.Screens
 
 import javax.inject.Inject
 
 class AuthenticationRepository @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val cookieManager: CookieManager
 ) {
 
-    suspend fun isLoggedIn(): Boolean {
-        val currentUser = getCurrentUser()
-        Log.i("Authentication getCurrentUser", "isUserLoggedIn: ${currentUser?.id !== null}")
-        if (currentUser != null) {
-            return currentUser.id !== null
-        }
-        return false
-    }
 
+    private val _currentUserLiveData = MutableLiveData<CurrentUserResponse?>()
+    val currentUserLiveData: LiveData<CurrentUserResponse?> = _currentUserLiveData
 
     suspend fun getConnectWithSalesForceUrl(
         redirectUri: String
@@ -41,14 +42,24 @@ class AuthenticationRepository @Inject constructor(
     suspend fun salesForceConnect(
         code: String,
         redirectUri: String
-    ): CurrentUser? {
-        return try {
+    ) {
+        try {
             val request = SalesForceConnectRequest(code = code, redirect_uri = redirectUri)
             val response = apiService.salesForceConnect(request);
+            val responseCookie = response.headers()["Set-Cookie"]
+            Log.i("MyApp", "Response: $responseCookie")
+            if (responseCookie != null) {
+                cookieManager.saveCookie(responseCookie)
+            }
             val currentUser = response.body()
+            _currentUserLiveData.value = currentUser
             Log.i("MyApp", "Response: $currentUser")
             if (response.isSuccessful) {
                 currentUser
+                NavigationService.navigateWithPopUp(
+                    Screens.HomeScreen.route,
+                    Screens.LoginScreen.route
+                )
             } else {
                 null
             }
@@ -58,29 +69,33 @@ class AuthenticationRepository @Inject constructor(
         }
     }
 
-    suspend fun getCurrentUser(): CurrentUser? {
-        return try {
+    suspend fun getCurrentUser() {
+        try {
             Log.i("Authentication inside", "getCurrentUser: ")
-            val response = apiService.getCurrentUser();
-            Log.i("Authentication after response", "getCurrentUser: ${response}")
+
+            val response = apiService.getCurrentUser()
+            Log.i("Authentication after response", "getCurrentUser: ${response.body()}")
             val currentUser = response.body()
 
-            Log.i("Authentication resoponse body", "getCurrentUser: $currentUser")
+            _currentUserLiveData.value = currentUser// Update the LiveData
 
-            if (response.isSuccessful) {
-                currentUser!!
-            } else {
-                null
-            }
+            Log.i(
+                "Authentication response body",
+                "getCurrentUser: ${response} ${response.body()} ${_currentUserLiveData.value!!.current_user}"
+            )
+
+            // No need to return anything here
         } catch (e: Exception) {
             Log.i("Authentication exception", "getCurrentUser: $e")
-            null
+            _currentUserLiveData.postValue(null) // Update LiveData with null in case of error
         }
     }
+
 
     suspend fun logout(): Boolean {
         return try {
             val response = apiService.logout();
+            cookieManager.clearCookie();
             response.isSuccessful
         } catch (e: Exception) {
             false
