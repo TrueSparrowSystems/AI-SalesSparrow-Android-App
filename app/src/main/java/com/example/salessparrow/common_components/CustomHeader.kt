@@ -53,6 +53,8 @@ fun CustomHeader(
     isRightButtonEnabled: Boolean = true,
     rightButtonTestId: String? = null,
     shouldShowAvatarComponent: Boolean = false,
+    userId: String? = null,
+    userName: String? = null,
 ) {
     Row(
         modifier = Modifier
@@ -108,9 +110,9 @@ fun CustomHeader(
                         )
 
                         UserAvatar(
-                            id = "1",
-                            firstName = "John",
-                            lastName = "Doe",
+                            id = userId!!,
+                            firstName = userName!!.split(" ")[0],
+                            lastName = userName!!.split(" ")[1],
                             size = 24.dp,
                             textStyle = TextStyle(
                                 fontSize = 6.45.sp,

@@ -6,12 +6,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -39,13 +39,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Observer
 import com.example.salessparrow.R
-import com.example.salessparrow.data.Record
-import com.example.salessparrow.data.RecordInfo
+import com.example.salessparrow.models.Record
 import com.example.salessparrow.ui.theme.customFontFamily
 import com.example.salessparrow.ui.theme.walkaway_gray
 import com.example.salessparrow.ui.theme.white
+import com.example.salessparrow.util.NetworkResponse
 import com.example.salessparrow.viewmodals.SearchAccountViewModel
+import androidx.compose.material3.CircularProgressIndicator
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -56,8 +58,33 @@ fun CustomBottomSheetContainer(
 ) {
     val searchAccountViewModal: SearchAccountViewModel = hiltViewModel()
     var searchQuery by remember { mutableStateOf("") }
-    var filteredRecords by remember { mutableStateOf<List<Record>?>(null) }
     var records by remember { mutableStateOf<List<Record>?>(null) }
+    val isAccountListApiInProgress = remember { mutableStateOf(true) }
+
+    searchAccountViewModal.searchAccountLiveDataData.observe(
+        LocalLifecycleOwner.current,
+        Observer { res ->
+            when (res) {
+                is NetworkResponse.Success -> {
+                    isAccountListApiInProgress.value = false
+                    Log.i("MyApp", "accountIds: ${res.data!!.accountIds}")
+                    records = res.data.accountIds.map { accountId ->
+                        val accountDetails = res.data.accountMapById[accountId]
+                        Record(accountId, accountDetails?.name ?: "")
+                    }
+                }
+
+                is NetworkResponse.Error -> {
+                    isAccountListApiInProgress.value = false
+                    Log.i("MyApp", "accountIds: ${res.message}")
+                }
+
+                is NetworkResponse.Loading -> {
+                    isAccountListApiInProgress.value = true
+                    Log.i("MyApp", "accountIds: ${res.message}")
+                }
+            }
+        })
 
 
     Scaffold(
@@ -76,6 +103,7 @@ fun CustomBottomSheetContainer(
                             modifier = Modifier
                                 .width(24.dp)
                                 .height(24.dp)
+
                         )
                         TextField(
                             textStyle = TextStyle(
@@ -88,7 +116,7 @@ fun CustomBottomSheetContainer(
                             ),
                             value = searchQuery, onValueChange = { newText ->
                                 searchQuery = newText
-                                filteredRecords = searchAccount(records, searchQuery)
+                                searchAccountViewModal.onSearchQueryChanged(searchQuery)
                             },
                             placeholder = {
                                 CustomText(
@@ -126,26 +154,29 @@ fun CustomBottomSheetContainer(
                 )
             }
         },
-    ) {
+    ) { it ->
         Column(modifier = Modifier.padding(it)) {
-            LaunchedEffect(true) {
-                searchAccountViewModal.getAccountList(callback = { accountsDataWrapper ->
-                    records = accountsDataWrapper?.compositeResponse?.firstOrNull()?.body?.records
-                    filteredRecords =
-                        accountsDataWrapper?.compositeResponse?.firstOrNull()?.body?.records
-                }, errorCallback = { error ->
-                    Log.i("error", "error: $error")
-                })
-            }
-            val filteredRecordInfoList = filteredRecords?.filter {
-                it.Name.contains(searchQuery, ignoreCase = true)
-            }?.map { record ->
-                RecordInfo(name = record.Name, attributes = record.attributes)
-            } ?: emptyList()
 
 
             LazyColumn {
-                if (filteredRecordInfoList.isEmpty()) {
+                if (isAccountListApiInProgress.value) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .height(70.dp)
+                                    .width(30.dp)
+                                    .padding(4.dp)
+                            )
+                        }
+
+                    }
+                } else if (records?.isEmpty() == true) {
                     item {
                         Text(
                             text = "No results found",
@@ -156,19 +187,34 @@ fun CustomBottomSheetContainer(
                         )
                     }
                 } else {
-                    items(filteredRecordInfoList) { recordInfo ->
-                        AccountName(
-                            name = recordInfo.name,
-                            showAddNote,
-                            accountRowTestId = "btn_search_account_name_${recordInfo.name}",
-                            addNoteButtonTestId = "btn_search_account_add_note_${recordInfo.name}",
-                            onAccountRowClick = {
-                                searchAccountViewModal.onAccountRowClicked(recordInfo.name, 1, isAccountSelectionEnabled)
-                                bottomSheetVisible()
-                            },
-                            onAddNoteClick = {
-                                searchAccountViewModal.onAddNoteClicked(recordInfo.name, 1, isAccountSelectionEnabled)
-                                bottomSheetVisible()
+                    records?.let { it1 ->
+                        items(
+                            count = it1.size,
+                            itemContent = { index ->
+                                val recordInfo = records!![index]
+                                AccountName(
+                                    name = recordInfo.name,
+                                    showAddNote,
+                                    accountRowTestId = "btn_search_account_name_${recordInfo.name}",
+                                    addNoteButtonTestId = "btn_search_account_add_note_${recordInfo.name}",
+                                    onAccountRowClick = {
+                                        searchAccountViewModal.onAccountRowClicked(
+                                            recordInfo.name,
+                                            recordInfo.id,
+                                            isAccountSelectionEnabled
+                                        )
+                                        bottomSheetVisible()
+                                    },
+                                    onAddNoteClick = {
+                                        searchAccountViewModal.onAddNoteClicked(
+                                            recordInfo.name,
+                                            recordInfo.id,
+                                            isAccountSelectionEnabled
+                                        )
+                                        bottomSheetVisible()
+                                    }
+                                )
+
                             }
                         )
                     }
@@ -177,8 +223,3 @@ fun CustomBottomSheetContainer(
         }
     }
 }
-
-fun searchAccount(records: List<Record>?, searchValue: String): List<Record>? {
-    return records?.filter { it.Name.contains(searchValue, ignoreCase = true) }
-}
-

@@ -1,6 +1,7 @@
 package com.example.salessparrow.screens
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -34,18 +36,49 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.salessparrow.R
 import com.example.salessparrow.common_components.AccountCard
 import com.example.salessparrow.common_components.CustomTextWithImage
 import com.example.salessparrow.common_components.NotesCard
 import com.example.salessparrow.common_components.UserAvatar
 import com.example.salessparrow.services.NavigationService
+import com.example.salessparrow.util.NetworkResponse
+import com.example.salessparrow.viewmodals.AccountDetailsViewModal
 import com.google.firebase.crashlytics.internal.model.CrashlyticsReport.Session.User
 
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AccountDetails() {
+fun AccountDetails(
+    accountId: String
+) {
+
+    val accountDetailsViewModal: AccountDetailsViewModal = hiltViewModel()
+
+    accountDetailsViewModal.getAccountNotes(accountId = accountId)
+
+    Log.i("AccountDetails", "Account Id: $accountId")
+
+    accountDetailsViewModal.accountDetailsLiveData.observe(LocalLifecycleOwner.current) {
+        when (it) {
+            is NetworkResponse.Success -> {
+                Log.i("AccountDetails", "Success: ${it.data}")
+            }
+
+            is NetworkResponse.Error -> {
+                Log.i("AccountDetails", "Failure: ${it.message}")
+            }
+
+            is NetworkResponse.Loading -> {
+                Log.i("AccountDetails", "Loading")
+            }
+
+        }
+
+    }
+
+
     Column(
         modifier = Modifier.padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp)

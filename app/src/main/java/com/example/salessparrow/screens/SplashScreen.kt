@@ -34,6 +34,7 @@ fun SplashScreen() {
             .background(nero)
     ) {
 
+
         val imageLoader = ImageLoader.Builder(LocalContext.current).components {
             if (SDK_INT >= 28) {
                 add(ImageDecoderDecoder.Factory())
@@ -51,8 +52,14 @@ fun SplashScreen() {
 
 
     LaunchedEffect(key1 = true) {
-        delay(1000);
-        authenticationViewModal.checkUserLoggedIn()
+        delay(2000);
+        val currentUser = authenticationViewModal.currentUserLiveData.value?.current_user
+        Log.i("SalesSparow", "SplashScreen: $currentUser")
+        if (currentUser != null) {
+            NavigationService.navigateWithPopUp(Screens.HomeScreen.route, Screens.SplashScreen.route)
+        } else {
+            NavigationService.navigateWithPopUp(Screens.LoginScreen.route, Screens.SplashScreen.route)
+        }
 
     }
 }

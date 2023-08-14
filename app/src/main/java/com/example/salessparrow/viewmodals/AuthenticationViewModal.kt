@@ -5,50 +5,43 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.salessparrow.BuildConfig
 import com.example.salessparrow.models.CurrentUser
+import com.example.salessparrow.models.CurrentUserResponse
 import com.example.salessparrow.models.RedirectUrl
 import com.example.salessparrow.repository.AuthenticationRepository
 import com.example.salessparrow.services.NavigationService
+import com.example.salessparrow.util.CookieManager
 import com.example.salessparrow.util.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthenticationViewModal @Inject constructor(private val authenticationRepository: AuthenticationRepository) :
+class AuthenticationViewModal @Inject constructor(
+    private val authenticationRepository: AuthenticationRepository
+) :
     ViewModel() {
-    open val currentUser = mutableStateOf(CurrentUser(email = "", id = null, name = ""))
 
-    fun checkUserLoggedIn() {
+    val currentUserLiveData: LiveData<CurrentUserResponse?> =
+        authenticationRepository.currentUserLiveData
+
+
+    init {
         viewModelScope.launch {
-            val isUserLoggedIn = authenticationRepository.isLoggedIn()
-            if (isUserLoggedIn) {
-                NavigationService.navigateWithPopUp(
-                    Screens.HomeScreen.route, Screens.SplashScreen.route
-                );
-            } else {
-                NavigationService.navigateWithPopUp(
-                    Screens.LoginScreen.route, Screens.SplashScreen.route
-                );
-
-            }
+            authenticationRepository.getCurrentUser() // Call the function to get the latest user data
         }
     }
 
-    fun salesForceConnect(code: String, redirectUri: String): CurrentUser {
+    fun salesForceConnect(code: String, redirectUri: String) {
         viewModelScope.launch {
-            currentUser.value = authenticationRepository.salesForceConnect(code, redirectUri)!!
-            println("currentUser: ${currentUser.value}")
-            if (currentUser.value.id.toString().isNotEmpty()) {
-                NavigationService.navigateWithPopUp(
-                    Screens.HomeScreen.route, Screens.LoginScreen.route
-                );
-            }
+            val response = authenticationRepository.salesForceConnect(code, redirectUri)
+            Log.i("SalesSparow", "salesForceConnect: $response")
         }
-        return currentUser.value;
     }
 
     fun handleDeepLink(intent: Intent) {
@@ -64,10 +57,6 @@ class AuthenticationViewModal @Inject constructor(private val authenticationRepo
             }
         }
 
-    }
-
-    fun getCurrentUser(): CurrentUser {
-        return currentUser.value;
     }
 
     fun getConnectWithSalesForceUrl(redirectUri: String, context: Context): RedirectUrl {

@@ -1,5 +1,6 @@
 package com.example.salessparrow.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,6 +51,7 @@ import com.example.salessparrow.viewmodals.AuthenticationViewModal
 fun SettingsScreen() {
     var switchCheckedState by remember { mutableStateOf(false) }
     val authenticationViewModal: AuthenticationViewModal = hiltViewModel();
+    val currentUser = authenticationViewModal.currentUserLiveData.value?.current_user
 
     Column(
         modifier = Modifier
@@ -63,16 +65,27 @@ fun SettingsScreen() {
             verticalAlignment = Alignment.CenterVertically,
 
             ) {
-            UserAvatar(id = "1", firstName = "John", lastName = "Doe", size = 30.dp)
-            Text(
-                text = "John Doe", style = TextStyle(
-                    fontSize = 14.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFF545A71),
-                    letterSpacing = 0.56.sp,
-                )
+            UserAvatar(
+                id = currentUser?.id ?: "121",
+                firstName = currentUser?.name ?: "abc def"!!.split(" ")[0],
+                lastName = currentUser?.name ?: "abc def"!!.split(" ")[1],
             )
+            Log.i("SettingsScreen", "SettingsScreen: ${currentUser?.name}")
+//
+//            if (currentUser!!?.name !== null) {
+//                Log.i("SettingsScreen", "SettingsScreen: ${currentUser?.name}")
+//                currentUser?.name?.let {
+//                    Text(
+//                        text = it, style = TextStyle(
+//                            fontSize = 14.sp,
+//                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
+//                            fontWeight = FontWeight(500),
+//                            color = Color(0xFF545A71),
+//                            letterSpacing = 0.56.sp,
+//                        )
+//                    )
+//                }
+//            }
         }
 
         Spacer(modifier = Modifier.padding(top = 20.dp))

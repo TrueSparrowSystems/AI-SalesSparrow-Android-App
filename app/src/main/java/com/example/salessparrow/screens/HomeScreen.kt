@@ -1,5 +1,6 @@
 package com.example.salessparrow.screens
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -43,6 +44,8 @@ import com.example.salessparrow.viewmodals.AuthenticationViewModal
 
 @Composable
 fun HomeScreen() {
+    val authenticationViewModal: AuthenticationViewModal = hiltViewModel()
+
     var bottomSheetVisible by remember { mutableStateOf(false) }
 
     val toggleBottomSheet: () -> Unit = {
@@ -55,8 +58,11 @@ fun HomeScreen() {
         AccountListBottomSheet(toggleBottomSheet, true)
     }
 
-    val authenticationViewModal: AuthenticationViewModal = hiltViewModel()
 
+
+    val currentUser = authenticationViewModal.currentUserLiveData.value?.current_user
+
+    Log.i("HomeScreen", "Current User: $currentUser")
 
 
     Scaffold(
@@ -99,7 +105,9 @@ fun HomeScreen() {
                     .width(24.dp)
                     .height(24.dp),
                 isRightButtonEnabled = true,
-                shouldShowAvatarComponent = true
+                shouldShowAvatarComponent = true,
+                userName = currentUser?.name ?: "John ve",
+                userId = currentUser?.id ?: "121",
             )
         },
         content = { innerPadding ->

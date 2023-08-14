@@ -5,10 +5,10 @@ import android.util.Log
 import com.example.salessparrow.BuildConfig
 import com.example.salessparrow.api.ApiService
 import com.example.salessparrow.api.JsonReader
+import com.example.salessparrow.api.RequestInterceptor
 import com.example.salessparrow.api.ResponseInterceptor
 import com.example.salessparrow.database.AppDatabase
-import com.example.salessparrow.repository.AuthenticationRepository
-import com.example.salessparrow.repository.SearchAccountRepository
+import com.example.salessparrow.util.CookieManager
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
@@ -26,11 +26,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AuthenticationModule {
 
-    @Singleton
-    @Provides
-    fun provideAuthenticationRepository(apiService: ApiService): AuthenticationRepository {
-        return AuthenticationRepository(apiService)
-    }
 
     @Singleton
     @Provides
@@ -40,17 +35,27 @@ object AuthenticationModule {
 
     @Singleton
     @Provides
-    fun providesRetrofit(interceptor: ResponseInterceptor): Retrofit {
+    fun provideCookieManager(@ApplicationContext context: Context): CookieManager {
+        return CookieManager(context)
+    }
+
+
+    @Singleton
+    @Provides
+    fun providesRetrofit(
+        responseInterceptor: ResponseInterceptor,
+        requestInterceptor: RequestInterceptor
+    ): Retrofit {
         val logging = HttpLoggingInterceptor()
         logging.setLevel(HttpLoggingInterceptor.Level.BODY)
         val client: OkHttpClient =
-            OkHttpClient.Builder().addInterceptor(logging).addInterceptor(interceptor).build()
+            OkHttpClient.Builder().addInterceptor(logging).addInterceptor(responseInterceptor)
+                .addInterceptor(requestInterceptor).build()
         val gson = GsonBuilder()
             .setLenient()
             .create()
 
         val baseUrl = BuildConfig.BASE_URL;
-        Log.i("okhttp.OkHttpClient", "Response: $baseUrl")
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create(gson))
@@ -70,10 +75,6 @@ object AuthenticationModule {
         return AppDatabase.getDatabase(context)
     }
 
-    @Provides
-    fun provideSearchAccountRepository(): SearchAccountRepository {
-        return SearchAccountRepository()
-    }
 
     @Singleton
     @Provides
