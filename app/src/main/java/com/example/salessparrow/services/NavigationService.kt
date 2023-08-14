@@ -125,7 +125,8 @@ fun NavigationService(intent: Intent?) {
         }
         composable(route = Screens.AccountDetailsScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
-            AccountDetails(accountId)
+            val accountName = it.arguments?.getString("accountName") ?: ""
+            AccountDetails(accountId, accountName)
         }
         composable(route = Screens.SettingsScreen.route) {
             SettingsScreen()

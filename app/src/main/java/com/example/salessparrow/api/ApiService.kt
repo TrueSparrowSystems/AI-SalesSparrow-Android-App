@@ -12,6 +12,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
@@ -33,17 +34,17 @@ interface ApiService {
     @Headers("$MOCK_RESPONSE_HEADER: CurrentUserResponse.json")
     suspend fun getCurrentUser(): Response<CurrentUserResponse>
 
-    @POST("/v1/accounts/{account_id}/note")
+    @POST("./v1/accounts/{account_id}/notes")
     @Headers("$MOCK_RESPONSE_HEADER: SaveNoteResponse.json")
     suspend fun saveNote(
         @Query("account_id") accountId: String,
         @Body request: SaveNoteRequest
     ): Response<SaveNote>
 
-    @GET("./v1/accounts/{account_id}/notes")
+    @GET("v1/accounts/{account_id}/notes")
     @Headers("$MOCK_RESPONSE_HEADER: NotesResponse.json")
     suspend fun getAccountNotes(
-        @Query("account_id") accountId: String
+       @Path(value = "account_id", encoded = true) accountId: String
     ): Response<AccountNotesResponse>
 
     @Headers("$MOCK_RESPONSE_HEADER: LogoutResponse.json")

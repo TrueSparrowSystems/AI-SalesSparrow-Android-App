@@ -11,3 +11,11 @@ data class NoteMapById(
     val last_modified_time: String,
     val text_preview: String
 )
+
+
+data class Note(
+    val creator: String,
+    val id: String,
+    val last_modified_time: String,
+    val text_preview: String
+)
