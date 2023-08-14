@@ -8,5 +8,6 @@ sealed class Screens(val route: String) {
         Screens("notes_screen/{accountId}/{accountName}/{isAccountSelectionEnabled}");
     object AccountDetailsScreen : Screens("account_details_screen/{accountId}/{accountName}")
 
+    object NoteDetailsScreen : Screens("note_details_screen/{accountId}/{accountName}/{noteId}")
     object SettingsScreen : Screens("settings_screen")
 }

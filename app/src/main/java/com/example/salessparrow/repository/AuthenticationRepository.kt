@@ -29,11 +29,13 @@ class AuthenticationRepository @Inject constructor(
             val response = apiService.getSalesForceRedirectUrl(redirectUri)
             val redirectUrl = response.body()
             if (response.isSuccessful) {
+                Log.i("MyApp", "Response: $redirectUrl")
                 redirectUrl
             } else {
                 null
             }
         } catch (e: Exception) {
+            Log.i("MyApp", "Error getConnectWithSalesForceUrl: $e")
             null
         }
     }

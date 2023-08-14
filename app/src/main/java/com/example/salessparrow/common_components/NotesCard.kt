@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,7 +30,14 @@ import java.time.Instant
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NotesCard(firsName: String, lastName: String, username: String, date: String, notes: String) {
+fun NotesCard(
+    firsName: String,
+    lastName: String,
+    username: String,
+    date: String,
+    notes: String,
+    onClick: () -> Unit
+) {
     Log.i("NotesCard", "NotesCard: $notes @date: $date @username: $username")
     var formattedTime: String = "";
     try {
@@ -55,6 +63,9 @@ fun NotesCard(firsName: String, lastName: String, username: String, date: String
             .fillMaxWidth()
             .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp))
             .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
+            .clickable {
+                onClick()
+            }
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,

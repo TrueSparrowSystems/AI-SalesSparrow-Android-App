@@ -6,6 +6,7 @@ import com.example.salessparrow.models.SaveNote
 import com.example.salessparrow.models.CurrentUserResponse
 import com.example.salessparrow.models.AccountListResponse
 import com.example.salessparrow.models.AccountNotesResponse
+import com.example.salessparrow.models.NotesDetailResponse
 import com.example.salessparrow.models.SaveNoteRequest
 import retrofit2.Response
 import retrofit2.http.Body
@@ -46,6 +47,14 @@ interface ApiService {
     suspend fun getAccountNotes(
        @Path(value = "account_id", encoded = true) accountId: String
     ): Response<AccountNotesResponse>
+
+    @GET("v1/accounts/{account_id}/notes/{note_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: NoteDetailsResponse.json")
+    suspend fun getNoteDetails(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "note_id") noteId: String
+    ): Response<NotesDetailResponse>
+
 
     @Headers("$MOCK_RESPONSE_HEADER: LogoutResponse.json")
     @POST("./v1/auth/logout")

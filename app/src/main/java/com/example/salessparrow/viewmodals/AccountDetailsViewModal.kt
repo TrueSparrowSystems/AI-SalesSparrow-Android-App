@@ -29,6 +29,4 @@ class AccountDetailsViewModal @Inject constructor(
         }
 
     }
-
-
 }
