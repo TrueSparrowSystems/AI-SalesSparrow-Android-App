@@ -16,6 +16,7 @@ import com.example.salessparrow.screens.AccountDetails
 import com.example.salessparrow.screens.HomeScreen
 import com.example.salessparrow.screens.SplashScreen
 import com.example.salessparrow.screens.LogInScreen
+import com.example.salessparrow.screens.NoteDetailScreen
 import com.example.salessparrow.screens.NotesScreen
 import com.example.salessparrow.screens.SettingsScreen
 import com.example.salessparrow.util.Screens
@@ -130,6 +131,12 @@ fun NavigationService(intent: Intent?) {
         }
         composable(route = Screens.SettingsScreen.route) {
             SettingsScreen()
+        }
+        composable(route = Screens.NoteDetailsScreen.route){
+            val accountId = it.arguments?.getString("accountId") ?: ""
+            val accountName = it.arguments?.getString("accountName") ?: ""
+            val noteId = it.arguments?.getString("noteId") ?: ""
+            NoteDetailScreen(accountId, accountName,noteId)
         }
     }
 }

@@ -121,7 +121,6 @@ fun NotesScreen(
         )
         NotesHeader(
             accountName = accountName,
-            accountId = accountId,
             isAccountSelectionEnabled = isAccountSelectionEnabled
         )
 
@@ -142,7 +141,7 @@ fun NotesScreen(
 
 
 @Composable
-fun NotesHeader(accountName: String?, accountId: String?, isAccountSelectionEnabled: Boolean) {
+fun NotesHeader(accountName: String?, isAccountSelectionEnabled: Boolean) {
     var bottomSheetVisible by remember { mutableStateOf(false) }
 
     val toggleBottomSheet: () -> Unit = {

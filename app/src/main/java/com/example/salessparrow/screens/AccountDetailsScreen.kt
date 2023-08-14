@@ -131,7 +131,11 @@ fun AccountDetails(
                     lastName = note.creator.split(" ")[1],
                     username = note.creator,
                     notes = note.text_preview,
-                    date = note.last_modified_time
+                    date = note.last_modified_time,
+                    onClick = {
+                        Log.i("AccountDetails", "NoteId: ${note.id}")
+                        NavigationService.navigateTo("note_details_screen/${accountId}/${accountName}/${note.id}")
+                    }
                 )
             }
         }
@@ -201,7 +205,11 @@ fun EmptyScreen() {
 
 
 @Composable
-fun NotesDetailsHeader(accountId: String, accountName: String, isAccountSelectionEnabled: Boolean? = false) {
+fun NotesDetailsHeader(
+    accountId: String,
+    accountName: String,
+    isAccountSelectionEnabled: Boolean? = false
+) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
