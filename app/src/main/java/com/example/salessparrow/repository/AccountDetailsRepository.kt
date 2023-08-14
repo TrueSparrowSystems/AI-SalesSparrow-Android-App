@@ -1,5 +1,6 @@
 package com.example.salessparrow.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.salessparrow.api.ApiService
@@ -26,9 +27,11 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
                 val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
                 _accountNotes.postValue(NetworkResponse.Error(errorObj.getString("message")))
             } else {
+                Log.i("AccountDetails", "Exception: $response")
                 _accountNotes.postValue(NetworkResponse.Error("Error went wrong"))
             }
         } catch (e: Exception) {
+            Log.i("AccountDetails", "Exception: ${e.message}")
             _accountNotes.postValue(NetworkResponse.Error("Something went wrong"))
         }
 

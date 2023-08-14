@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,8 +15,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -37,13 +46,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.loader.content.Loader
 import com.example.salessparrow.R
 import com.example.salessparrow.common_components.AccountCard
 import com.example.salessparrow.common_components.CustomTextWithImage
 import com.example.salessparrow.common_components.NotesCard
 import com.example.salessparrow.common_components.UserAvatar
+import com.example.salessparrow.models.Note
+import com.example.salessparrow.models.Record
 import com.example.salessparrow.services.NavigationService
 import com.example.salessparrow.util.NetworkResponse
+import com.example.salessparrow.util.Screens
 import com.example.salessparrow.viewmodals.AccountDetailsViewModal
 import com.google.firebase.crashlytics.internal.model.CrashlyticsReport.Session.User
 
@@ -51,26 +64,44 @@ import com.google.firebase.crashlytics.internal.model.CrashlyticsReport.Session.
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AccountDetails(
-    accountId: String
+    accountId: String,
+    accountName: String
 ) {
 
     val accountDetailsViewModal: AccountDetailsViewModal = hiltViewModel()
+    var isAccountNoteDetailsLoading by remember { mutableStateOf(false) };
+    var notes by remember { mutableStateOf<List<Note>?>(null) }
 
-    accountDetailsViewModal.getAccountNotes(accountId = accountId)
+    val accountNotesResponse by accountDetailsViewModal.accountDetailsLiveData.observeAsState()
 
-    Log.i("AccountDetails", "Account Id: $accountId")
+    LaunchedEffect(key1 = accountId) {
+        accountDetailsViewModal.getAccountNotes(accountId = accountId)
+    }
 
-    accountDetailsViewModal.accountDetailsLiveData.observe(LocalLifecycleOwner.current) {
+
+    accountNotesResponse?.let {
         when (it) {
             is NetworkResponse.Success -> {
+                isAccountNoteDetailsLoading = false
+                notes = it.data?.note_ids?.map { noteId ->
+                    val noteDetails = it.data?.note_map_by_id?.get(noteId)
+                    Note(
+                        creator = noteDetails?.creator ?: "",
+                        id = noteDetails?.id ?: "",
+                        last_modified_time = noteDetails?.last_modified_time ?: "",
+                        text_preview = noteDetails?.text_preview ?: ""
+                    )
+                }
                 Log.i("AccountDetails", "Success: ${it.data}")
             }
 
             is NetworkResponse.Error -> {
+                isAccountNoteDetailsLoading = false
                 Log.i("AccountDetails", "Failure: ${it.message}")
             }
 
             is NetworkResponse.Loading -> {
+                isAccountNoteDetailsLoading = true
                 Log.i("AccountDetails", "Loading")
             }
 
@@ -83,19 +114,37 @@ fun AccountDetails(
         modifier = Modifier.padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
+
         AccountDetailsHeader()
         ContactDetailsHeader()
         AccountCard()
-        NotesDetailsHeader()
-        EmptyScreen()
-        NotesCard(
-            firsName = "John",
-            lastName = "Doe",
-            username = "johndoe",
-            notes = "Pre for Presentation on how we would get prepare and plan a migration from PHP to Ruby. Get number of teams members and detailed estimates for Smagic.  Jaydon to lead this.",
-            date = "2019-10-12T07:20:50.52Z"
-        )
+        NotesDetailsHeader(accountId, accountName = accountName)
+
+        if (isAccountNoteDetailsLoading) {
+            Loader()
+        } else if (notes?.isEmpty() == true || notes == null) {
+            EmptyScreen()
+        } else {
+            notes?.forEach { note ->
+                NotesCard(
+                    firsName = note.creator.split(" ")[0],
+                    lastName = note.creator.split(" ")[1],
+                    username = note.creator,
+                    notes = note.text_preview,
+                    date = note.last_modified_time
+                )
+            }
+        }
     }
+}
+
+@Composable
+fun Loader() {
+    CircularProgressIndicator(
+        modifier = Modifier
+            .height(20.dp)
+            .width(20.dp)
+    )
 }
 
 
@@ -152,7 +201,7 @@ fun EmptyScreen() {
 
 
 @Composable
-fun NotesDetailsHeader() {
+fun NotesDetailsHeader(accountId: String, accountName: String, isAccountSelectionEnabled: Boolean? = false) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -178,6 +227,9 @@ fun NotesDetailsHeader() {
             modifier = Modifier
                 .width(20.dp)
                 .height(20.dp)
+                .clickable {
+                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
+                }
         )
     }
 

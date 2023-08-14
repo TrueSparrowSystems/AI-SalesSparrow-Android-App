@@ -1,5 +1,6 @@
 package com.example.salessparrow.viewmodals
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,7 +21,9 @@ class AccountDetailsViewModal @Inject constructor(
         get() = accountDetailsRepository.accountNotes
 
 
+
     fun getAccountNotes(accountId: String) {
+        Log.i("AccountDetails", "Account Id: $accountId")
         viewModelScope.launch {
             accountDetailsRepository.getAccountNotes(accountId)
         }

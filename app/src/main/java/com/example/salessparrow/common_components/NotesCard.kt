@@ -1,6 +1,7 @@
 package com.example.salessparrow.common_components
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
@@ -24,13 +24,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.salessparrow.R
 import com.example.salessparrow.util.formatTime
+import com.example.salessparrow.util.parseTime
 import java.time.Instant
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NotesCard(firsName: String, lastName: String, username: String, date: String, notes: String) {
-    val parsedTime = Instant.parse(date)
-    val formattedTime = formatTime(parsedTime)
+    Log.i("NotesCard", "NotesCard: $notes @date: $date @username: $username")
+    var formattedTime: String = "";
+    try {
+        val parsedTime = parseTime(date)
+        formattedTime = parsedTime?.let { formatTime(it) }.toString()
+    } catch (e: Exception) {
+        Log.i("NotesCard", "NotesCard: $e")
+    }
+
+
+
+    Log.i("NotesCard", "NotesCard formattedTime $formattedTime ")
 
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),

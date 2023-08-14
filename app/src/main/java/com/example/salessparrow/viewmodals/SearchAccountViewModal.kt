@@ -43,7 +43,7 @@ class SearchAccountViewModel @Inject constructor(
         isAccountSelectionEnabled: Boolean
     ) {
         Log.d("SearchAccountViewModel", "onAccountRowClicked: $accountName")
-        NavigationService.navigateTo("account_details_screen/${accountId}");
+        NavigationService.navigateTo("account_details_screen/${accountId}/${accountName}")
     }
 
 
