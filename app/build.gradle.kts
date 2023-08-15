@@ -25,11 +25,11 @@ fun getPropertyValueFromPropertiesFile(propertyFile: File, propertyName: String)
 }
 
 android {
-    namespace = "com.example.salessparrow"
+    namespace = "com.truesparrowsystemspvtltd.salessparrow"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.salessparrow"
+        applicationId = "com.truesparrowsystemspvtltd.salessparrow"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
