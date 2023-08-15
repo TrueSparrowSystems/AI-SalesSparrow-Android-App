@@ -13,6 +13,7 @@ import com.truesparrowsystemspvtltd.salessparrow.models.CurrentUserResponse
 import com.truesparrowsystemspvtltd.salessparrow.models.RedirectUrl
 import com.truesparrowsystemspvtltd.salessparrow.repository.AuthenticationRepository
 import com.truesparrowsystemspvtltd.salessparrow.services.NavigationService
+import com.truesparrowsystemspvtltd.salessparrow.util.NetworkResponse
 import com.truesparrowsystemspvtltd.salessparrow.util.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -24,20 +25,19 @@ class AuthenticationViewModal @Inject constructor(
 ) :
     ViewModel() {
 
-    val currentUserLiveData: LiveData<CurrentUserResponse?> =
-        authenticationRepository.currentUserLiveData
+    val currentUserLiveData: LiveData<NetworkResponse<CurrentUserResponse>>
+        get() = authenticationRepository.currentUserLiveData
 
 
     init {
         viewModelScope.launch {
-            authenticationRepository.getCurrentUser() // Call the function to get the latest user data
+            authenticationRepository.getCurrentUser()
         }
     }
 
     fun salesForceConnect(code: String, redirectUri: String) {
         viewModelScope.launch {
-            val response = authenticationRepository.salesForceConnect(code, redirectUri)
-            Log.i("SalesSparow", "salesForceConnect: $response")
+           authenticationRepository.salesForceConnect(code, redirectUri)
         }
     }
 

@@ -18,6 +18,7 @@ import androidx.compose.material.FabPosition
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,7 +58,8 @@ fun HomeScreen() {
         AccountListBottomSheet(toggleBottomSheet, true)
     }
 
-    val currentUser = authenticationViewModal.currentUserLiveData.value?.current_user
+    val currentUser = authenticationViewModal.currentUserLiveData?.observeAsState()?.value
+
 
     Log.i("HomeScreen", "Current User: $currentUser")
 
@@ -103,8 +105,8 @@ fun HomeScreen() {
                     .height(24.dp),
                 isRightButtonEnabled = true,
                 shouldShowAvatarComponent = true,
-                userName = currentUser?.name ?: "John ve",
-                userId = currentUser?.id ?: "121",
+                userName = currentUser?.data?.current_user?.name ?: "John ve",
+                userId = currentUser?.data?.current_user?.name ?: "121",
             )
         },
         content = { innerPadding ->
