@@ -20,6 +20,7 @@ import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,7 +52,8 @@ import com.truesparrowsystemspvtltd.salessparrow.viewmodals.AuthenticationViewMo
 fun SettingsScreen() {
     var switchCheckedState by remember { mutableStateOf(false) }
     val authenticationViewModal: AuthenticationViewModal = hiltViewModel();
-    val currentUser = authenticationViewModal.currentUserLiveData.value?.current_user
+    val currentUser =
+        authenticationViewModal.currentUserLiveData?.observeAsState()?.value?.data?.current_user
 
     Column(
         modifier = Modifier
@@ -63,29 +65,31 @@ fun SettingsScreen() {
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
-
             ) {
-            UserAvatar(
-                id = currentUser?.id ?: "121",
-                firstName = currentUser?.name ?: "abc def"!!.split(" ")[0],
-                lastName = currentUser?.name ?: "abc def"!!.split(" ")[1],
-            )
+            if (currentUser != null) {
+                UserAvatar(
+                    id = currentUser.id ?: "121",
+                    firstName = currentUser.name?.split(" ")?.get(0) ?: "",
+                    lastName = currentUser.name?.split(" ")?.get(1) ?: "",
+                    size = 40.dp,
+                )
+            }
             Log.i("SettingsScreen", "SettingsScreen: ${currentUser?.name}")
-//
-//            if (currentUser!!?.name !== null) {
-//                Log.i("SettingsScreen", "SettingsScreen: ${currentUser?.name}")
-//                currentUser?.name?.let {
-//                    Text(
-//                        text = it, style = TextStyle(
-//                            fontSize = 14.sp,
-//                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-//                            fontWeight = FontWeight(500),
-//                            color = Color(0xFF545A71),
-//                            letterSpacing = 0.56.sp,
-//                        )
-//                    )
-//                }
-//            }
+
+            if (currentUser?.name != null) {
+                Log.i("SettingsScreen", "SettingsScreen: ${currentUser?.name}")
+                currentUser?.name?.let {
+                    Text(
+                        text = it, style = TextStyle(
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                            fontWeight = FontWeight(500),
+                            color = Color(0xFF545A71),
+                            letterSpacing = 0.56.sp,
+                        )
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.padding(top = 20.dp))

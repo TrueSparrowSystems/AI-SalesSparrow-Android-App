@@ -9,7 +9,9 @@ import com.truesparrowsystemspvtltd.salessparrow.models.RedirectUrl
 import com.truesparrowsystemspvtltd.salessparrow.models.CurrentUserResponse
 import com.truesparrowsystemspvtltd.salessparrow.services.NavigationService
 import com.truesparrowsystemspvtltd.salessparrow.util.CookieManager
+import com.truesparrowsystemspvtltd.salessparrow.util.NetworkResponse
 import com.truesparrowsystemspvtltd.salessparrow.util.Screens
+import org.json.JSONObject
 
 import javax.inject.Inject
 
@@ -19,8 +21,9 @@ class AuthenticationRepository @Inject constructor(
 ) {
 
 
-    private val _currentUserLiveData = MutableLiveData<CurrentUserResponse?>()
-    val currentUserLiveData: LiveData<CurrentUserResponse?> = _currentUserLiveData
+    private val _currentUserLiveData = MutableLiveData<NetworkResponse<CurrentUserResponse>>()
+    val currentUserLiveData: LiveData<NetworkResponse<CurrentUserResponse>>
+        get() = _currentUserLiveData
 
     suspend fun getConnectWithSalesForceUrl(
         redirectUri: String
@@ -44,51 +47,52 @@ class AuthenticationRepository @Inject constructor(
         code: String,
         redirectUri: String
     ) {
+
         try {
             val request = SalesForceConnectRequest(code = code, redirect_uri = redirectUri)
             val response = apiService.salesForceConnect(request);
-            val responseCookie = response.headers()["Set-Cookie"]
-            Log.i("MyApp", "Response: $responseCookie")
-            if (responseCookie != null) {
-                cookieManager.saveCookie(responseCookie)
-            }
-            val currentUser = response.body()
-            _currentUserLiveData.value = currentUser
-            Log.i("MyApp", "Response: $currentUser")
-            if (response.isSuccessful) {
-                currentUser
+            if (response.isSuccessful && response.body() != null) {
+                val responseCookie = response.headers()["Set-Cookie"]
+                if (responseCookie != null) {
+                    cookieManager.saveCookie(responseCookie)
+                }
+                _currentUserLiveData.postValue(NetworkResponse.Success(response.body()!!))
                 NavigationService.navigateWithPopUp(
                     Screens.HomeScreen.route,
                     Screens.LoginScreen.route
                 )
+            } else if (response.errorBody() != null) {
+                val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
+                _currentUserLiveData.postValue(NetworkResponse.Error(errorObj.getString("message")))
             } else {
-                null
+                _currentUserLiveData.postValue(NetworkResponse.Error("Error went wrong"))
             }
+
         } catch (e: Exception) {
-            Log.i("MyApp", "Error salesForceConnect: $e")
-            null
+            _currentUserLiveData.postValue(NetworkResponse.Error("Something went wrong"))
         }
     }
 
     suspend fun getCurrentUser() {
         try {
             Log.i("Authentication inside", "getCurrentUser: ")
-
+            _currentUserLiveData.postValue(NetworkResponse.Loading())
             val response = apiService.getCurrentUser()
-            Log.i("Authentication after response", "getCurrentUser: ${response.body()}")
-            val currentUser = response.body()
 
-            _currentUserLiveData.value = currentUser// Update the LiveData
-
-            Log.i(
-                "Authentication response body",
-                "getCurrentUser: ${response} ${response.body()} ${_currentUserLiveData.value!!.current_user}"
-            )
-
-            // No need to return anything here
+            if (response.isSuccessful) {
+                _currentUserLiveData.postValue(NetworkResponse.Success(response.body()!!))
+                Log.i("Authentication response", "getCurrentUser: ${response.body()}")
+            } else if (response.errorBody() != null) {
+                val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
+                _currentUserLiveData.postValue(NetworkResponse.Error(errorObj.getString("message")))
+                Log.i("Authentication response", "getCurrentUser: ${response.errorBody()}")
+            } else {
+                _currentUserLiveData.postValue(NetworkResponse.Error("Error went wrong"))
+                Log.i("Authentication response", "getCurrentUser: ${response.errorBody()}")
+            }
         } catch (e: Exception) {
             Log.i("Authentication exception", "getCurrentUser: $e")
-            _currentUserLiveData.postValue(null) // Update LiveData with null in case of error
+            _currentUserLiveData.postValue(NetworkResponse.Error("Something went wrong"))
         }
     }
 

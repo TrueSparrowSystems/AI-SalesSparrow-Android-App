@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -18,6 +20,7 @@ import coil.decode.ImageDecoderDecoder
 import com.truesparrowsystemspvtltd.salessparrow.R
 import com.truesparrowsystemspvtltd.salessparrow.services.NavigationService
 import com.truesparrowsystemspvtltd.salessparrow.ui.theme.nero
+import com.truesparrowsystemspvtltd.salessparrow.util.NetworkResponse
 import com.truesparrowsystemspvtltd.salessparrow.util.Screens
 import com.truesparrowsystemspvtltd.salessparrow.viewmodals.AuthenticationViewModal
 import kotlinx.coroutines.delay
@@ -26,6 +29,9 @@ import kotlinx.coroutines.delay
 fun SplashScreen() {
 
     val authenticationViewModal: AuthenticationViewModal = hiltViewModel()
+
+    val currentUserResponse by authenticationViewModal.currentUserLiveData.observeAsState();
+
 
     Box(
         modifier = Modifier
@@ -52,13 +58,22 @@ fun SplashScreen() {
 
     LaunchedEffect(key1 = true) {
         delay(2000);
-        val currentUser = authenticationViewModal.currentUserLiveData.value?.current_user
-        Log.i("SalesSparow", "SplashScreen: $currentUser")
-        if (currentUser != null) {
-            NavigationService.navigateWithPopUp(Screens.HomeScreen.route, Screens.SplashScreen.route)
-        } else {
-            NavigationService.navigateWithPopUp(Screens.LoginScreen.route, Screens.SplashScreen.route)
+        currentUserResponse?.let {
+           when(it){
+                is NetworkResponse.Success -> {
+                     Log.i("SalesSparow", "SplashScreen: ${it.data!!.current_user}")
+                     NavigationService.navigateWithPopUp(Screens.HomeScreen.route, Screens.SplashScreen.route)
+                }
+                is NetworkResponse.Error -> {
+                     NavigationService.navigateWithPopUp(Screens.LoginScreen.route, Screens.SplashScreen.route)
+                }
+                is NetworkResponse.Loading -> {
+
+                }
+           }
+
         }
+
 
     }
 }
