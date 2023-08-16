@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.truesparrowsystemspvtltd.salessparrow.staging",
+  "applicationId": "com.truesparrow.sales.dev",
   "variantName": "stagingRelease",
   "elements": [
     {

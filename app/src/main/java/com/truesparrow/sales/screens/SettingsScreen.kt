@@ -105,14 +105,14 @@ fun SettingsScreen() {
                     shape = RoundedCornerShape(size = 4.dp)
                 )
                 .fillMaxWidth()
-                .height(128.dp)
+                .height(158.dp)
                 .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp))
                 .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
         ) {
             Column(
                 modifier = Modifier
                     .width(323.dp)
-                    .height(100.dp)
+                    .height(120.dp)
                     .background(color = Color(0xFFF5F5F6), shape = RoundedCornerShape(size = 4.dp))
                     .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
             ) {
@@ -122,7 +122,7 @@ fun SettingsScreen() {
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(36.dp)
+                        .height(56.dp)
                         .background(
                             color = Color(0xFFFFFFFF),
                             shape = RoundedCornerShape(size = 4.dp)
@@ -274,6 +274,7 @@ fun DisconnectingSalesforceText(modifier: Modifier = Modifier) {
         },
         modifier = modifier
             .fillMaxWidth()
+            .fillMaxHeight()
     )
 }
 
