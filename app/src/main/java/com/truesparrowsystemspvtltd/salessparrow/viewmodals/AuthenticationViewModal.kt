@@ -28,6 +28,9 @@ class AuthenticationViewModal @Inject constructor(
     val currentUserLiveData: LiveData<NetworkResponse<CurrentUserResponse>>
         get() = authenticationRepository.currentUserLiveData
 
+    val getSalesForcceConnectUrl: LiveData<NetworkResponse<RedirectUrl>>
+        get() = authenticationRepository.getSalesForcceConnectUrl
+
 
     init {
         viewModelScope.launch {
@@ -56,20 +59,11 @@ class AuthenticationViewModal @Inject constructor(
 
     }
 
-    fun getConnectWithSalesForceUrl(redirectUri: String, context: Context): RedirectUrl {
-        val redirectUrl = mutableStateOf(RedirectUrl(url = ""))
-        Log.i("AuthenticationViewModal", "getConnectWithSalesForceUrl: $redirectUri")
+    fun getConnectWithSalesForceUrl(redirectUri: String) {
         viewModelScope.launch {
-            redirectUrl.value = authenticationRepository.getConnectWithSalesForceUrl(redirectUri)!!
-            Log.i(
-                "AuthenticationViewModal",
-                "getConnectWithSalesForceUrl: ${redirectUrl.value.url}"
-            )
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(redirectUrl.value.url));
-            context.startActivity(intent);
+            authenticationRepository.getConnectWithSalesForceUrl(redirectUri)
         }
-        Log.i("AuthenticationViewModal", "getConnectWithSalesForceUrl: ${redirectUrl.value}")
-        return redirectUrl.value;
+
     }
 
     fun logout() {

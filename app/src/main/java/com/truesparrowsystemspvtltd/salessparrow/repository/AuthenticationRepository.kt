@@ -25,21 +25,26 @@ class AuthenticationRepository @Inject constructor(
     val currentUserLiveData: LiveData<NetworkResponse<CurrentUserResponse>>
         get() = _currentUserLiveData
 
+    private val _getSalesForcceConnectUrl = MutableLiveData<NetworkResponse<RedirectUrl>>()
+    val getSalesForcceConnectUrl: LiveData<NetworkResponse<RedirectUrl>>
+        get() = _getSalesForcceConnectUrl
+
     suspend fun getConnectWithSalesForceUrl(
         redirectUri: String
-    ): RedirectUrl? {
-        return try {
+    ) {
+        try {
+            _getSalesForcceConnectUrl.postValue(NetworkResponse.Loading())
             val response = apiService.getSalesForceRedirectUrl(redirectUri)
-            val redirectUrl = response.body()
-            if (response.isSuccessful) {
-                Log.i("MyApp", "Response: $redirectUrl")
-                redirectUrl
+            if (response.isSuccessful && response.body() != null) {
+                _getSalesForcceConnectUrl.postValue(NetworkResponse.Success(response.body()!!))
+            } else if (response.errorBody() != null) {
+                val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
+                _getSalesForcceConnectUrl.postValue(NetworkResponse.Error(errorObj.getString("message")))
             } else {
-                null
+                _getSalesForcceConnectUrl.postValue(NetworkResponse.Error("Error went wrong"))
             }
         } catch (e: Exception) {
-            Log.i("MyApp", "Error getConnectWithSalesForceUrl: $e")
-            null
+            _getSalesForcceConnectUrl.postValue(NetworkResponse.Error("Something went wrong"))
         }
     }
 
