@@ -26,6 +26,7 @@ import com.truesparrowsystemspvtltd.salessparrow.ui.theme.port_gore
 import com.truesparrowsystemspvtltd.salessparrow.ui.theme.whisper
 import com.truesparrowsystemspvtltd.salessparrow.ui.theme.white
 import com.truesparrowsystemspvtltd.salessparrow.R
+import com.truesparrowsystemspvtltd.salessparrow.util.NoRippleInteractionSource
 
 
 object AccountCardData {
@@ -53,6 +54,7 @@ fun AccountCard(accountName: String, onAccountCardClick: () -> Unit = {}){
         ),
         shape = RoundedCornerShape(size = 4.dp),
         border = BorderStroke(width = 1.dp, color = whisper),
+        interactionSource = NoRippleInteractionSource(),
         onClick = {
             Log.i("AccountCard", "AccountCard Clicked")
             onAccountCardClick()
