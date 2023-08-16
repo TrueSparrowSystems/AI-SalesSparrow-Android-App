@@ -112,6 +112,7 @@ fun NotesScreen(
         }
     }
 
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -123,7 +124,6 @@ fun NotesScreen(
                 toastState = if (saveNoteApiIsSuccess) ToastState.SUCCESS else ToastState.ERROR,
                 message = if (saveNoteApiIsSuccess) "Note is saved to your Salesforce Account" else "Failed to save the note to your Salesforce Account"
             )
-
         }
     }
 
@@ -146,6 +146,7 @@ fun NotesScreen(
             onValueChange = {
                 note = it
             },
+            readOnly = saveNoteApiIsSuccess,
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics {
@@ -268,7 +269,7 @@ fun Header(
                 color = Color(0xFF5D678D),
                 letterSpacing = 0.56.sp,
             ),
-            modifier = Modifier.clickable(interactionSource =  MutableInteractionSource(),
+            modifier = Modifier.clickable(interactionSource = MutableInteractionSource(),
                 indication = null, onClick = { NavigationService.navigateBack() }),
         )
 
@@ -280,13 +281,13 @@ fun Header(
                 )
             },
 
-            enabled = !(saveNoteApiInProgress || note.isEmpty() || accountName!!.isEmpty()),
+            enabled = !(saveNoteApiInProgress || saveNoteApiIsSuccess),
             contentPadding = PaddingValues(all = 8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent, contentColor = Color.White
             ),
             modifier = Modifier
-                .background(color = Color(0xFF212653))
+                .background(color = Color(0xFF212653), shape = RoundedCornerShape(size = 5.dp))
                 .width(92.dp)
                 .height(46.dp)
                 .clip(shape = RoundedCornerShape(size = 5.dp))
