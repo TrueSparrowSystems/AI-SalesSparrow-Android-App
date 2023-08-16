@@ -1,7 +1,6 @@
 package com.truesparrowsystemspvtltd.salessparrow.viewmodals
 
 import android.content.Intent
-import android.content.Intent.getIntent
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
