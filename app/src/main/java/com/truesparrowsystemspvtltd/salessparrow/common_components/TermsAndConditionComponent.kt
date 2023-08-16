@@ -41,7 +41,6 @@ fun TermsAndConditionComponent(
                     textDecoration = TextDecoration.Underline,
                 )
             ) {
-
                 append(" Terms and Conditions")
             }
 

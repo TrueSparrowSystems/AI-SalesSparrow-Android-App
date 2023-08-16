@@ -1,6 +1,7 @@
 package com.truesparrowsystemspvtltd.salessparrow.screens
 
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,16 +18,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -45,7 +45,7 @@ import com.truesparrowsystemspvtltd.salessparrow.common_components.CustomText
 import com.truesparrowsystemspvtltd.salessparrow.common_components.CustomTextWithImage
 import com.truesparrowsystemspvtltd.salessparrow.common_components.HorizontalBar
 import com.truesparrowsystemspvtltd.salessparrow.common_components.TermsAndConditionComponent
-import com.truesparrowsystemspvtltd.salessparrow.models.RedirectUrl
+import com.truesparrowsystemspvtltd.salessparrow.util.NetworkResponse
 import com.truesparrowsystemspvtltd.salessparrow.viewmodals.AuthenticationViewModal
 
 
@@ -55,9 +55,29 @@ fun LogInScreen(intent: Intent?) {
     val context = LocalContext.current;
     val authenticationViewModal: AuthenticationViewModal = hiltViewModel();
 
-    var salesForceConnectUrl by remember { mutableStateOf<RedirectUrl?>(null) }
 
     var isLogInProgress = remember { mutableStateOf(false) }
+
+    authenticationViewModal.getSalesForcceConnectUrl.observe(
+        LocalLifecycleOwner.current
+    ) {
+        when (it) {
+            is NetworkResponse.Success -> {
+                isLogInProgress.value = false;
+                Log.i("SalesSparow", " LogInScreen: ${it.data}")
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.data?.url ?: ""));
+                context.startActivity(intent);
+            }
+
+            is NetworkResponse.Loading -> {
+                isLogInProgress.value = true;
+            }
+
+            is NetworkResponse.Error -> {
+                isLogInProgress.value = false;
+            }
+        }
+    };
 
     if (intent?.data != null) {
         Log.i("SalesSparow", " LogInScreen onResume ;${intent} ${isLogInProgress.value}")
@@ -71,6 +91,9 @@ fun LogInScreen(intent: Intent?) {
         }
 
     }
+
+
+
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -199,17 +222,7 @@ fun LogInScreen(intent: Intent?) {
                     ),
                     onClick = {
                         isLogInProgress.value = true;
-                        //TODO:Read from environment config
-                        val redirectUri = "salessparrowdev://oauth/success";
-                        salesForceConnectUrl =
-                            authenticationViewModal.getConnectWithSalesForceUrl(
-                                redirectUri,
-                                context
-                            )
-                        Log.i("salesForceConnectUrl", salesForceConnectUrl!!.url);
-                        if (!salesForceConnectUrl!!.url.isNullOrEmpty()) {
-                            isLogInProgress.value = false;
-                        }
+                        authenticationViewModal.getConnectWithSalesForceUrl("salessparrowdev://oauth/success")
                     },
                     imageId = R.drawable.salesforce_connect,
                     imageContentDescription = "salesforce_logo",
