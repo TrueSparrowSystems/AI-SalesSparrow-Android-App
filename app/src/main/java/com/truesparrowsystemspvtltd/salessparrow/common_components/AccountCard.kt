@@ -38,7 +38,7 @@ object AccountCardData {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AccountCard(onAccountCardClick: () -> Unit = {}){
+fun AccountCard(accountName: String, onAccountCardClick: () -> Unit = {}){
     val context = LocalContext.current
 
     Card(
@@ -66,47 +66,32 @@ fun AccountCard(onAccountCardClick: () -> Unit = {}){
             Spacer(modifier = Modifier.height(8.dp))
 
             CustomText(
-                text = AccountCardData.accountName, Typography.titleMedium, color = port_gore
+                text = accountName, Typography.titleMedium, color = port_gore
             )
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.link_icon),
-                    contentDescription = null,
-                )
-                Text(
-                    text = AccountCardData.website,
-                    color = port_gore,
-                    style = Typography.labelMedium,
-                    modifier = Modifier.clickable {
-                        val intent =
-                            Intent(Intent.ACTION_VIEW, Uri.parse(AccountCardData.linkUrl))
-                        ContextCompat.startActivity(context, intent, null)
-                    }
-                )
-            }
+//            Row(verticalAlignment = Alignment.CenterVertically) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.link_icon),
+//                    contentDescription = null,
+//                )
+//                Text(
+//                    text = AccountCardData.website,
+//                    color = port_gore,
+//                    style = Typography.labelMedium,
+//                    modifier = Modifier.clickable {
+//                        val intent =
+//                            Intent(Intent.ACTION_VIEW, Uri.parse(AccountCardData.linkUrl))
+//                        ContextCompat.startActivity(context, intent, null)
+//                    }
+//                )
+//            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            CustomText(
-                text = "CONTACT", Typography.titleSmall, color = eastBay.copy(alpha = 0.7f)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            CustomText(
-                text = AccountCardData.contactName, Typography.titleMedium, color = port_gore,
-            )
-            CustomText(
-                text = AccountCardData.contactTitle, Typography.labelSmall, color = port_gore
-            )
         }
     }
 }
 
-@Composable
-@Preview
-fun PreviewAccountCard() {
-    AccountCard()
-}
 
 
 

@@ -117,14 +117,14 @@ fun HomeScreen() {
                     .padding(innerPadding)
                     .background(color = Color(0xFFF1F1F2)),
             ) {
-                for (index in 0 until 100) {
-                    item {
-                        AccountCard(onAccountCardClick = {
-                            NavigationService.navigateTo(Screens.AccountDetailsScreen.route)
-                        }
-                        )
-                    }
-                }
+//                for (index in 0 until 100) {
+//                    item {
+//                        AccountCard(onAccountCardClick = {
+//                            NavigationService.navigateTo(Screens.AccountDetailsScreen.route)
+//                        }
+//                        )
+//                    }
+//                }
             }
         },
 

@@ -93,6 +93,7 @@ android {
             applicationIdSuffix = ".staging"
             versionCode = 1
             versionName = "0.1"
+            resValue("string", "app_name", "SalesSparrow-Staging")
             buildConfigField(
                 "String",
                 "IS_MOCK",

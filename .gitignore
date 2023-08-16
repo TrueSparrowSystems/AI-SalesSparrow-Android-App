@@ -51,3 +51,8 @@ output.json
 .idea/androidTestResultsUserPreferences.xml
 
 /app/src/main/assets
+salessparrow-staging.keystore
+salessparrow-prod.keystore
+salessparrow-staging.jks
+salessparrow-prod.jks
+android/app/staging/relese
