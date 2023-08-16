@@ -111,7 +111,7 @@ fun AccountDetails(
 
         AccountDetailsHeader()
         ContactDetailsHeader()
-        AccountCard()
+        AccountCard(accountName)
         NotesDetailsHeader(accountId, accountName = accountName)
 
         if (isAccountNoteDetailsLoading) {
