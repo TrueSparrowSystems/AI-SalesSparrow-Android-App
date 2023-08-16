@@ -50,6 +50,7 @@ import com.truesparrowsystemspvtltd.salessparrow.common_components.ToastState
 import com.truesparrowsystemspvtltd.salessparrow.services.NavigationService
 import com.truesparrowsystemspvtltd.salessparrow.ui.theme.customFontFamily
 import com.truesparrowsystemspvtltd.salessparrow.util.NetworkResponse
+import com.truesparrowsystemspvtltd.salessparrow.util.NoRippleInteractionSource
 import com.truesparrowsystemspvtltd.salessparrow.viewmodals.NotesViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -209,7 +210,7 @@ fun NotesHeader(accountName: String?, isAccountSelectionEnabled: Boolean) {
                 },
                 elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = NoRippleInteractionSource(),
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.Start),
@@ -268,7 +269,8 @@ fun Header(
                 color = Color(0xFF5D678D),
                 letterSpacing = 0.56.sp,
             ),
-            modifier = Modifier.clickable(onClick = { NavigationService.navigateBack() }),
+            modifier = Modifier.clickable(interactionSource =  MutableInteractionSource(),
+                indication = null, onClick = { NavigationService.navigateBack() }),
         )
 
         Button(

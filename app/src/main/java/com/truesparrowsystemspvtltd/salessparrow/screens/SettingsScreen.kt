@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -167,9 +168,12 @@ fun SettingsScreen() {
                 .height(40.dp)
                 .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp))
                 .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
-                .clickable(onClick = {
+                .clickable(
+                    interactionSource =  MutableInteractionSource(),
+                    indication = null,
+                    onClick = {
                     authenticationViewModal.logout()
-                })
+                },  )
         ) {
             Image(painterResource(id = R.drawable.sign_out), contentDescription = "sign_out")
             Spacer(modifier = Modifier.padding(start = 8.dp))
@@ -234,6 +238,8 @@ fun SettingHeader() {
             .width(32.dp)
             .height(32.dp)
             .clickable(
+                interactionSource =  MutableInteractionSource(),
+                indication = null,
                 onClick = {
                     NavigationService.navigateBack()
                 }
