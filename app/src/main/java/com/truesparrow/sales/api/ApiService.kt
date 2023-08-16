@@ -35,10 +35,10 @@ interface ApiService {
     @Headers("$MOCK_RESPONSE_HEADER: CurrentUserResponse.json")
     suspend fun getCurrentUser(): Response<CurrentUserResponse>
 
-    @POST("./v1/accounts/{account_id}/notes")
+    @POST("v1/accounts/{account_id}/notes")
     @Headers("$MOCK_RESPONSE_HEADER: SaveNoteResponse.json")
     suspend fun saveNote(
-        @Query("account_id") accountId: String,
+        @Path(value = "account_id", encoded = true) accountId: String,
         @Body request: SaveNoteRequest
     ): Response<SaveNote>
 
