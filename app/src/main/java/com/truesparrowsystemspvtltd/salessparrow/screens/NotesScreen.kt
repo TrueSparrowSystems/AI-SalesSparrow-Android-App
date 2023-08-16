@@ -15,12 +15,14 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
@@ -49,6 +51,8 @@ import com.truesparrowsystemspvtltd.salessparrow.services.NavigationService
 import com.truesparrowsystemspvtltd.salessparrow.ui.theme.customFontFamily
 import com.truesparrowsystemspvtltd.salessparrow.util.NetworkResponse
 import com.truesparrowsystemspvtltd.salessparrow.viewmodals.NotesViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -60,24 +64,45 @@ fun NotesScreen(
 
     var note by remember { mutableStateOf("") }
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val snackbarState = remember { SnackbarHostState() }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val coroutineScope = rememberCoroutineScope()
 
     val notesViewModel: NotesViewModel = hiltViewModel()
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
     var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
+    var snackbarShown by remember { mutableStateOf(false) }
+
 
     notesViewModel.notesLiveData.observe(LocalLifecycleOwner.current) { response ->
         when (response) {
             is NetworkResponse.Success -> {
                 saveNoteApiInProgress = false;
                 saveNoteApiIsSuccess = true
-                Log.d("NotesScreen", "Success")
+                if (!snackbarShown) {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            "",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                    snackbarShown = true
+                }
 
             }
 
             is NetworkResponse.Error -> {
                 saveNoteApiInProgress = false;
-                Log.d("NotesScreen", "Error : ${response.message}")
+                if (!snackbarShown) {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            "",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                    snackbarShown = true
+                }
+
             }
 
             is NetworkResponse.Loading -> {
@@ -87,25 +112,20 @@ fun NotesScreen(
         }
     }
 
-
-
-
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = statusBarHeight)
+            .zIndex(1f)
     ) {
-        SnackbarHost(modifier = Modifier.align(Alignment.TopStart), hostState = snackbarState) {
+        SnackbarHost(modifier = Modifier.align(Alignment.TopStart), hostState = snackbarHostState) {
             CustomToast(
-                toastState = ToastState.SUCCESS,
-                message = "Note is saved to your Salesforce Account"
+                toastState = if (saveNoteApiIsSuccess) ToastState.SUCCESS else ToastState.ERROR,
+                message = if (saveNoteApiIsSuccess) "Note is saved to your Salesforce Account" else "Failed to save the note to your Salesforce Account"
             )
+
         }
     }
-
-
 
     Column(modifier = Modifier.padding(vertical = 30.dp, horizontal = 16.dp)) {
         Header(
@@ -114,7 +134,7 @@ fun NotesScreen(
             accountId = accountId!!,
             saveNoteApiInProgress = saveNoteApiInProgress,
             saveNoteApiIsSuccess = saveNoteApiIsSuccess,
-            snackbarState
+            snackbarHostState
         )
         NotesHeader(
             accountName = accountName,

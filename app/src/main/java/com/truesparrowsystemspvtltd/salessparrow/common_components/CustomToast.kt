@@ -38,13 +38,18 @@ fun CustomToast(
     toastState: ToastState,
     message: String,
 ) {
+    val backgroundColor = when (toastState) {
+        ToastState.SUCCESS -> Color(0xFF63E17D)
+        ToastState.ERROR ->  Color(0xFFFF3B30)
+        else -> Color.Red
+    }
     Row(
         horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
         verticalAlignment = Alignment.Bottom,
         modifier = Modifier
             .fillMaxWidth()
             .height(93.dp)
-            .background(color = Color(0xFF63E17D))
+            .background(backgroundColor)
             .padding(start = 24.dp, top = 10.dp, end = 24.dp, bottom = 10.dp)
             .zIndex(Float.MAX_VALUE)
     ) {
@@ -56,6 +61,7 @@ fun CustomToast(
                     verticalAlignment = Alignment.Top,
                 ) {
                     Image(
+//                        TODO: Change it with suitable icon
                         painter = painterResource(id = R.drawable.success_toast_check),
                         contentDescription = "Success",
                         modifier = Modifier
@@ -76,7 +82,28 @@ fun CustomToast(
             }
 
             ToastState.ERROR -> {
-                // Compose elements for error state
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.success_toast_check),
+                        contentDescription = "Error",
+                        modifier = Modifier
+                            .height(24.dp)
+                            .width(28.dp)
+                    )
+                    Text(
+                        text = message,
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            lineHeight = 24.sp,
+                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                            fontWeight = FontWeight(500),
+                            color = Color(0xFFFFFFFF),
+                        )
+                    )
+                }
             }
 
             ToastState.WARNING -> {
@@ -94,7 +121,7 @@ fun CustomToast(
 @Composable
 fun CustomToastPreview() {
     CustomToast(
-        toastState = ToastState.SUCCESS,
+        toastState = ToastState.ERROR,
         message = "Note is saved to your Salesforce Account"
     )
 }
