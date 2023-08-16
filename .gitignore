@@ -55,4 +55,4 @@ salessparrow-staging.keystore
 salessparrow-prod.keystore
 salessparrow-staging.jks
 salessparrow-prod.jks
-android/app/staging/relese
+android/app/staging/release/output-metadata.json
