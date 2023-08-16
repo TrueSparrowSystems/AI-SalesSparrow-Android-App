@@ -202,7 +202,7 @@ fun SettingsScreen() {
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) {
                 Text(
-                    text = BuildConfig.VERSION_CODE.toString() + '.' + BuildConfig.VERSION_NAME,
+                    text = BuildConfig.VERSION_NAME,
                     style = TextStyle(
                         fontSize = 12.sp,
                         fontFamily = FontFamily(Font(R.font.nunito_regular)),

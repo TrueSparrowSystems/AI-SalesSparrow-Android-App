@@ -146,6 +146,7 @@ fun NotesScreen(
             onValueChange = {
                 note = it
             },
+            readOnly = saveNoteApiIsSuccess,
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics {
