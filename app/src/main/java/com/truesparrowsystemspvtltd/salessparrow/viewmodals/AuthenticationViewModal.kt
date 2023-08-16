@@ -1,10 +1,8 @@
 package com.truesparrowsystemspvtltd.salessparrow.viewmodals
 
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import android.content.Intent.getIntent
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,6 +16,7 @@ import com.truesparrowsystemspvtltd.salessparrow.util.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 @HiltViewModel
 class AuthenticationViewModal @Inject constructor(
@@ -53,6 +52,9 @@ class AuthenticationViewModal @Inject constructor(
             val redirectUri = BuildConfig.REDIRECT_URI
             if (code != null && redirectUri != null) {
                 salesForceConnect(code, redirectUri)
+                intent.action = ""
+                intent.data = null
+                intent.flags = 0
 
             }
         }
