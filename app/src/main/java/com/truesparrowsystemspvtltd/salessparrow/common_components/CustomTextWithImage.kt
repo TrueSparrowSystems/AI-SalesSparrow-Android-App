@@ -2,6 +2,7 @@ package com.truesparrowsystemspvtltd.salessparrow.common_components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Text
@@ -23,10 +24,15 @@ fun CustomTextWithImage(
     imageModifier: Modifier? = Modifier,
     onClick: () -> Unit? = {}
 ) {
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.Start),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable(onClick = { onClick()!! })
+        modifier = Modifier.clickable(
+            onClick = { onClick()!! },
+            interactionSource = MutableInteractionSource(),
+            indication = null
+        )
     ) {
 
         Image(

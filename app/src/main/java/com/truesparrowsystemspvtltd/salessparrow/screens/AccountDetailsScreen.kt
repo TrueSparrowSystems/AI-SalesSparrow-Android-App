@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -238,7 +239,8 @@ fun NotesDetailsHeader(
             modifier = Modifier
                 .width(20.dp)
                 .height(20.dp)
-                .clickable {
+                .clickable( interactionSource =  MutableInteractionSource(),
+                    indication = null) {
                     NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
                 }
         )

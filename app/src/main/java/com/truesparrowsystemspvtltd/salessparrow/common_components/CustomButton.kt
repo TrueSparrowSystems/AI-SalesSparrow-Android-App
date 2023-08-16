@@ -21,6 +21,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.truesparrowsystemspvtltd.salessparrow.R
+import com.truesparrowsystemspvtltd.salessparrow.util.NoRippleInteractionSource
 
 
 @Composable
@@ -53,7 +54,8 @@ fun CustomButton(
             onClick = onClick,
             modifier = modifier,
             shape = buttonShape,
-            enabled = isButtonEnabled
+            enabled = isButtonEnabled,
+            interactionSource = NoRippleInteractionSource()
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

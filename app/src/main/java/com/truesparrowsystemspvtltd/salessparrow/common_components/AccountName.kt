@@ -1,6 +1,7 @@
 package com.truesparrowsystemspvtltd.salessparrow.common_components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,14 +41,19 @@ fun AccountName(
     ) {
 
         Row(
-            verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
                 .semantics {
                     testTagsAsResourceId = true
                     testTag = accountRowTestId
                 }
-                .clickable(onClick = onAccountRowClick)
+                .clickable(
+                    onClick = onAccountRowClick,
+                    interactionSource =  MutableInteractionSource(),
+                    indication = null
+                ),
 
-        ) {
+            ) {
             CustomText(
                 text = name, Typography.labelMedium, color = walkaway_gray
             )
@@ -63,7 +69,9 @@ fun AccountName(
                             testTag = addNoteButtonTestId
                         }
                         .clickable(
-                            onClick = onAddNoteClick
+                            onClick = onAddNoteClick,
+                            interactionSource =  MutableInteractionSource(),
+                            indication = null
                         )
                 )
             }

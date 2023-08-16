@@ -18,6 +18,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import com.truesparrowsystemspvtltd.salessparrow.R
 import com.truesparrowsystemspvtltd.salessparrow.services.NavigationService
+import com.truesparrowsystemspvtltd.salessparrow.util.NoRippleInteractionSource
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -27,7 +28,9 @@ fun Fab() {
             Log.d("Fab", "Fab clicked")
             val isAccountSelectionEnabled = true;
             NavigationService.navigateTo("notes_screen/{1}/${"Select Account"}/${isAccountSelectionEnabled}")
+
         },
+        interactionSource = NoRippleInteractionSource(),
         shape = RoundedCornerShape(4.dp),
         containerColor = Color(0xFF212653),
         modifier = Modifier.semantics {

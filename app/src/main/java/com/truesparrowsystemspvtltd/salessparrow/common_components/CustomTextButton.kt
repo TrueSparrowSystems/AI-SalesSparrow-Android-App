@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import com.truesparrowsystemspvtltd.salessparrow.util.NoRippleInteractionSource
 
 @Composable
 fun CustomTextButton(
@@ -19,7 +20,11 @@ fun CustomTextButton(
     isButtonEnabled: Boolean = true,
     buttonTextStyle: TextStyle? = TextStyle.Default,
 ) {
-    TextButton(onClick = buttonAction, enabled = isButtonEnabled) {
+    TextButton(
+        onClick = buttonAction,
+        enabled = isButtonEnabled,
+        interactionSource = NoRippleInteractionSource()
+    ) {
         if (imageId != null) {
             Image(
                 painter = painterResource(id = imageId),

@@ -2,6 +2,7 @@ package com.truesparrowsystemspvtltd.salessparrow.common_components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -31,7 +32,8 @@ fun UserAvatar(
     Box(
         modifier
             .size(size)
-            .clickable(onClick = { onUserAvatarClick() }), contentAlignment = Alignment.Center
+            .clickable(interactionSource =  MutableInteractionSource(),
+                indication = null, onClick = { onUserAvatarClick() }), contentAlignment = Alignment.Center
     ) {
         val color = remember(id, firstName, lastName) {
             val name = listOf(firstName, lastName)
