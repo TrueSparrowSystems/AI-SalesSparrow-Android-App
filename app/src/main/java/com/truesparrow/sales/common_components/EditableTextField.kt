@@ -15,7 +15,12 @@ import androidx.compose.ui.unit.sp
 import com.truesparrow.sales.R
 
 @Composable
-fun EditableTextField(note: String, onValueChange: (String) -> Unit, modifier: Modifier = Modifier, readOnly: Boolean = false) {
+fun EditableTextField(
+    note: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    readOnly: Boolean = false
+) {
 
     TextField(
         value = note,
@@ -28,7 +33,6 @@ fun EditableTextField(note: String, onValueChange: (String) -> Unit, modifier: M
             fontWeight = FontWeight(500),
             color = Color(0xFF545A71),
         ),
-
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color(0xCC545A71),
             backgroundColor = Color.Transparent,
