@@ -25,11 +25,11 @@ fun getPropertyValueFromPropertiesFile(propertyFile: File, propertyName: String)
 }
 
 android {
-    namespace = "com.truesparrowsystemspvtltd.salessparrow"
+    namespace = "com.truesparrow.sales"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.truesparrowsystemspvtltd.salessparrow"
+        applicationId = "com.truesparrow.sales"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
@@ -48,6 +48,7 @@ android {
         create("production") {
             versionCode = 1
             versionName = "0.0"
+            resValue("string", "app_name", "Sales")
             buildConfigField(
                 "String",
                 "IS_MOCK",
@@ -90,10 +91,10 @@ android {
             )
         }
         create("staging") {
-            applicationIdSuffix = ".staging"
+            applicationIdSuffix = ".dev"
             versionCode = 1
             versionName = "0.1"
-            resValue("string", "app_name", "SalesSparrow-Staging")
+            resValue("string", "app_name", "Sales-Dev")
             buildConfigField(
                 "String",
                 "IS_MOCK",
