@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -33,6 +37,7 @@ enum class ToastState(val value: String) {
 }
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CustomToast(
     toastState: ToastState,
@@ -46,12 +51,17 @@ fun CustomToast(
     Row(
         horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
         verticalAlignment = Alignment.Bottom,
+
         modifier = Modifier
             .fillMaxWidth()
             .height(93.dp)
             .background(backgroundColor)
             .padding(start = 24.dp, top = 10.dp, end = 24.dp, bottom = 10.dp)
-            .zIndex(Float.MAX_VALUE)
+            .zIndex(Float.MAX_VALUE).semantics {
+                testTagsAsResourceId = true
+                testTag = "toastMessageRowTestId"
+            }
+
     ) {
         when (toastState) {
             ToastState.SUCCESS -> {
