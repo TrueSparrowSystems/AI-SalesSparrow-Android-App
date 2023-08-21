@@ -17,7 +17,6 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
-
     @GET("./v1/accounts")
     suspend fun getAccounts(@Query("q") query: String): Response<AccountListResponse>
 
@@ -45,7 +44,7 @@ interface ApiService {
     @GET("v1/accounts/{account_id}/notes")
     @Headers("$MOCK_RESPONSE_HEADER: NotesResponse.json")
     suspend fun getAccountNotes(
-       @Path(value = "account_id", encoded = true) accountId: String
+        @Path(value = "account_id", encoded = true) accountId: String
     ): Response<AccountNotesResponse>
 
     @GET("v1/accounts/{account_id}/notes/{note_id}")
@@ -62,5 +61,10 @@ interface ApiService {
 
     @POST("./v1/auth/disconnect")
     suspend fun disconnectSalesForce(): Response<Unit>
+
+
+    //Todo:Ds Change Api url
+    @GET("./v1/accounts")
+    suspend fun getCrmUser(@Query("q") query: String): Response<AccountListResponse>
 
 }

@@ -54,13 +54,14 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.Observer
 import com.truesparrow.sales.util.NetworkResponse
+import com.truesparrow.sales.viewmodals.SearchCrmUserNameViewModal
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SearchNameSheetContainer(
     bottomSheetVisible: () -> Unit
 ) {
-    val searchAccountViewModal: SearchAccountViewModel = hiltViewModel()
+    val searchCrmUserNameViewModal: SearchCrmUserNameViewModal = hiltViewModel()
     var searchQuery by remember { mutableStateOf("") }
     var records by remember { mutableStateOf<List<Record>?>(null) }
     val isAccountListApiInProgress = remember { mutableStateOf(true) }
@@ -69,7 +70,7 @@ fun SearchNameSheetContainer(
     val focusRequester = remember { FocusRequester() }
 
 
-    searchAccountViewModal.searchAccountLiveDataData.observe(
+    searchCrmUserNameViewModal.searchAccountLiveDataData.observe(
         LocalLifecycleOwner.current,
         Observer { res ->
             when (res) {
@@ -132,7 +133,7 @@ fun SearchNameSheetContainer(
                             ),
                             value = searchQuery, onValueChange = { newText ->
                                 searchQuery = newText
-                                searchAccountViewModal.onSearchQueryChanged(searchQuery)
+                                searchCrmUserNameViewModal.onSearchQueryChanged(searchQuery)
                             },
                             placeholder = {
                                 CustomText(
@@ -213,7 +214,7 @@ fun SearchNameSheetContainer(
                                     lastName = recordInfo.name,
                                     searchNameTestId = "btn_search_user_name_${recordInfo.name}",
                                     onAccountRowClick = {
-                                        searchAccountViewModal.onAccountRowClicked(
+                                        searchCrmUserNameViewModal.onAccountRowClicked(
                                             recordInfo.name,
                                             recordInfo.id,
                                             true
