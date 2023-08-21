@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -48,6 +50,10 @@ import com.truesparrow.sales.ui.theme.white
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.viewmodals.SearchAccountViewModel
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -61,8 +67,14 @@ fun CustomBottomSheetContainer(
     var records by remember { mutableStateOf<List<Record>?>(null) }
     val isAccountListApiInProgress = remember { mutableStateOf(true) }
 
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+
+
+
     searchAccountViewModal.searchAccountLiveDataData.observe(
         LocalLifecycleOwner.current,
+
         Observer { res ->
             when (res) {
                 is NetworkResponse.Success -> {
@@ -72,6 +84,8 @@ fun CustomBottomSheetContainer(
                         val accountDetails = res.data.accountMapById[accountId]
                         Record(accountId, accountDetails?.name ?: "")
                     }
+                    focusRequester.requestFocus()
+                    keyboardController?.show()
                 }
 
                 is NetworkResponse.Error -> {
@@ -114,6 +128,10 @@ fun CustomBottomSheetContainer(
                                 letterSpacing = 0.48.sp,
                                 color = walkaway_gray,
                             ),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(
+                                onDone = { keyboardController?.hide() }
+                            ),
                             value = searchQuery, onValueChange = { newText ->
                                 searchQuery = newText
                                 searchAccountViewModal.onSearchQueryChanged(searchQuery)
@@ -138,6 +156,7 @@ fun CustomBottomSheetContainer(
                                 unfocusedIndicatorColor = Color.Transparent
                             ),
                             modifier = Modifier
+                                .focusRequester(focusRequester)
                                 .background(Color.Transparent)
                                 .semantics {
                                     testTagsAsResourceId = true
