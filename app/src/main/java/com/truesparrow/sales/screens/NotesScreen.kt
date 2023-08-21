@@ -273,6 +273,11 @@ fun Header(
                 indication = null, onClick = { NavigationService.navigateBack() }),
         )
 
+        val buttonColor = if (note.isNotEmpty() && accountId.isNotEmpty()) {
+            Color(0xFF212653)
+        } else {
+            Color(0xFF212653).copy(alpha = 0.7f)
+        }
         Button(
             onClick = {
                 notesViewModel.saveNote(
@@ -281,13 +286,13 @@ fun Header(
                 )
             },
 
-            enabled = !(saveNoteApiInProgress || saveNoteApiIsSuccess),
+            enabled = note.isNotEmpty() && accountId.isNotEmpty() && !(saveNoteApiInProgress || saveNoteApiIsSuccess),
             contentPadding = PaddingValues(all = 8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent, contentColor = Color.White
             ),
             modifier = Modifier
-                .background(color = Color(0xFF212653), shape = RoundedCornerShape(size = 5.dp))
+                .background(color = buttonColor, shape = RoundedCornerShape(size = 5.dp))
                 .width(92.dp)
                 .height(46.dp)
                 .clip(shape = RoundedCornerShape(size = 5.dp))
