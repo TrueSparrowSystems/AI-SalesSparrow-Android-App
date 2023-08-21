@@ -23,3 +23,34 @@ app/src/staging/google-services.json
 app/src/google-services.json
 app/src/prod/google-services.json
 app/google-services.json
+/app/src/staging/google-services.json
+/app/src/google-services.json
+.idea/
+.idea/gradle.xml
+.idea/misc.xml
+*.iws
+*.ipr
+.gradle/
+*/build/
+*~
+*.swp
+
+#built application files
+*.apk
+*.ap_
+*.aab
+
+# Android Studio
+.idea
+#.idea/workspace.xml - remove # and delete .idea if it better suit your needs.
+build/
+.navigation
+captures/
+output.json
+.idea/
+.idea/androidTestResultsUserPreferences.xml
+
+/app/src/main/assets
+android/app/staging/release/output-metadata.json
+*./app/src/staging/release
+/Users/dakshbhardwaj/AndroidStudioProjects/SalesSparrow/app/staging/release/output-metadata.json
