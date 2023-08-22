@@ -90,14 +90,14 @@ fun TermsAndConditionComponent(
         onClick = { offset ->
             annotedString.getStringAnnotations(tag = "terms", start = offset, end = offset)
                 .firstOrNull()?.let {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse( "https://truesparrow.com"));
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse( "https://truesparrow.com/terms"));
                     context.startActivity(intent);
                     Log.d("terms URL", it.item)
                 }
 
             annotedString.getStringAnnotations(tag = "privacy", start = offset, end = offset)
                 .firstOrNull()?.let {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse( "https://truesparrow.com"));
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse( "https://truesparrow.com/privacy"));
                     context.startActivity(intent);
                     Log.d("policy URL", it.item)
                 }

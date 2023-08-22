@@ -22,7 +22,8 @@ fun CustomTextWithImage(
     textStyle: TextStyle,
     maxLines: Int = 1,
     imageModifier: Modifier? = Modifier,
-    onClick: () -> Unit? = {}
+    onClick: () -> Unit? = {},
+    textModifier: Modifier? = Modifier
 ) {
 
     Row(
@@ -40,7 +41,13 @@ fun CustomTextWithImage(
             contentDescription = imageContentDescription,
             modifier = imageModifier!!
         )
-        Text(text, style = textStyle, maxLines = maxLines, overflow = TextOverflow.Ellipsis)
+        Text(
+            text,
+            style = textStyle,
+            maxLines = maxLines,
+            overflow = TextOverflow.Ellipsis,
+            modifier = textModifier!!
+        )
     }
 
 }

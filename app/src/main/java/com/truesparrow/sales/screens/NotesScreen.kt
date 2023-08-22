@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.*;
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -44,6 +45,7 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.truesparrow.sales.R
 import com.truesparrow.sales.common_components.AccountListBottomSheet
+import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
 import com.truesparrow.sales.common_components.ToastState
@@ -150,11 +152,63 @@ fun NotesScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics {
+                    contentDescription = "et_create_note"
                     testTag = "et_create_note"
                     testTagsAsResourceId = true
                 }
         )
+
+        if (saveNoteApiIsSuccess) {
+            RecommendedSectionHeader(
+                accountId,
+                accountName = accountName!!,
+                isAccountSelectionEnabled
+            )
+        }
+
     }
+}
+
+@Composable
+fun RecommendedSectionHeader(
+    accountId: String,
+    accountName: String,
+    isAccountSelectionEnabled: Boolean? = false
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        CustomTextWithImage(
+            imageId = R.drawable.sparkle,
+            imageContentDescription = "buildings",
+            text = "Notes",
+            imageModifier = Modifier
+                .width(24.dp)
+                .height(24.dp),
+            textStyle = TextStyle(
+                fontSize = 16.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                fontWeight = FontWeight(600),
+                color = Color(0xFF212653),
+            )
+        )
+        Image(
+            painter = painterResource(id = R.drawable.add_icon),
+            contentDescription = "add_notes",
+            modifier = Modifier
+                .width(20.dp)
+                .height(20.dp)
+                .clickable(
+                    interactionSource = MutableInteractionSource(),
+                    indication = null
+                ) {
+                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
+                }
+        )
+    }
+
 }
 
 
@@ -211,6 +265,9 @@ fun NotesHeader(accountName: String?, isAccountSelectionEnabled: Boolean) {
                 elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 interactionSource = NoRippleInteractionSource(),
+                modifier = Modifier.semantics {
+                    contentDescription = "btn_select_account"
+                }
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.Start),
@@ -223,7 +280,12 @@ fun NotesHeader(accountName: String?, isAccountSelectionEnabled: Boolean) {
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = customFontFamily,
-                        )
+                        ),
+                        modifier = Modifier
+                            .semantics {
+                                contentDescription =
+                                    if (accountName.isNullOrBlank()) "txt_create_note_selected_account" else "txt_create_note_select_account"
+                            }
                     )
                 }
                 Icon(
@@ -269,8 +331,13 @@ fun Header(
                 color = Color(0xFF5D678D),
                 letterSpacing = 0.56.sp,
             ),
-            modifier = Modifier.clickable(interactionSource = MutableInteractionSource(),
-                indication = null, onClick = { NavigationService.navigateBack() }),
+            modifier = Modifier
+                .clickable(interactionSource = MutableInteractionSource(),
+                    indication = null, onClick = { NavigationService.navigateBack() })
+                .semantics {
+                    contentDescription =
+                        if (saveNoteApiIsSuccess) "btn_done_note_screen" else "btn_cancel_create_note"
+                },
         )
 
         val buttonColor = if (note.isNotEmpty() && accountId.isNotEmpty()) {
@@ -296,6 +363,9 @@ fun Header(
                 .width(92.dp)
                 .height(46.dp)
                 .clip(shape = RoundedCornerShape(size = 5.dp))
+                .semantics {
+                    contentDescription = "btn_save_note"
+                }
 
 
         ) {
@@ -339,7 +409,11 @@ fun Header(
                         fontWeight = FontWeight(500),
                         color = Color(0xFFFFFFFF),
                         letterSpacing = 0.48.sp,
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        contentDescription =
+                            if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
+                    }
                 )
             }
         }

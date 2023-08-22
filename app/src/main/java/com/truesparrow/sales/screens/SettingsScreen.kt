@@ -73,6 +73,7 @@ fun SettingsScreen() {
                     firstName = currentUser.name?.split(" ")?.get(0) ?: "",
                     lastName = currentUser.name?.split(" ")?.get(1) ?: "",
                     size = 40.dp,
+                    userAvatarTestId = "setting_screen_user_profile"
                 )
             }
             Log.i("SettingsScreen", "SettingsScreen: ${currentUser?.name}")
