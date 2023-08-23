@@ -93,7 +93,8 @@ fun NotesCard(
                         fontWeight = FontWeight(700),
                         color = Color(0xFF000000),
                         letterSpacing = 0.21.sp,
-                    )
+                    ),
+                    userAvatarTestId = "user_avatar_note_details"
                 )
                 Text(
                     text = username,

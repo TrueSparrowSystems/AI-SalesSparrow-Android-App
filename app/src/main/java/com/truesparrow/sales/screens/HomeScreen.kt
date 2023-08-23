@@ -25,6 +25,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -88,7 +90,14 @@ fun HomeScreen() {
                 ),
                 leftIconModifier = Modifier
                     .width(24.dp)
-                    .height(24.dp),
+                    .height(24.dp)
+                    .semantics {
+                        contentDescription = "img_home_screen_account_icon"
+                    },
+                leftTextModifier = Modifier
+                    .semantics {
+                        contentDescription = "txt_account_details_title"
+                    },
                 isLeftButtonEnabled = false,
                 rightButtonTestId = "btn_search_account",
                 isRightButtonPresent = true,
@@ -99,9 +108,16 @@ fun HomeScreen() {
                 rightButtonShape = CircleShape,
                 rightIconModifier = Modifier
                     .width(24.dp)
-                    .height(24.dp),
+                    .height(24.dp)
+                    .semantics {
+                        contentDescription = "btn_search_account"
+                    },
                 isRightButtonEnabled = true,
                 shouldShowAvatarComponent = true,
+                userAvatarModifier = Modifier
+                    .semantics {
+                        contentDescription = "txt_user_account_icon"
+                    },
                 userName = currentUser?.data?.current_user?.name ?: "John ve",
                 userId = currentUser?.data?.current_user?.name ?: "121",
             )

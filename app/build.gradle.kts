@@ -47,8 +47,8 @@ android {
 
         create("production") {
             versionCode = 1
-            versionName = "0.0"
-            resValue("string", "app_name", "Sales")
+            versionName = "1.0.0"
+            resValue("string", "app_name", "SalesSparrow")
             buildConfigField(
                 "String",
                 "IS_MOCK",

@@ -53,6 +53,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.input.ImeAction
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -71,7 +72,6 @@ fun CustomBottomSheetContainer(
     val focusRequester = remember { FocusRequester() }
 
 
-
     searchAccountViewModal.searchAccountLiveDataData.observe(
         LocalLifecycleOwner.current,
 
@@ -84,7 +84,7 @@ fun CustomBottomSheetContainer(
                         val accountDetails = res.data.accountMapById[accountId]
                         Record(accountId, accountDetails?.name ?: "")
                     }
-                    focusRequester.requestFocus()
+//                    focusRequester.requestFocus()
                     keyboardController?.show()
                 }
 
@@ -113,7 +113,7 @@ fun CustomBottomSheetContainer(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Image(
                             painter = painterResource(id = R.drawable.search_icon),
-                            contentDescription = "Search",
+                            contentDescription = "img_search_magnifying_glass",
                             modifier = Modifier
                                 .width(24.dp)
                                 .height(24.dp)
@@ -159,6 +159,7 @@ fun CustomBottomSheetContainer(
                                 .focusRequester(focusRequester)
                                 .background(Color.Transparent)
                                 .semantics {
+                                    contentDescription = "text_field_search_account"
                                     testTagsAsResourceId = true
                                     testTag = "text_field_search_account"
                                 },

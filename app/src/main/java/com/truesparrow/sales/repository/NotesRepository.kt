@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.truesparrow.sales.api.ApiService
+import com.truesparrow.sales.models.GetCrmActionRequest
+import com.truesparrow.sales.models.GetCrmActionsResponse
 import com.truesparrow.sales.models.NotesDetailResponse
 import com.truesparrow.sales.models.SaveNote
 import com.truesparrow.sales.models.SaveNoteRequest
@@ -23,13 +25,17 @@ class NotesRepository @Inject constructor(
     val noteDetails: LiveData<NetworkResponse<NotesDetailResponse>>
         get() = _noteDetails
 
+    private val _getCrmActions = MutableLiveData<NetworkResponse<GetCrmActionsResponse>>()
+    val getCrmActions: LiveData<NetworkResponse<GetCrmActionsResponse>>
+        get() = _getCrmActions
+
     suspend fun saveNote(
         accountId: String,
         text: String,
     ) {
         try {
             _notesLiveData.postValue(NetworkResponse.Loading())
-            val result = apiService.saveNote(accountId,  SaveNoteRequest( text = text));
+            val result = apiService.saveNote(accountId, SaveNoteRequest(text = text));
 
             if (result.isSuccessful && result.body() != null) {
                 _notesLiveData.postValue(NetworkResponse.Success(result.body()!!))
@@ -62,6 +68,24 @@ class NotesRepository @Inject constructor(
         } catch (e: Exception) {
             Log.i("AccountDetails", "Exception: ${e.message}")
             _noteDetails.postValue(NetworkResponse.Error("Something went wrong"))
+        }
+    }
+
+    suspend fun getCrmActions(text: String) {
+        try {
+            _getCrmActions.postValue(NetworkResponse.Loading())
+            val response = apiService.getCrmActions(GetCrmActionRequest(text = text))
+            if (response.isSuccessful && response.body() != null) {
+                _getCrmActions.postValue(NetworkResponse.Success(response.body()!!))
+            } else if (response.errorBody() != null) {
+                val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
+                _getCrmActions.postValue(NetworkResponse.Error(errorObj.getString("message")))
+            } else {
+                _getCrmActions.postValue(NetworkResponse.Error("Error went wrong"))
+            }
+
+        } catch (e: Exception) {
+            _getCrmActions.postValue(NetworkResponse.Error("Something went wrong"))
         }
     }
 }
