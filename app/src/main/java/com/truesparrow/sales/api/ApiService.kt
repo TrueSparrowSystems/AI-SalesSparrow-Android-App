@@ -19,7 +19,6 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
-
     @GET("./v1/accounts")
     suspend fun getAccounts(@Query("q") query: String): Response<AccountListResponse>
 
@@ -65,6 +64,10 @@ interface ApiService {
     @POST("./v1/auth/disconnect")
     suspend fun disconnectSalesForce(): Response<Unit>
 
+
+    //Todo:Ds Change Api url
+    @GET("./v1/accounts")
+    suspend fun getCrmUser(@Query("q") query: String): Response<AccountListResponse>
     @POST("./v1/suggestions/crm-actions")
     suspend fun getCrmActions(
         @Body request: GetCrmActionRequest
