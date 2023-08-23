@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.truesparrow.sales.BuildConfig
 import com.truesparrow.sales.R
 import com.truesparrow.sales.common_components.CustomButton
 import com.truesparrow.sales.common_components.CustomText
@@ -123,7 +125,7 @@ fun LogInScreen(intent: Intent?) {
                 ) {
                 Image(
                     painter = painterResource(id = R.drawable.sales_sparrow_logo),
-                    contentDescription = "Sales Sparrow Logo",
+                    contentDescription = "img_login_app_logo",
                     modifier = Modifier
                         .width(160.dp)
                         .height(80.dp)
@@ -136,7 +138,11 @@ fun LogInScreen(intent: Intent?) {
                         fontFamily = FontFamily(Font(R.font.nunito_regular)),
                         color = Color(0xFF2A2E4F),
                         textAlign = TextAlign.Center,
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        contentDescription = "txt_login_app_description"
+                    }
+
                 )
 
                 Row(
@@ -145,7 +151,7 @@ fun LogInScreen(intent: Intent?) {
                 ) {
                     CustomTextWithImage(
                         imageId = R.drawable.notes,
-                        imageContentDescription = "notes",
+                        imageContentDescription = "img_login_note_icon",
                         text = "Notes",
                         textStyle = TextStyle(
                             fontSize = 16.sp,
@@ -154,11 +160,14 @@ fun LogInScreen(intent: Intent?) {
                             fontWeight = FontWeight(400),
                             color = Color(0xFF2A2E4F),
                             textAlign = TextAlign.Center,
-                        )
+                        ),
+                        textModifier = Modifier.semantics {
+                            contentDescription = "txt_login_notes"
+                        }
                     )
                     CustomTextWithImage(
                         imageId = R.drawable.tasks,
-                        imageContentDescription = "tasks",
+                        imageContentDescription = "img_login_tasks_icon",
                         text = "Task",
                         textStyle = TextStyle(
                             fontSize = 16.sp,
@@ -167,11 +176,14 @@ fun LogInScreen(intent: Intent?) {
                             fontWeight = FontWeight(400),
                             color = Color(0xFF2A2E4F),
                             textAlign = TextAlign.Center,
-                        )
+                        ),
+                        textModifier = Modifier.semantics {
+                            contentDescription = "txt_login_tasks"
+                        }
                     )
                     CustomTextWithImage(
                         imageId = R.drawable.events,
-                        imageContentDescription = "events",
+                        imageContentDescription = "img_login_events_icon",
                         text = "Events",
                         textStyle = TextStyle(
                             fontSize = 16.sp,
@@ -180,11 +192,14 @@ fun LogInScreen(intent: Intent?) {
                             fontWeight = FontWeight(400),
                             color = Color(0xFF2A2E4F),
                             textAlign = TextAlign.Center,
-                        )
+                        ),
+                        textModifier = Modifier.semantics {
+                            contentDescription = "txt_login_events"
+                        }
                     )
                     CustomTextWithImage(
                         imageId = R.drawable.oppurtunities,
-                        imageContentDescription = "opportunities",
+                        imageContentDescription = "img_login_opportunities_icon",
                         text = "Opportunities",
                         textStyle = TextStyle(
                             fontSize = 16.sp,
@@ -193,7 +208,10 @@ fun LogInScreen(intent: Intent?) {
                             fontWeight = FontWeight(400),
                             color = Color(0xFF2A2E4F),
                             textAlign = TextAlign.Center,
-                        )
+                        ),
+                        textModifier = Modifier.semantics {
+                            contentDescription = "txt_login_opportunities"
+                        }
                     )
                 }
 
@@ -207,12 +225,19 @@ fun LogInScreen(intent: Intent?) {
                         fontWeight = FontWeight(600),
                         color = Color(0xFF2A2E4F),
                         textAlign = TextAlign.Center,
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        contentDescription = "txt_login_create_account"
+                    }
                 )
 
 
                 CustomButton(
                     buttonText = "Continue with Salesforce",
+                    buttonTextModifier = Modifier
+                        .semantics {
+                            contentDescription = "txt_login_continue_salesforce"
+                        },
                     buttonTextStyle = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight(500),
@@ -223,10 +248,10 @@ fun LogInScreen(intent: Intent?) {
                     ),
                     onClick = {
                         isLogInProgress.value = true;
-                        authenticationViewModal.getConnectWithSalesForceUrl("salessparrowdev://oauth/success")
+                        authenticationViewModal.getConnectWithSalesForceUrl(BuildConfig.REDIRECT_URI)
                     },
                     imageId = R.drawable.salesforce_connect,
-                    imageContentDescription = "salesforce_logo",
+                    imageContentDescription = "img_login_salesforce_icon",
                     imageModifier = Modifier
                         .width(25.dp)
                         .height(18.dp),
@@ -234,6 +259,7 @@ fun LogInScreen(intent: Intent?) {
                         .fillMaxWidth()
                         .height(46.dp)
                         .semantics {
+                            contentDescription = "btn_connect_salesforce"
                             testTagsAsResourceId = true;
                             testTag = "salesforce_button"
                         },
@@ -247,6 +273,9 @@ fun LogInScreen(intent: Intent?) {
                     .align(Alignment.BottomCenter)
                     .clickable {
 
+                    }
+                    .semantics {
+                        contentDescription = "txt_login_terms"
                     }
             )
         }

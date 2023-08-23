@@ -54,3 +54,8 @@ output.json
 android/app/staging/release/output-metadata.json
 *./app/src/staging/release
 /Users/dakshbhardwaj/AndroidStudioProjects/SalesSparrow/app/staging/release/output-metadata.json
+*./app/src/production/release/output-metadata.json
+*./app/src/production/release
+*./app/src/production
+app/production/release/output-metadata.json
+app/staging/release/output-metadata.json

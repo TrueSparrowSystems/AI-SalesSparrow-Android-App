@@ -6,6 +6,8 @@ import com.truesparrow.sales.models.SaveNote
 import com.truesparrow.sales.models.CurrentUserResponse
 import com.truesparrow.sales.models.AccountListResponse
 import com.truesparrow.sales.models.AccountNotesResponse
+import com.truesparrow.sales.models.GetCrmActionRequest
+import com.truesparrow.sales.models.GetCrmActionsResponse
 import com.truesparrow.sales.models.NotesDetailResponse
 import com.truesparrow.sales.models.SaveNoteRequest
 import retrofit2.Response
@@ -66,5 +68,9 @@ interface ApiService {
     //Todo:Ds Change Api url
     @GET("./v1/accounts")
     suspend fun getCrmUser(@Query("q") query: String): Response<AccountListResponse>
+    @POST("./v1/suggestions/crm-actions")
+    suspend fun getCrmActions(
+        @Body request: GetCrmActionRequest
+    ): Response<GetCrmActionsResponse>
 
 }
