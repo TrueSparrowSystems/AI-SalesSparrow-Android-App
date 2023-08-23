@@ -114,6 +114,7 @@ fun TaskSuggestionCard() {
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
+            .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 5.dp))
             .border(
                 width = 1.dp, color = Color(0xFFE9E9E9), shape = RoundedCornerShape(size = 4.dp)
             )
@@ -126,7 +127,6 @@ fun TaskSuggestionCard() {
             horizontalAlignment = Alignment.Start,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp))
 
         ) {
             Row(
@@ -189,11 +189,6 @@ fun TaskSuggestionCard() {
                 verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xFFE9E9E9),
-                        shape = RoundedCornerShape(size = 4.dp)
-                    )
                     .fillMaxWidth()
                     .background(color = Color(0xFFF6F7F8), shape = RoundedCornerShape(size = 5.dp))
                     .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
@@ -214,11 +209,6 @@ fun TaskSuggestionCard() {
                 verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xFFE9E9E9),
-                        shape = RoundedCornerShape(size = 4.dp)
-                    )
                     .background(color = Color(0xFFF6F7F8), shape = RoundedCornerShape(size = 5.dp))
                     .padding(8.dp)
 
@@ -278,11 +268,6 @@ fun TaskSuggestionCard() {
                 verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xFFE9E9E9),
-                        shape = RoundedCornerShape(size = 4.dp)
-                    )
                     .background(color = Color(0xFFF6F7F8), shape = RoundedCornerShape(size = 5.dp))
                     .padding(8.dp)
                     .width(160.dp)
