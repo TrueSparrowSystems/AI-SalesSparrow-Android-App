@@ -175,7 +175,10 @@ fun NotesScreen(
             )
         }
         Spacer(modifier = Modifier.height(30.dp))
-        TaskSuggestionCard()
+        TaskSuggestionCard(
+            "Presentation to plan a migration from PHP to Ruby.",
+            crmUserName = "John"
+        )
         if (recommendedPopup) {
             Popup(
                 alignment = Alignment.BottomEnd,
