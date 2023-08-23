@@ -69,11 +69,8 @@ fun SearchUserName(
                     fontWeight = FontWeight.Bold,
                     fontSize = 5.sp,
                 ),
-                modifier = Modifier.semantics {
-                    testTagsAsResourceId = true
-                    testTag = "txt_search_user_user_initials_${firstName}${lastName}"
-                    contentDescription = "txt_search_user_user_initials_${firstName}${lastName}"
-                }
+                userAvatarTestId = "txt_search_user_user_initials_${firstName}${lastName}"
+
             )
             Spacer(modifier = Modifier.width(4.dp))
             CustomText(

@@ -8,7 +8,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material.Icon
@@ -57,7 +56,6 @@ import com.truesparrow.sales.common_components.AccountListBottomSheet
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
-import com.truesparrow.sales.common_components.SearchNameBottomSheet
 import com.truesparrow.sales.common_components.ToastState
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
@@ -169,7 +167,6 @@ fun NotesScreen(
                 }
         )
 
-//        SearchName()
         if (true) {
             RecommendedSectionHeader(
                 accountId,
@@ -237,31 +234,6 @@ fun NotesScreen(
 }
 
 @Composable
-fun SearchName() {
-    var bottomSheetVisible by remember { mutableStateOf(false) }
-
-    val toggleBottomSheet: () -> Unit = {
-        bottomSheetVisible = !bottomSheetVisible
-    }
-
-    if (bottomSheetVisible) {
-        SearchNameBottomSheet(toggleBottomSheet)
-    }
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.Start),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-       Button(onClick =  toggleBottomSheet) {
-           Text(
-               text = "Search Name",
-               style = TextStyle(
-                   fontSize = 14.sp,
-                   fontWeight = FontWeight.Bold,
-                   fontFamily = customFontFamily,
-               )
-           )
-       }
 fun RecommendedSectionHeader(
     accountId: String,
     accountName: String,
@@ -515,5 +487,3 @@ fun Header(
     }
 
 }
-
-
