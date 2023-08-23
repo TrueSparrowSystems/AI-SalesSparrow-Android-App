@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.truesparrow.sales.models.AccountNotesResponse
+import com.truesparrow.sales.models.AccountTasksResponse
 import com.truesparrow.sales.repository.AccountDetailsRepository
 import com.truesparrow.sales.util.NetworkResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +21,9 @@ class AccountDetailsViewModal @Inject constructor(
     val accountDetailsLiveData: LiveData<NetworkResponse<AccountNotesResponse>>
         get() = accountDetailsRepository.accountNotes
 
+    val accountTasksLiveData: LiveData<NetworkResponse<AccountTasksResponse>>
+        get() = accountDetailsRepository.accountTasks
+
 
 
     fun getAccountNotes(accountId: String) {
@@ -27,6 +31,11 @@ class AccountDetailsViewModal @Inject constructor(
         viewModelScope.launch {
             accountDetailsRepository.getAccountNotes(accountId)
         }
+    }
 
+    fun getAccountTasks(accountId: String){
+        viewModelScope.launch {
+            accountDetailsRepository.getAccountTasks(accountId)
+        }
     }
 }

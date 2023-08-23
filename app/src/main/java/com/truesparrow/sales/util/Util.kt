@@ -4,10 +4,12 @@ import android.os.Build
 import androidx.annotation.ColorInt
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.ColorUtils
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.absoluteValue
 
 @ColorInt
@@ -33,4 +35,11 @@ fun formatTime(time: Instant): String {
     val zonedDateTime = ZonedDateTime.ofInstant(time, zoneId)
     val formatter = DateTimeFormatter.ofPattern("EEEE, h:mma")
     return formatter.format(zonedDateTime).replace("AM", "am").replace("PM", "pm")
+}
+
+fun convertDateFormat(inputDate: String): String {
+    val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val outputFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+    val date = inputFormat.parse(inputDate)
+    return outputFormat.format(date!!)
 }

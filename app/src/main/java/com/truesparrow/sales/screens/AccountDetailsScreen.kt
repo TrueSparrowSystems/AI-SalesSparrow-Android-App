@@ -50,7 +50,9 @@ import com.truesparrow.sales.R
 import com.truesparrow.sales.common_components.AccountCard
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.NotesCard
+import com.truesparrow.sales.common_components.TasksCard
 import com.truesparrow.sales.models.Note
+import com.truesparrow.sales.models.Task
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.viewmodals.AccountDetailsViewModal
@@ -65,12 +67,18 @@ fun AccountDetails(
 
     val accountDetailsViewModal: AccountDetailsViewModal = hiltViewModel()
     var isAccountNoteDetailsLoading by remember { mutableStateOf(false) };
+    var isAccountTaskDetailsLoading by remember { mutableStateOf(false) };
+
     var notes by remember { mutableStateOf<List<Note>?>(null) }
+    var tasks by remember { mutableStateOf<List<Task>?>(null) }
 
     val accountNotesResponse by accountDetailsViewModal.accountDetailsLiveData.observeAsState()
 
+    val accountTasksResponse by accountDetailsViewModal.accountTasksLiveData.observeAsState()
+
     LaunchedEffect(key1 = accountId) {
         accountDetailsViewModal.getAccountNotes(accountId = accountId)
+        accountDetailsViewModal.getAccountTasks(accountId = accountId)
     }
 
 
@@ -104,6 +112,38 @@ fun AccountDetails(
 
     }
 
+    accountTasksResponse?.let {
+        when (it) {
+            is NetworkResponse.Success -> {
+                isAccountTaskDetailsLoading = false
+                tasks = it.data?.task_ids?.map { taskId ->
+                    val taskDetails = it.data?.task_map_by_id?.get(taskId)
+                    Task(
+                        creator_name = taskDetails?.creator_name ?: "",
+                        crm_organization_user_name = taskDetails?.crm_organization_user_name ?: "",
+                        description = taskDetails?.description ?: "",
+                        due_date = taskDetails?.due_date ?: "",
+                        id = taskDetails?.id ?: "",
+                        last_modified_time = taskDetails?.last_modified_time ?: ""
+                    )
+                }
+                Log.i("AccountDetails", "Success: ${it.data}")
+            }
+
+            is NetworkResponse.Error -> {
+                isAccountTaskDetailsLoading = false
+                Log.i("AccountDetails", "Failure: ${it.message}")
+            }
+
+            is NetworkResponse.Loading -> {
+                isAccountTaskDetailsLoading = true
+                Log.i("AccountDetails", "Loading")
+            }
+
+        }
+
+    }
+
 
     Column(
         modifier = Modifier
@@ -121,7 +161,7 @@ fun AccountDetails(
         if (isAccountNoteDetailsLoading) {
             Loader()
         } else if (notes?.isEmpty() == true || notes == null) {
-            EmptyScreen()
+            EmptyScreen("Add notes and sync with your salesforce account")
         } else {
             notes?.forEach { note ->
                 NotesCard(
@@ -137,6 +177,32 @@ fun AccountDetails(
                 )
             }
         }
+
+        TaskDetailsHeader(accountId, accountName = accountName)
+
+        if (isAccountTaskDetailsLoading) {
+            Loader()
+        } else if (tasks?.isEmpty() == true || tasks == null) {
+            EmptyScreen("Add tasks, set due dates and assign to your team")
+        } else {
+            tasks?.forEach { task ->
+                TasksCard(
+                    firsName = task.creator_name.split(" ")[0],
+                    lastName = task.creator_name.split(" ")[1],
+                    username = task.creator_name,
+                    notes = task.description,
+                    date = task.last_modified_time,
+                    assignedTaskUserName = task.crm_organization_user_name,
+                    dueDate = task.due_date,
+                    onClick = {
+                        Log.i("AccountDetails", "TaskId: ${task.id}")
+                        NavigationService.navigateTo("task_details_screen/${accountId}/${accountName}/${task.id}")
+                    }
+                )
+            }
+        }
+
+
     }
 }
 
@@ -179,7 +245,7 @@ fun Modifier.dashedBorder(width: Dp, radius: Dp, color: Color) =
     }
 
 @Composable
-fun EmptyScreen() {
+fun EmptyScreen(emptyText: String) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -192,7 +258,7 @@ fun EmptyScreen() {
     ) {
 
         Text(
-            text = "Add notes and sync with your salesforce account",
+            text = emptyText,
             style = TextStyle(
                 fontSize = 12.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_regular)),
@@ -207,6 +273,46 @@ fun EmptyScreen() {
 
 }
 
+@Composable
+fun TaskDetailsHeader(
+    accountId: String,
+    accountName: String,
+    isAccountSelectionEnabled: Boolean? = false
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        CustomTextWithImage(
+            imageId = R.drawable.tasks,
+            imageContentDescription = "buildings",
+            imageModifier = Modifier
+                .width(17.dp)
+                .height(17.dp),
+            text = "Tasks",
+            textStyle = TextStyle(
+                fontSize = 16.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                fontWeight = FontWeight(600),
+                color = Color(0xFF212653),
+            )
+        )
+        Image(
+            painter = painterResource(id = R.drawable.add_icon),
+            contentDescription = "add_tasks",
+            modifier = Modifier
+                .width(20.dp)
+                .height(20.dp)
+                .clickable(
+                    interactionSource = MutableInteractionSource(),
+                    indication = null
+                ) {
+                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
+                }
+        )
+    }
+}
 
 @Composable
 fun NotesDetailsHeader(
@@ -239,8 +345,10 @@ fun NotesDetailsHeader(
             modifier = Modifier
                 .width(20.dp)
                 .height(20.dp)
-                .clickable( interactionSource =  MutableInteractionSource(),
-                    indication = null) {
+                .clickable(
+                    interactionSource = MutableInteractionSource(),
+                    indication = null
+                ) {
                     NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
                 }
         )
