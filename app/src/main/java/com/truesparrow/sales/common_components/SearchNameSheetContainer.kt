@@ -51,6 +51,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.Observer
 import com.truesparrow.sales.util.NetworkResponse
@@ -116,6 +117,10 @@ fun SearchNameSheetContainer(
                             modifier = Modifier
                                 .width(24.dp)
                                 .height(24.dp)
+                                .semantics {
+                                    testTagsAsResourceId = true
+                                    testTag = "txt_field_search_user"
+                                }
 
                         )
                         TextField(
@@ -160,6 +165,7 @@ fun SearchNameSheetContainer(
                                 .semantics {
                                     testTagsAsResourceId = true
                                     testTag = "text_field_search_account"
+                                    contentDescription = "txt_search_user_field"
                                 },
                             maxLines = 1
                         )
@@ -199,7 +205,12 @@ fun SearchNameSheetContainer(
                             text = "No results found",
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(16.dp)
+                                .semantics {
+                                    testTagsAsResourceId = true
+                                    testTag = "txt_search_no_result_found"
+                                    contentDescription = "txt_search_no_result_found"
+                                },
                             textAlign = TextAlign.Center
                         )
                     }
@@ -212,7 +223,7 @@ fun SearchNameSheetContainer(
                                 SearchUserName(
                                     firstName = recordInfo.name,
                                     lastName = recordInfo.name,
-                                    searchNameTestId = "btn_search_user_name_${recordInfo.name}",
+                                    searchNameTestId = "btn_search_user_user_name_${recordInfo.name}",
                                     onAccountRowClick = {
                                         searchCrmUserNameViewModal.onAccountRowClicked(
                                             recordInfo.name,

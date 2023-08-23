@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -67,7 +68,12 @@ fun SearchUserName(
                     fontFamily = customFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 5.sp,
-                )
+                ),
+                modifier = Modifier.semantics {
+                    testTagsAsResourceId = true
+                    testTag = "txt_search_user_user_initials_${firstName}${lastName}"
+                    contentDescription = "txt_search_user_user_initials_${firstName}${lastName}"
+                }
             )
             Spacer(modifier = Modifier.width(4.dp))
             CustomText(
