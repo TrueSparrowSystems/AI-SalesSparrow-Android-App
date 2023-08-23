@@ -72,7 +72,6 @@ fun CustomBottomSheetContainer(
     val focusRequester = remember { FocusRequester() }
 
 
-
     searchAccountViewModal.searchAccountLiveDataData.observe(
         LocalLifecycleOwner.current,
 
@@ -85,7 +84,7 @@ fun CustomBottomSheetContainer(
                         val accountDetails = res.data.accountMapById[accountId]
                         Record(accountId, accountDetails?.name ?: "")
                     }
-                    focusRequester.requestFocus()
+//                    focusRequester.requestFocus()
                     keyboardController?.show()
                 }
 

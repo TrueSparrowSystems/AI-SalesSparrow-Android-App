@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -27,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*;
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -36,8 +38,14 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.*;
 import androidx.compose.ui.text.font.*
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
@@ -74,6 +82,7 @@ fun NotesScreen(
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
     var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
     var snackbarShown by remember { mutableStateOf(false) }
+    var recommendedPopup by remember { mutableStateOf(false) }
 
 
     notesViewModel.notesLiveData.observe(LocalLifecycleOwner.current) { response ->
@@ -158,12 +167,67 @@ fun NotesScreen(
                 }
         )
 
-        if (saveNoteApiIsSuccess) {
+        if (true) {
             RecommendedSectionHeader(
                 accountId,
                 accountName = accountName!!,
-                isAccountSelectionEnabled
+                isAccountSelectionEnabled,
+                onPlusClicked = {
+                    recommendedPopup = true
+                }
             )
+        }
+
+        if (recommendedPopup) {
+            Popup(
+                alignment = Alignment.BottomEnd,
+                onDismissRequest = { recommendedPopup = false },
+                offset = IntOffset(-50, 350),
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top),
+                    horizontalAlignment = Alignment.Start,
+                    modifier = Modifier
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFFDBDEEB),
+                            shape = RoundedCornerShape(size = 4.dp)
+                        )
+                        .width(215.dp)
+                        .height(126.dp)
+                        .background(
+                            color = Color(0xFFFFFFFF),
+                            shape = RoundedCornerShape(size = 4.dp)
+                        )
+                        .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable {
+                            recommendedPopup = false
+                            //TODO: Navigate to Add Tasks Screen
+                        }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.tasks),
+                            contentDescription = "add_tasks",
+                            contentScale = ContentScale.None
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "Add Tasks",
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                                fontWeight = FontWeight(600),
+                                color = Color(0xFF545A71),
+                            )
+                        )
+                    }
+                }
+
+            }
         }
 
     }
@@ -173,8 +237,10 @@ fun NotesScreen(
 fun RecommendedSectionHeader(
     accountId: String,
     accountName: String,
-    isAccountSelectionEnabled: Boolean? = false
+    isAccountSelectionEnabled: Boolean? = false,
+    onPlusClicked: () -> Unit
 ) {
+
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -183,7 +249,7 @@ fun RecommendedSectionHeader(
         CustomTextWithImage(
             imageId = R.drawable.sparkle,
             imageContentDescription = "buildings",
-            text = "Notes",
+            text = "We have some recommendations",
             imageModifier = Modifier
                 .width(24.dp)
                 .height(24.dp),
@@ -204,7 +270,8 @@ fun RecommendedSectionHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
+                    onPlusClicked()
+//                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
                 }
         )
     }

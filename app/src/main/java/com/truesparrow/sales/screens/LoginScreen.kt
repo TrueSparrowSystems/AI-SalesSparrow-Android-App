@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.truesparrow.sales.BuildConfig
 import com.truesparrow.sales.R
 import com.truesparrow.sales.common_components.CustomButton
 import com.truesparrow.sales.common_components.CustomText
@@ -247,7 +248,7 @@ fun LogInScreen(intent: Intent?) {
                     ),
                     onClick = {
                         isLogInProgress.value = true;
-                        authenticationViewModal.getConnectWithSalesForceUrl("salessparrowdev://oauth/success")
+                        authenticationViewModal.getConnectWithSalesForceUrl(BuildConfig.REDIRECT_URI)
                     },
                     imageId = R.drawable.salesforce_connect,
                     imageContentDescription = "img_login_salesforce_icon",
