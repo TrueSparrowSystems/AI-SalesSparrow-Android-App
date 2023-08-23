@@ -42,4 +42,10 @@ class NotesViewModel @Inject constructor(
             )
         }
     }
+
+    fun getCrmActions(text: String) {
+        viewModelScope.launch {
+            notesRepository.getCrmActions(text)
+        }
+    }
 }

@@ -6,6 +6,8 @@ import com.truesparrow.sales.models.SaveNote
 import com.truesparrow.sales.models.CurrentUserResponse
 import com.truesparrow.sales.models.AccountListResponse
 import com.truesparrow.sales.models.AccountNotesResponse
+import com.truesparrow.sales.models.GetCrmActionRequest
+import com.truesparrow.sales.models.GetCrmActionsResponse
 import com.truesparrow.sales.models.NotesDetailResponse
 import com.truesparrow.sales.models.SaveNoteRequest
 import retrofit2.Response
@@ -45,7 +47,7 @@ interface ApiService {
     @GET("v1/accounts/{account_id}/notes")
     @Headers("$MOCK_RESPONSE_HEADER: NotesResponse.json")
     suspend fun getAccountNotes(
-       @Path(value = "account_id", encoded = true) accountId: String
+        @Path(value = "account_id", encoded = true) accountId: String
     ): Response<AccountNotesResponse>
 
     @GET("v1/accounts/{account_id}/notes/{note_id}")
@@ -62,5 +64,10 @@ interface ApiService {
 
     @POST("./v1/auth/disconnect")
     suspend fun disconnectSalesForce(): Response<Unit>
+
+    @POST("./v1/suggestions/crm-actions")
+    suspend fun getCrmActions(
+        @Body request: GetCrmActionRequest
+    ): Response<GetCrmActionsResponse>
 
 }
