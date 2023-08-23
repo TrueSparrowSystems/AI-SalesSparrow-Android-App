@@ -3,9 +3,11 @@ package com.truesparrow.sales.common_components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,28 +15,107 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import com.truesparrow.sales.R
 
 @Composable
 fun TaskSuggestionCard() {
+    var EditTaskPopup by remember { mutableStateOf(false) }
+
+    if (EditTaskPopup) {
+        Popup(
+            alignment = Alignment.BottomEnd,
+            onDismissRequest = { EditTaskPopup = false },
+            offset = IntOffset(-50, -320),
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top),
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFDBDEEB),
+                        shape = RoundedCornerShape(size = 4.dp)
+                    )
+                    .width(110.dp)
+                    .height(100.dp)
+                    .background(
+                        color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp)
+                    )
+                    .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
+            ) {
+                Row(horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable {
+                        EditTaskPopup = false
+                        // Todo: Add Edit suggested task functionality
+
+                    }) {
+                    Image(
+                        painter = painterResource(id = R.drawable.edit),
+                        contentDescription = "edit_tasks",
+                        contentScale = ContentScale.None
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = "Edit", style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                            fontWeight = FontWeight(600),
+                            color = Color(0xFF545A71),
+                        )
+                    )
+                }
+
+                Row(horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable {
+                        EditTaskPopup = false
+//                        Todo: Add Delete suggested task functionality
+
+                    }) {
+                    Image(
+                        painter = painterResource(id = R.drawable.delete),
+                        contentDescription = "delete_tasks",
+                        contentScale = ContentScale.None
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = "Delete", style = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                            fontWeight = FontWeight(600),
+                            color = Color(0xFF545A71),
+                        )
+                    )
+                }
+            }
+
+        }
+    }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .border(
-                width = 1.dp,
-                color = Color(0xFFE9E9E9),
-                shape = RoundedCornerShape(size = 4.dp)
+                width = 1.dp, color = Color(0xFFE9E9E9), shape = RoundedCornerShape(size = 4.dp)
             )
             .padding(0.75.dp)
             .fillMaxWidth()
@@ -94,13 +175,14 @@ fun TaskSuggestionCard() {
                         )
                     )
 
-                    Image(
-                        painter = painterResource(id = R.drawable.setting_three_dots_outline),
+                    Image(painter = painterResource(id = R.drawable.setting_three_dots_outline),
                         contentDescription = "add_notes",
                         modifier = Modifier
                             .width(20.dp)
                             .height(20.dp)
-                    )
+                            .clickable {
+                                EditTaskPopup = true
+                            })
                 }
             }
             Column(
