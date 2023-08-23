@@ -56,7 +56,7 @@ import com.truesparrow.sales.common_components.AccountListBottomSheet
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
-import com.truesparrow.sales.common_components.TaskCard
+import com.truesparrow.sales.common_components.TaskSuggestionCard
 import com.truesparrow.sales.common_components.ToastState
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
@@ -179,7 +179,7 @@ fun NotesScreen(
             )
         }
         Spacer(modifier = Modifier.height(30.dp))
-        TaskCard()
+        TaskSuggestionCard()
         if (recommendedPopup) {
             Popup(
                 alignment = Alignment.BottomEnd,

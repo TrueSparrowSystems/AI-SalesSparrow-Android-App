@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.truesparrow.sales.R
 
 @Composable
-fun TaskCard() {
+fun TaskSuggestionCard() {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
