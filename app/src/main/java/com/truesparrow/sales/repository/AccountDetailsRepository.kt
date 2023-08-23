@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.truesparrow.sales.api.ApiService
 import com.truesparrow.sales.models.AccountNotesResponse
+import com.truesparrow.sales.models.AccountTasksResponse
 import com.truesparrow.sales.util.NetworkResponse
 import org.json.JSONObject
 import javax.inject.Inject
@@ -14,6 +15,10 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
     private val _accountNotes = MutableLiveData<NetworkResponse<AccountNotesResponse>>()
     val accountNotes: LiveData<NetworkResponse<AccountNotesResponse>>
         get() = _accountNotes
+
+    private val _accountTasks = MutableLiveData<NetworkResponse<AccountTasksResponse>>()
+    val accountTasks: LiveData<NetworkResponse<AccountTasksResponse>>
+        get() = _accountTasks
 
     suspend fun getAccountNotes(accountId: String) {
 
@@ -34,8 +39,26 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
             Log.i("AccountDetails", "Exception: ${e.message}")
             _accountNotes.postValue(NetworkResponse.Error("Something went wrong"))
         }
+    }
 
+    suspend fun getAccountTasks(accountId: String) {
+        try {
+            _accountTasks.postValue(NetworkResponse.Loading())
+            val response = apiService.getAccountTasks(accountId)
 
+            if (response.isSuccessful && response.body() != null) {
+                _accountTasks.postValue(NetworkResponse.Success(response.body()!!))
+            } else if (response.errorBody() != null) {
+                val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
+                _accountTasks.postValue(NetworkResponse.Error(errorObj.getString("message")))
+            } else {
+                Log.i("AccountDetails", "Exception: $response")
+                _accountTasks.postValue(NetworkResponse.Error("Error went wrong"))
+            }
+        } catch (e: Exception) {
+            Log.i("AccountDetails", "Exception: ${e.message}")
+            _accountTasks.postValue(NetworkResponse.Error("Something went wrong"))
+        }
     }
 }
 
