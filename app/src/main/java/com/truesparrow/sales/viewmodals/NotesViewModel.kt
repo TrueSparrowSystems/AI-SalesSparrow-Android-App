@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.truesparrow.sales.models.GetCrmActionsResponse
 import com.truesparrow.sales.models.NotesDetailResponse
 import com.truesparrow.sales.models.SaveNote
 import com.truesparrow.sales.repository.NotesRepository
@@ -25,6 +26,9 @@ class NotesViewModel @Inject constructor(
 
     val noteDetailsLiveData: LiveData<NetworkResponse<NotesDetailResponse>>
         get() = notesRepository.noteDetails
+
+    val getCrmActionsLiveData: LiveData<NetworkResponse<GetCrmActionsResponse>>
+        get() = notesRepository.getCrmActions
 
     fun getNoteDetails(accountId: String, noteId: String) {
         Log.i("NotesDetails", "Account Id: $accountId Note Id: $noteId");

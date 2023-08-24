@@ -221,7 +221,7 @@ fun Loader() {
     }
 }
 
-
+@Composable
 fun Modifier.dashedBorder(width: Dp, radius: Dp, color: Color) =
     drawBehind {
         drawIntoCanvas {
@@ -245,7 +245,7 @@ fun Modifier.dashedBorder(width: Dp, radius: Dp, color: Color) =
     }
 
 @Composable
-fun EmptyScreen(emptyText: String) {
+fun EmptyScreen(emptyText: String, shouldShowIcon: Boolean = false, height: Dp = 40.dp) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -253,9 +253,19 @@ fun EmptyScreen(emptyText: String) {
             .dashedBorder(1.dp, 5.dp, Color(0xFF545A71))
             .padding(0.75.dp)
             .fillMaxWidth()
-            .height(40.dp)
+            .height(height)
             .padding(start = 14.dp, top = 12.dp, end = 14.dp, bottom = 12.dp)
     ) {
+
+        if (shouldShowIcon) {
+            Image(
+                painter = painterResource(id = R.drawable.check_marked),
+                contentDescription = "check_marked",
+                modifier = Modifier
+                    .height(28.dp)
+                    .width(28.dp)
+            )
+        }
 
         Text(
             text = emptyText,
