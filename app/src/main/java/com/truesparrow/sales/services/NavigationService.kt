@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import com.truesparrow.sales.BuildConfig
 import com.truesparrow.sales.screens.AccountDetails
+import com.truesparrow.sales.screens.AddRecommendedTaskScreen
 import com.truesparrow.sales.screens.HomeScreen
 import com.truesparrow.sales.screens.SplashScreen
 import com.truesparrow.sales.screens.LogInScreen
@@ -122,6 +123,10 @@ fun NavigationService(intent: Intent?) {
             val accountName = it.arguments?.getString("accountName") ?: ""
             val noteId = it.arguments?.getString("noteId") ?: ""
             NoteDetailScreen(accountId, accountName,noteId)
+        }
+
+        composable(route = Screens.AddRecommendedTaskScreen.route) {
+            AddRecommendedTaskScreen()
         }
     }
 }
