@@ -32,7 +32,7 @@ fun EditableTextField(
         onValueChange = { onValueChange(it) },
         readOnly = readOnly,
         textStyle = TextStyle(
-            fontSize = 18.sp,
+            fontSize = 16.sp,
             lineHeight = 24.sp,
             fontFamily = FontFamily(Font(R.font.nunito_regular)),
             fontWeight = FontWeight(500),
