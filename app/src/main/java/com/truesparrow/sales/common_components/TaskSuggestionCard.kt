@@ -1,6 +1,8 @@
 package com.truesparrow.sales.common_components
 
+import android.app.DatePickerDialog
 import android.os.Build
+import android.widget.DatePicker
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,13 +58,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Calendar
+import java.util.Date
 
 @Composable
 fun TaskSuggestionCard(
-    taskTitle: String,
-    crmUserName: String?,
-    dueDate: String?,
-    onDeleteTaskClick: () -> Unit
+    taskTitle: String, crmUserName: String?, dueDate: String?, onDeleteTaskClick: () -> Unit
 ) {
     var showLoader by remember { mutableStateOf(false) }
     var expanded by remember {
@@ -72,6 +73,35 @@ fun TaskSuggestionCard(
     var itemHeight by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
 
+    var searchNameBottomSheetVisible by remember { mutableStateOf(false) }
+
+    val toggleSearchNameBottomSheet: () -> Unit = {
+        searchNameBottomSheetVisible = !searchNameBottomSheetVisible
+    }
+
+
+    if (searchNameBottomSheetVisible) {
+        SearchNameBottomSheet(toggleSearchNameBottomSheet)
+    }
+
+    val dueDateContext = LocalContext.current
+    val dueDateYear: Int
+    val dueDateMonth: Int
+    val dueDateDay: Int
+
+    val dueDateCalendar = Calendar.getInstance()
+    dueDateYear = dueDateCalendar.get(Calendar.YEAR)
+    dueDateMonth = dueDateCalendar.get(Calendar.MONTH)
+    dueDateDay = dueDateCalendar.get(Calendar.DAY_OF_MONTH)
+
+    dueDateCalendar.time = Date()
+    val dueDate = remember { mutableStateOf("") }
+
+    val mDatePickerDialog = DatePickerDialog(
+        dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
+            dueDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
+        }, dueDateYear, dueDateMonth, dueDateDay
+    )
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -163,8 +193,7 @@ fun TaskSuggestionCard(
 
             }
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -197,11 +226,13 @@ fun TaskSuggestionCard(
                     .padding(8.dp)
 
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.width(160.dp)
-                ) {
+                    modifier = Modifier
+                        .width(160.dp)
+                        .clickable {
+                            toggleSearchNameBottomSheet()
+                        }) {
 
                     Text(
                         text = "Assign to", style = TextStyle(
@@ -246,6 +277,7 @@ fun TaskSuggestionCard(
                     )
                 }
             }
+
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
                 horizontalAlignment = Alignment.Start,
@@ -257,10 +289,9 @@ fun TaskSuggestionCard(
                     .width(160.dp)
 
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { mDatePickerDialog.show() }) {
 
                     Text(
                         text = "Due", style = TextStyle(
@@ -281,7 +312,11 @@ fun TaskSuggestionCard(
                     )
 
                     Text(
-                        text = "04/07/2023", style = TextStyle(
+                        text = if (dueDate.value.isNotEmpty()) {
+                            dueDate.value
+                        } else {
+                            "Select"
+                        }, style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(700),
