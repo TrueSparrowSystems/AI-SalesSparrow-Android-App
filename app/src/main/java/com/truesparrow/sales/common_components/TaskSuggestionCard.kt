@@ -2,6 +2,7 @@ package com.truesparrow.sales.common_components
 
 import android.app.DatePickerDialog
 import android.os.Build
+import android.util.Log
 import android.widget.DatePicker
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -90,9 +91,7 @@ fun TaskSuggestionCard(
 
     if (searchNameBottomSheetVisible) {
         SearchNameBottomSheet(
-            toggleSearchNameBottomSheet,
-            accountId = accountId,
-            accountName = accountName!!
+            toggleSearchNameBottomSheet, accountId = accountId, accountName = accountName!!
         )
     }
 
@@ -205,6 +204,13 @@ fun TaskSuggestionCard(
 
             }
 
+
+            val dueDateV = if (dueDate.value.isNotEmpty()) {
+                dueDate.value?.replace("/", "-")
+            } else {
+                "Select"
+            }
+
             Column(verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier
@@ -212,7 +218,7 @@ fun TaskSuggestionCard(
                     .background(color = Color(0xFFF6F7F8), shape = RoundedCornerShape(size = 5.dp))
                     .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
                     .clickable {
-                        NavigationService.navigateTo("task_screen/${1234}/${crmUserName}")
+                        NavigationService.navigateTo("task_screen/${1}/${crmUserName}/${dueDateV}")
 
                     }
 
@@ -240,8 +246,7 @@ fun TaskSuggestionCard(
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clickable {
+                    modifier = Modifier.clickable {
                             toggleSearchNameBottomSheet()
                         }) {
 

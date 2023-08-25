@@ -65,6 +65,7 @@ import java.util.Date
 fun TaskScreen(
     crmUserId: String? = null,
     crmUserName: String? = null,
+    dueDate: String? = null
 ) {
 
     var task by remember { mutableStateOf("Presentation on how we would get prepare and plan a migration from PHP to Ruby. Get number of teams members and detailed estimates for Smagic.  Rachin to lead this. |") }
@@ -72,7 +73,7 @@ fun TaskScreen(
         AddTaskHeader()
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
-            crmUserName = crmUserName, crmUserId = crmUserId
+            crmUserName = crmUserName, crmUserId = crmUserId, dueDate = dueDate?.replace("-", "/")
         )
         Spacer(modifier = Modifier.height(20.dp))
         EditableTextField(note = task ?: "", placeholderText = if (task == null) {
@@ -95,6 +96,7 @@ fun TaskScreen(
 fun AddTaskContent(
     crmUserName: String? = null,
     crmUserId: String? = null,
+    dueDate: String? = null,
 ) {
 
     var searchNameBottomSheetVisible by remember { mutableStateOf(false) }
@@ -119,11 +121,12 @@ fun AddTaskContent(
     dueDateDay = dueDateCalendar.get(Calendar.DAY_OF_MONTH)
 
     dueDateCalendar.time = Date()
-    val dueDate = remember { mutableStateOf("") }
+    val selectedDueDate = remember { mutableStateOf("") }
+
 
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            dueDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
+            selectedDueDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
         }, dueDateYear, dueDateMonth, dueDateDay
     )
 
@@ -259,10 +262,10 @@ fun AddTaskContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = if (dueDate.value.isNotEmpty()) {
-                            dueDate.value
+                        text = if (selectedDueDate.value.isNotEmpty()) {
+                            selectedDueDate.value
                         } else {
-                            "Select"
+                            dueDate?:"Select"
                         },
                         color = Color(0xff444A62),
                         style = TextStyle(
