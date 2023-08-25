@@ -4,24 +4,21 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.truesparrow.sales.api.ApiService
 import com.truesparrow.sales.models.AccountListResponse
-import com.truesparrow.sales.models.CrmUserNameListResponse
+import com.truesparrow.sales.models.CrmOrganisationUsersResponse
 import com.truesparrow.sales.util.NetworkResponse
 import javax.inject.Inject
 
 class SearchCrmUserNameRepository @Inject constructor(private val apiService: ApiService) {
 
-
-//    Todo:Ds replace AccountListResponse with CrmUserNameListResponse once APi is ready from BE
-
-    private val _searchCrmUserLiveData = MutableLiveData<NetworkResponse<AccountListResponse>>()
-    val searchCrmUserLiveData: LiveData<NetworkResponse<AccountListResponse>>
+    private val _searchCrmUserLiveData = MutableLiveData<NetworkResponse<CrmOrganisationUsersResponse>>()
+    val searchCrmUserLiveData: LiveData<NetworkResponse<CrmOrganisationUsersResponse>>
         get() = _searchCrmUserLiveData
 
 
     suspend fun searchCrmUsers(query: String) {
         try {
             _searchCrmUserLiveData.postValue(NetworkResponse.Loading())
-            val result = apiService.getCrmUser(query = query);
+            val result = apiService.getCrmOrganisationUser(query = query);
 
             if (result.isSuccessful && result.body() != null) {
                 _searchCrmUserLiveData.postValue(NetworkResponse.Success(result.body()!!))

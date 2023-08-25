@@ -77,7 +77,6 @@ fun NotesScreen(
     crmUserId: String? = null,
     crmUserName: String? = null,
 ) {
-
     var note by remember { mutableStateOf("") }
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -207,7 +206,7 @@ fun NotesScreen(
             onValueChange = {
                 note = it
             },
-            placeholderText  ="Add A Note",
+            placeholderText = "Add A Note",
             readOnly = saveNoteApiIsSuccess,
             modifier = Modifier
                 .fillMaxWidth()
@@ -224,7 +223,7 @@ fun NotesScreen(
                 heading = "Getting recommendations",
                 accountId,
                 accountName = accountName!!,
-                isAccountSelectionEnabled,
+                isAccountSelectionEnabled = isAccountSelectionEnabled,
                 onPlusClicked = {
                     recommendedPopup = true
                 },
@@ -309,7 +308,7 @@ fun RecommendedSectionHeader(
     accountName: String,
     isAccountSelectionEnabled: Boolean? = false,
     onPlusClicked: () -> Unit,
-    shouldShowPlusIcon: Boolean
+    shouldShowPlusIcon: Boolean,
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,

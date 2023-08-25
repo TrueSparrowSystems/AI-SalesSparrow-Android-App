@@ -7,6 +7,7 @@ import com.truesparrow.sales.models.CurrentUserResponse
 import com.truesparrow.sales.models.AccountListResponse
 import com.truesparrow.sales.models.AccountNotesResponse
 import com.truesparrow.sales.models.AccountTasksResponse
+import com.truesparrow.sales.models.CrmOrganisationUsersResponse
 import com.truesparrow.sales.models.GetCrmActionRequest
 import com.truesparrow.sales.models.GetCrmActionsResponse
 import com.truesparrow.sales.models.NotesDetailResponse
@@ -67,10 +68,9 @@ interface ApiService {
     suspend fun disconnectSalesForce(): Response<Unit>
 
 
-    //Todo:Ds Change Api url
-    @GET("./v1/accounts")
-    @Headers("$MOCK_RESPONSE_HEADER: AccountListResponse.json")
-    suspend fun getCrmUser(@Query("q") query: String): Response<AccountListResponse>
+    @GET("./v1/crm-organization-users")
+    @Headers("$MOCK_RESPONSE_HEADER: CrmOrganisationUsersResponse.json")
+    suspend fun getCrmOrganisationUser(@Query("q") query: String): Response<CrmOrganisationUsersResponse>
 
     @POST("./v1/suggestions/crm-actions")
     @Headers("$MOCK_RESPONSE_HEADER: GetCrmActionsResponse.json")

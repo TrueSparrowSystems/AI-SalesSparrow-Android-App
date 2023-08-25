@@ -79,10 +79,11 @@ fun SearchNameSheetContainer(
             when (res) {
                 is NetworkResponse.Success -> {
                     isCrmUserApiInProgress.value = false
-                    Log.i("MyApp", "accountIds: ${res.data!!.accountIds}")
-                    records = res.data.accountIds.map { accountId ->
-                        val accountDetails = res.data.accountMapById[accountId]
-                        Record(accountId, accountDetails?.name ?: "")
+                    Log.i("MyApp", "crm_org_user_ids: ${res.data!!.crmOrganizationUserIds}")
+
+                    records = res.data.crmOrganizationUserIds.map { crmOrganizationUserId ->
+                        val userDetails = res.data.crmOrganizationUserMapById[crmOrganizationUserId]
+                        Record(crmOrganizationUserId, userDetails?.name ?: "")
                     }
 //                    focusRequester.requestFocus()
                     keyboardController?.show()
