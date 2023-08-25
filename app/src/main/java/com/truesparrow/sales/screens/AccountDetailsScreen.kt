@@ -280,7 +280,6 @@ fun EmptyScreen(emptyText: String, shouldShowIcon: Boolean = false, height: Dp =
             )
         )
     }
-
 }
 
 @Composable
@@ -318,7 +317,7 @@ fun TaskDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
+                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}/{1}/${"Select"}")
                 }
         )
     }
@@ -359,7 +358,7 @@ fun NotesDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
+                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}/{1}/${"Select"}")
                 }
         )
     }

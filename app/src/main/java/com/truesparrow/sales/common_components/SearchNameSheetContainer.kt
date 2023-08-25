@@ -45,7 +45,6 @@ import com.truesparrow.sales.models.Record
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.ui.theme.walkaway_gray
 import com.truesparrow.sales.ui.theme.white
-import com.truesparrow.sales.viewmodals.SearchAccountViewModel
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -60,12 +59,15 @@ import com.truesparrow.sales.viewmodals.SearchCrmUserNameViewModal
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SearchNameSheetContainer(
-    bottomSheetVisible: () -> Unit
+    bottomSheetVisible: () -> Unit,
+    accountId: String,
+    accountName: String,
+    isNewTask : Boolean,
 ) {
     val searchCrmUserNameViewModal: SearchCrmUserNameViewModal = hiltViewModel()
     var searchQuery by remember { mutableStateOf("") }
     var records by remember { mutableStateOf<List<Record>?>(null) }
-    val isAccountListApiInProgress = remember { mutableStateOf(true) }
+    val isCrmUserApiInProgress = remember { mutableStateOf(true) }
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
@@ -76,23 +78,24 @@ fun SearchNameSheetContainer(
         Observer { res ->
             when (res) {
                 is NetworkResponse.Success -> {
-                    isAccountListApiInProgress.value = false
-                    Log.i("MyApp", "accountIds: ${res.data!!.accountIds}")
-                    records = res.data.accountIds.map { accountId ->
-                        val accountDetails = res.data.accountMapById[accountId]
-                        Record(accountId, accountDetails?.name ?: "")
+                    isCrmUserApiInProgress.value = false
+                    Log.i("MyApp", "crm_org_user_ids: ${res.data!!.crmOrganizationUserIds}")
+
+                    records = res.data.crmOrganizationUserIds.map { crmOrganizationUserId ->
+                        val userDetails = res.data.crmOrganizationUserMapById[crmOrganizationUserId]
+                        Record(crmOrganizationUserId, userDetails?.name ?: "")
                     }
-                    focusRequester.requestFocus()
+//                    focusRequester.requestFocus()
                     keyboardController?.show()
                 }
 
                 is NetworkResponse.Error -> {
-                    isAccountListApiInProgress.value = false
+                    isCrmUserApiInProgress.value = false
                     Log.i("MyApp", "accountIds: ${res.message}")
                 }
 
                 is NetworkResponse.Loading -> {
-                    isAccountListApiInProgress.value = true
+                    isCrmUserApiInProgress.value = true
                     Log.i("MyApp", "accountIds: ${res.message}")
                 }
             }
@@ -181,7 +184,7 @@ fun SearchNameSheetContainer(
     ) { it ->
         Column(modifier = Modifier.padding(it)) {
             LazyColumn {
-                if (isAccountListApiInProgress.value) {
+                if (isCrmUserApiInProgress.value) {
                     item {
                         Box(
                             modifier = Modifier
@@ -226,9 +229,11 @@ fun SearchNameSheetContainer(
                                     searchNameTestId = "btn_search_user_user_name_${recordInfo.name}",
                                     onAccountRowClick = {
                                         searchCrmUserNameViewModal.onAccountRowClicked(
-                                            recordInfo.name,
                                             recordInfo.id,
-                                            true
+                                            recordInfo.name,
+                                            accountId = accountId,
+                                            accountName = accountName!!,
+                                            isNewTask = isNewTask
                                         )
                                         bottomSheetVisible()
                                     },

@@ -15,6 +15,9 @@ import com.truesparrow.sales.ui.theme.white
 @Composable
 fun SearchNameBottomSheet(
     bottomSheetVisible: () -> Unit,
+    accountId: String = "",
+    accountName: String = "",
+    isNewTask : Boolean = false
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -28,7 +31,12 @@ fun SearchNameBottomSheet(
             topStart = 10.dp, topEnd = 10.dp
         ),
     ) {
-        SearchNameSheetContainer(bottomSheetVisible)
+        SearchNameSheetContainer(
+            bottomSheetVisible,
+            accountId = accountId,
+            accountName = accountName!!,
+            isNewTask = isNewTask
+        )
     }
 }
 

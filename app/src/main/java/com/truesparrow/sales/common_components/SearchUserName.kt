@@ -61,8 +61,8 @@ fun SearchUserName(
 
             UserAvatar(
                 id = "crm_user_$firstName",
-                firstName = "John",
-                lastName = "Doe",
+                firstName = firstName,
+                lastName = lastName,
                 size = 20.dp,
                 textStyle = TextStyle(
                     fontFamily = customFontFamily,
@@ -74,7 +74,7 @@ fun SearchUserName(
             )
             Spacer(modifier = Modifier.width(4.dp))
             CustomText(
-                text = "$firstName $lastName", Typography.labelMedium, color = walkaway_gray
+                text = "$firstName", Typography.labelMedium, color = walkaway_gray
             )
         }
     }

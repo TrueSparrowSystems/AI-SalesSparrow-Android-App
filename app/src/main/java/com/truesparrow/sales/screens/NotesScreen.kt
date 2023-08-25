@@ -57,6 +57,7 @@ import com.truesparrow.sales.common_components.AccountListBottomSheet
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
+import com.truesparrow.sales.common_components.SearchNameBottomSheet
 import com.truesparrow.sales.common_components.TaskSuggestionCard
 import com.truesparrow.sales.common_components.ToastState
 import com.truesparrow.sales.models.TaskSuggestions
@@ -72,9 +73,10 @@ import kotlinx.coroutines.launch
 fun NotesScreen(
     accountName: String? = null,
     accountId: String? = null,
-    isAccountSelectionEnabled: Boolean = false
+    isAccountSelectionEnabled: Boolean = false,
+    crmUserId: String? = null,
+    crmUserName: String? = null,
 ) {
-
     var note by remember { mutableStateOf("") }
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -136,8 +138,7 @@ fun NotesScreen(
                     notesViewModel.getCrmActions(note);
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar(
-                            "",
-                            duration = SnackbarDuration.Short
+                            "", duration = SnackbarDuration.Short
                         )
                     }
                     snackbarShown = true
@@ -150,8 +151,7 @@ fun NotesScreen(
                 if (!snackbarShown) {
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar(
-                            "",
-                            duration = SnackbarDuration.Short
+                            "", duration = SnackbarDuration.Short
                         )
                     }
                     snackbarShown = true
@@ -195,15 +195,14 @@ fun NotesScreen(
             snackbarHostState
         )
         NotesHeader(
-            accountName = accountName,
-            isAccountSelectionEnabled = isAccountSelectionEnabled
+            accountName = accountName, isAccountSelectionEnabled = isAccountSelectionEnabled
         )
 
-        EditableTextField(
-            note = note,
+        EditableTextField(note = note,
             onValueChange = {
                 note = it
             },
+            placeholderText = "Add A Note",
             readOnly = saveNoteApiIsSuccess,
             modifier = Modifier
                 .fillMaxWidth()
@@ -211,20 +210,14 @@ fun NotesScreen(
                     contentDescription = "et_create_note"
                     testTag = "et_create_note"
                     testTagsAsResourceId = true
-                }
-        )
+                })
 
 
         if (getCrmActionLoading) {
             RecommendedSectionHeader(
-                heading = "Getting recommendations",
-                accountId,
-                accountName = accountName!!,
-                isAccountSelectionEnabled,
-                onPlusClicked = {
+                heading = "Getting recommendations", onPlusClicked = {
                     recommendedPopup = true
-                },
-                shouldShowPlusIcon = false
+                }, shouldShowPlusIcon = false, crmUserId = crmUserId!!, crmUserName = crmUserName!!
             )
             Spacer(modifier = Modifier.height(30.dp))
             Column(
@@ -236,10 +229,7 @@ fun NotesScreen(
                     .height(122.dp)
             ) {
                 CircularProgressIndicator(
-                    color = Color(0xFF212653),
-                    strokeWidth = 2.dp,
-                    modifier = Modifier
-                        .size(20.dp)
+                    color = Color(0xFF212653), strokeWidth = 2.dp, modifier = Modifier.size(20.dp)
                 )
                 Text(
                     text = "Please wait, we're checking to recommend tasks or events for you.",
@@ -262,13 +252,12 @@ fun NotesScreen(
         } else {
             RecommendedSectionHeader(
                 heading = "We have some recommendations",
-                accountId,
-                accountName = accountName!!,
-                isAccountSelectionEnabled,
                 onPlusClicked = {
                     recommendedPopup = true
                 },
-                shouldShowPlusIcon = true
+                shouldShowPlusIcon = true,
+                crmUserName = crmUserName!!,
+                crmUserId = crmUserId!!,
             )
             Spacer(modifier = Modifier.height(30.dp))
             tasks.forEach { task ->
@@ -279,12 +268,12 @@ fun NotesScreen(
                             .fillMaxWidth()
                             .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
                     ) {
-                        TaskSuggestionCard(
-                            taskTitle = it.description,
+                        TaskSuggestionCard(taskTitle = it.description,
                             dueDate = it.due_date,
-                            crmUserName = "John",
-                            onDeleteTaskClick = {}
-                        )
+                            crmUserName = crmUserName,
+                            accountId = accountId,
+                            accountName = accountName!!,
+                            onDeleteTaskClick = {})
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -299,13 +288,11 @@ fun NotesScreen(
 @Composable
 fun RecommendedSectionHeader(
     heading: String,
-    accountId: String,
-    accountName: String,
-    isAccountSelectionEnabled: Boolean? = false,
+    crmUserName: String,
+    crmUserId: String,
     onPlusClicked: () -> Unit,
-    shouldShowPlusIcon: Boolean
+    shouldShowPlusIcon: Boolean,
 ) {
-
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -326,20 +313,17 @@ fun RecommendedSectionHeader(
             )
         )
         if (shouldShowPlusIcon) {
-            Image(
-                painter = painterResource(id = R.drawable.add_icon),
+            Image(painter = painterResource(id = R.drawable.add_icon),
                 contentDescription = "add_notes",
                 modifier = Modifier
                     .width(20.dp)
                     .height(20.dp)
                     .clickable(
-                        interactionSource = MutableInteractionSource(),
-                        indication = null
+                        interactionSource = MutableInteractionSource(), indication = null
                     ) {
                         onPlusClicked()
-//                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
-                    }
-            )
+                        NavigationService.navigateTo("task_screen/1/Select/Select")
+                    })
         }
 
     }
@@ -391,37 +375,32 @@ fun NotesHeader(accountName: String?, isAccountSelectionEnabled: Boolean) {
                 .background(color = Color(0xFFF6F6F8), shape = RoundedCornerShape(size = 4.dp))
 
         ) {
-            Button(
-                onClick = {
-                    if (isAccountSelectionEnabled) {
-                        toggleBottomSheet()
-                    }
-                },
+            Button(onClick = {
+                if (isAccountSelectionEnabled) {
+                    toggleBottomSheet()
+                }
+            },
                 elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 interactionSource = NoRippleInteractionSource(),
                 modifier = Modifier.semantics {
                     contentDescription = "btn_select_account"
-                }
-            ) {
+                }) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.Start),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = accountName ?: "Select Account",
+                    Text(text = accountName ?: "Select Account",
                         color = Color(0xffdd1a77),
                         style = TextStyle(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = customFontFamily,
                         ),
-                        modifier = Modifier
-                            .semantics {
+                        modifier = Modifier.semantics {
                                 contentDescription =
                                     if (accountName.isNullOrBlank()) "txt_create_note_selected_account" else "txt_create_note_select_account"
-                            }
-                    )
+                            })
                 }
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
@@ -468,7 +447,8 @@ fun Header(
             ),
             modifier = Modifier
                 .clickable(interactionSource = MutableInteractionSource(),
-                    indication = null, onClick = { NavigationService.navigateBack() })
+                    indication = null,
+                    onClick = { NavigationService.navigateBack() })
                 .semantics {
                     contentDescription =
                         if (saveNoteApiIsSuccess) "btn_done_note_screen" else "btn_cancel_create_note"
@@ -480,13 +460,12 @@ fun Header(
         } else {
             Color(0xFF212653).copy(alpha = 0.7f)
         }
-        Button(
-            onClick = {
-                notesViewModel.saveNote(
-                    accountId = accountId!!,
-                    text = note,
-                )
-            },
+        Button(onClick = {
+            notesViewModel.saveNote(
+                accountId = accountId!!,
+                text = note,
+            )
+        },
 
             enabled = note.isNotEmpty() && accountId.isNotEmpty() && !(saveNoteApiInProgress || saveNoteApiIsSuccess),
             contentPadding = PaddingValues(all = 8.dp),
@@ -494,7 +473,9 @@ fun Header(
                 containerColor = Color.Transparent, contentColor = Color.White
             ),
             modifier = Modifier
-                .background(color = buttonColor, shape = RoundedCornerShape(size = 5.dp))
+                .background(
+                    color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
+                )
                 .width(92.dp)
                 .height(46.dp)
                 .clip(shape = RoundedCornerShape(size = 5.dp))
@@ -531,25 +512,22 @@ fun Header(
                         .width(width = 17.dp)
                         .height(height = 12.dp)
                 )
-                Text(
-                    text = if (saveNoteApiInProgress) {
-                        "Saving..."
-                    } else if (saveNoteApiIsSuccess) {
-                        "Saved"
-                    } else {
-                        "Save"
-                    }, color = Color.White, style = TextStyle(
-                        fontSize = 12.sp,
-                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFFFFFFFF),
-                        letterSpacing = 0.48.sp,
-                    ),
-                    modifier = Modifier.semantics {
-                        contentDescription =
-                            if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
-                    }
-                )
+                Text(text = if (saveNoteApiInProgress) {
+                    "Saving..."
+                } else if (saveNoteApiIsSuccess) {
+                    "Saved"
+                } else {
+                    "Save"
+                }, color = Color.White, style = TextStyle(
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                    fontWeight = FontWeight(500),
+                    color = Color(0xFFFFFFFF),
+                    letterSpacing = 0.48.sp,
+                ), modifier = Modifier.semantics {
+                    contentDescription =
+                        if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
+                })
             }
         }
     }

@@ -19,6 +19,7 @@ import com.truesparrow.sales.screens.LogInScreen
 import com.truesparrow.sales.screens.NoteDetailScreen
 import com.truesparrow.sales.screens.NotesScreen
 import com.truesparrow.sales.screens.SettingsScreen
+import com.truesparrow.sales.screens.TaskScreen
 import com.truesparrow.sales.util.Screens
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 
@@ -76,8 +77,6 @@ object NavigationService {
     fun navigateBack() {
         navController.popBackStack()
     }
-
-    
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -107,7 +106,9 @@ fun NavigationService(intent: Intent?) {
             val accountName = it.arguments?.getString("accountName") ?: ""
             val isAccountSelectionEnabled =
                 it.arguments?.getString("isAccountSelectionEnabled")?.toBoolean() ?: false
-            NotesScreen(accountName, accountId, isAccountSelectionEnabled)
+            val crmUserId = it.arguments?.getString("crmUserId") ?: ""
+            val crmUserName = it.arguments?.getString("crmUserName") ?: ""
+            NotesScreen(accountName, accountId, isAccountSelectionEnabled,crmUserId, crmUserName)
         }
         composable(route = Screens.AccountDetailsScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
@@ -122,6 +123,14 @@ fun NavigationService(intent: Intent?) {
             val accountName = it.arguments?.getString("accountName") ?: ""
             val noteId = it.arguments?.getString("noteId") ?: ""
             NoteDetailScreen(accountId, accountName,noteId)
+        }
+
+        composable(route = Screens.TaskScreen.route) {
+            val crmUserId = it.arguments?.getString("crmUserId") ?: ""
+            val crmUserName = it.arguments?.getString("crmUserName") ?: ""
+            val dueDate = it.arguments?.getString("dueDate") ?: ""
+
+            TaskScreen(crmUserId, crmUserName, dueDate)
         }
     }
 }
