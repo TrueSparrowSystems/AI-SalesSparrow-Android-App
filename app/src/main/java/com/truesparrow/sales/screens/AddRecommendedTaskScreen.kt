@@ -1,7 +1,9 @@
 package com.truesparrow.sales.screens
 
+import android.app.DatePickerDialog
 import android.os.Build
 import android.util.Log
+import android.widget.DatePicker
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -52,13 +53,14 @@ import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.truesparrow.sales.R
-import com.truesparrow.sales.common_components.AccountListBottomSheet
 import com.truesparrow.sales.common_components.EditableTextField
 import com.truesparrow.sales.common_components.SearchNameBottomSheet
 import com.truesparrow.sales.common_components.UserAvatar
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.util.NoRippleInteractionSource
+import java.util.Calendar
+import java.util.Date
 
 @Composable
 fun AddRecommendedTaskScreen(
@@ -106,6 +108,24 @@ fun AddTaskContent(
         SearchNameBottomSheet(toggleSearchNameBottomSheet)
     }
 
+    val dueDateContext = LocalContext.current
+    val dueDateYear: Int
+    val dueDateMonth: Int
+    val dueDateDay: Int
+
+    val dueDateCalendar = Calendar.getInstance()
+    dueDateYear = dueDateCalendar.get(Calendar.YEAR)
+    dueDateMonth = dueDateCalendar.get(Calendar.MONTH)
+    dueDateDay = dueDateCalendar.get(Calendar.DAY_OF_MONTH)
+
+    dueDateCalendar.time = Date()
+    val dueDate = remember { mutableStateOf("") }
+
+    val mDatePickerDialog = DatePickerDialog(
+        dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
+            dueDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
+        }, dueDateYear, dueDateMonth, dueDateDay
+    )
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
@@ -219,7 +239,9 @@ fun AddTaskContent(
                 )
 
         ) {
-            Button(onClick = {},
+            Button(onClick = {
+                mDatePickerDialog.show()
+            },
                 elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 interactionSource = NoRippleInteractionSource(),
@@ -232,7 +254,11 @@ fun AddTaskContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Select",
+                        text = if (dueDate.value.isNotEmpty()) {
+                            dueDate.value
+                        } else {
+                            "Select"
+                        },
                         color = Color(0xff444A62),
                         style = TextStyle(
                             fontSize = 14.sp,
