@@ -322,7 +322,7 @@ fun RecommendedSectionHeader(
                         interactionSource = MutableInteractionSource(), indication = null
                     ) {
                         onPlusClicked()
-                        NavigationService.navigateTo("task_screen/${crmUserId}/${crmUserName}/{Select}")
+                        NavigationService.navigateTo("task_screen/1/Select/Select")
                     })
         }
 
