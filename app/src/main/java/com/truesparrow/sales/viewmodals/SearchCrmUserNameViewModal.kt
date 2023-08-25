@@ -1,7 +1,4 @@
 package com.truesparrow.sales.viewmodals
-
-import com.truesparrow.sales.repository.SearchAccountRepository
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -40,6 +37,6 @@ class SearchCrmUserNameViewModal @Inject constructor(
         crmUserId: String,
         crmUserName: String,
     ) {
-        NavigationService.navigateTo("recommended_add_task_screen/${crmUserId}/${crmUserName}")
+        NavigationService.navigateTo("task_screen/${crmUserId}/${crmUserName}")
     }
 }

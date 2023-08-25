@@ -13,13 +13,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import com.truesparrow.sales.BuildConfig
 import com.truesparrow.sales.screens.AccountDetails
-import com.truesparrow.sales.screens.AddRecommendedTaskScreen
 import com.truesparrow.sales.screens.HomeScreen
 import com.truesparrow.sales.screens.SplashScreen
 import com.truesparrow.sales.screens.LogInScreen
 import com.truesparrow.sales.screens.NoteDetailScreen
 import com.truesparrow.sales.screens.NotesScreen
 import com.truesparrow.sales.screens.SettingsScreen
+import com.truesparrow.sales.screens.TaskScreen
 import com.truesparrow.sales.util.Screens
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 
@@ -123,10 +123,10 @@ fun NavigationService(intent: Intent?) {
             NoteDetailScreen(accountId, accountName,noteId)
         }
 
-        composable(route = Screens.AddRecommendedTaskScreen.route) {
+        composable(route = Screens.TaskScreen.route) {
             val crmUserId = it.arguments?.getString("crmUserId") ?: ""
             val crmUserName = it.arguments?.getString("crmUserName") ?: ""
-            AddRecommendedTaskScreen(crmUserId, crmUserName)
+            TaskScreen(crmUserId, crmUserName)
         }
     }
 }

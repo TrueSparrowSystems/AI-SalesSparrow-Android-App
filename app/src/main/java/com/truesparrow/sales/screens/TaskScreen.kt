@@ -63,7 +63,7 @@ import java.util.Calendar
 import java.util.Date
 
 @Composable
-fun AddRecommendedTaskScreen(
+fun TaskScreen(
     crmUserId: String? = null,
     crmUserName: String? = null,
 ) {
@@ -389,6 +389,6 @@ fun AddTaskHeader(
 
 @Preview(showBackground = true)
 @Composable
-fun AddRecommendedTaskScreenPreview() {
-    AddRecommendedTaskScreen()
+fun TaskScreenPreview() {
+    TaskScreen()
 }
