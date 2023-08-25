@@ -221,13 +221,12 @@ fun NotesScreen(
         if (getCrmActionLoading) {
             RecommendedSectionHeader(
                 heading = "Getting recommendations",
-                accountId,
-                accountName = accountName!!,
-                isAccountSelectionEnabled = isAccountSelectionEnabled,
                 onPlusClicked = {
                     recommendedPopup = true
                 },
-                shouldShowPlusIcon = false
+                shouldShowPlusIcon = false,
+                crmUserId = crmUserId!!,
+                crmUserName = crmUserName!!
             )
             Spacer(modifier = Modifier.height(30.dp))
             Column(
@@ -265,13 +264,12 @@ fun NotesScreen(
         } else {
             RecommendedSectionHeader(
                 heading = "We have some recommendations",
-                accountId,
-                accountName = accountName!!,
-                isAccountSelectionEnabled,
                 onPlusClicked = {
                     recommendedPopup = true
                 },
-                shouldShowPlusIcon = true
+                shouldShowPlusIcon = true,
+                crmUserName = crmUserName!!,
+                crmUserId = crmUserId!!,
             )
             Spacer(modifier = Modifier.height(30.dp))
             tasks.forEach { task ->
@@ -304,9 +302,8 @@ fun NotesScreen(
 @Composable
 fun RecommendedSectionHeader(
     heading: String,
-    accountId: String,
-    accountName: String,
-    isAccountSelectionEnabled: Boolean? = false,
+    crmUserName : String,
+    crmUserId : String,
     onPlusClicked: () -> Unit,
     shouldShowPlusIcon: Boolean,
 ) {
@@ -341,7 +338,7 @@ fun RecommendedSectionHeader(
                         indication = null
                     ) {
                         onPlusClicked()
-//                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
+                    NavigationService.navigateTo("task_screen/${crmUserId}/${crmUserName}")
                     }
             )
         }
