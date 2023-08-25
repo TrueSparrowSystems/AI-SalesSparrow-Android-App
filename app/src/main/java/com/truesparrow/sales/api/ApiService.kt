@@ -1,5 +1,6 @@
 package com.truesparrow.sales.api
 
+import com.truesparrow.sales.models.AccountFeedResponse
 import com.truesparrow.sales.models.SalesForceConnectRequest
 import com.truesparrow.sales.models.RedirectUrl
 import com.truesparrow.sales.models.SaveNote
@@ -82,4 +83,9 @@ interface ApiService {
     suspend fun getAccountTasks(
         @Path(value = "account_id", encoded = true) accountId: String
     ): Response<AccountTasksResponse>
+
+    @GET("./v1/accounts/feed")
+    @Headers("$MOCK_RESPONSE_HEADER: AccountFeedResponse.json")
+    suspend fun getAccountFeed(): Response<AccountFeedResponse>
+
 }
