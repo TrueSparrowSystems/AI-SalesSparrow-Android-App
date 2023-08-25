@@ -96,8 +96,6 @@ fun LogInScreen(intent: Intent?) {
     }
 
 
-
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFF1F1F2)
@@ -261,7 +259,7 @@ fun LogInScreen(intent: Intent?) {
                         .semantics {
                             contentDescription = "btn_connect_salesforce"
                             testTagsAsResourceId = true;
-                            testTag = "salesforce_button"
+                            testTag = "btn_connect_salesforce"
                         },
                     isLoadingProgressBar = isLogInProgress.value,
                     buttonShape = RoundedCornerShape(size = 5.dp),
