@@ -207,6 +207,7 @@ fun NotesScreen(
             onValueChange = {
                 note = it
             },
+            placeholderText  ="Add A Note",
             readOnly = saveNoteApiIsSuccess,
             modifier = Modifier
                 .fillMaxWidth()

@@ -2,7 +2,6 @@ package com.truesparrow.sales.screens
 
 import android.app.DatePickerDialog
 import android.os.Build
-import android.util.Log
 import android.widget.DatePicker
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -76,7 +75,11 @@ fun TaskScreen(
             crmUserName = crmUserName, crmUserId = crmUserId
         )
         Spacer(modifier = Modifier.height(20.dp))
-        EditableTextField(note = task, onValueChange = {
+        EditableTextField(note = task ?: "", placeholderText = if (task == null) {
+            "Add task"
+        } else {
+            ""
+        }, onValueChange = {
             task = it
         }, modifier = Modifier
             .fillMaxWidth()
@@ -160,32 +163,38 @@ fun AddTaskContent(
                 elevation = ButtonDefaults.buttonElevation(0.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 interactionSource = NoRippleInteractionSource(),
-                modifier = Modifier
-                    .semantics {
-                        contentDescription = ""
-                    }) {
+                modifier = Modifier.semantics {
+                    contentDescription = ""
+                }) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    UserAvatar(
-                        id = "1",
-                        firstName = "D",
-                        lastName = "S",
-                        size = 17.dp,
-                        textStyle = TextStyle(
-                            fontSize = 5.24.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(700),
-                            color = Color(0xFF000000),
-                            letterSpacing = 0.21.sp,
-                        ),
-                        userAvatarTestId = ""
-                    )
+                    if (crmUserId != "1") {
+                        UserAvatar(
+                            id = "1",
+                            firstName = "D",
+                            lastName = "S",
+                            size = 17.dp,
+                            textStyle = TextStyle(
+                                fontSize = 5.24.sp,
+                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                                fontWeight = FontWeight(700),
+                                color = Color(0xFF000000),
+                                letterSpacing = 0.21.sp,
+                            ),
+                            userAvatarTestId = ""
+                        )
+                    }
 
+                    val selectTabColor = if (crmUserId == "1") {
+                        Color(0xff444A62)
+                    } else {
+                        Color(0xffdd1a77)
+                    }
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         text = crmUserName ?: "Select",
-                        color = Color(0xffdd1a77),
+                        color = selectTabColor,
                         style = TextStyle(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
@@ -305,8 +314,7 @@ fun AddTaskHeader(
                     indication = null,
                     onClick = { NavigationService.navigateBack() })
                 .semantics {
-                    contentDescription =
-                        if (tasksApiIsSuccess) "" else ""
+                    contentDescription = if (tasksApiIsSuccess) "" else ""
                 },
         )
 
@@ -375,8 +383,7 @@ fun AddTaskHeader(
                     color = Color(0xFFFFFFFF),
                     letterSpacing = 0.48.sp,
                 ), modifier = Modifier.semantics {
-                    contentDescription =
-                        if (tasksApiIsSuccess) "" else ""
+                    contentDescription = if (tasksApiIsSuccess) "" else ""
                 })
             }
         }
