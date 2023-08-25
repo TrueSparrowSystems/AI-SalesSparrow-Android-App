@@ -10,5 +10,5 @@ sealed class Screens(val route: String) {
 
     object NoteDetailsScreen : Screens("note_details_screen/{accountId}/{accountName}/{noteId}")
     object SettingsScreen : Screens("settings_screen")
-    object AddRecommendedTaskScreen : Screens("recommended_add_task_screen")
+    object AddRecommendedTaskScreen : Screens("recommended_add_task_screen/{crmUserId}/{crmUserName}")
 }

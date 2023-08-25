@@ -77,8 +77,6 @@ object NavigationService {
     fun navigateBack() {
         navController.popBackStack()
     }
-
-    
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -126,7 +124,9 @@ fun NavigationService(intent: Intent?) {
         }
 
         composable(route = Screens.AddRecommendedTaskScreen.route) {
-            AddRecommendedTaskScreen()
+            val crmUserId = it.arguments?.getString("crmUserId") ?: ""
+            val crmUserName = it.arguments?.getString("crmUserName") ?: ""
+            AddRecommendedTaskScreen(crmUserId, crmUserName)
         }
     }
 }

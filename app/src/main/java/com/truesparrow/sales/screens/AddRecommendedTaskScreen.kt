@@ -65,8 +65,8 @@ fun AddRecommendedTaskScreen(
     crmUserId: String? = null,
     crmUserName: String? = null,
 ) {
-    Log.i("crmUserId","$crmUserName")
-    Log.i("crmUserName","$crmUserId")
+    Log.i("crmUserId", "$crmUserName")
+    Log.i("crmUserName", "$crmUserId")
 
     var note by remember { mutableStateOf("Presentation on how we would get prepare and plan a migration from PHP to Ruby. Get number of teams members and detailed estimates for Smagic.  Rachin to lead this. |") }
     Column(modifier = Modifier.padding(vertical = 30.dp, horizontal = 16.dp)) {
@@ -74,8 +74,7 @@ fun AddRecommendedTaskScreen(
         )
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
-            crmUserName = crmUserName,
-            crmUserId = crmUserId
+            crmUserName = crmUserName, crmUserId = crmUserId
         )
         Spacer(modifier = Modifier.height(20.dp))
         EditableTextField(note = note, onValueChange = {

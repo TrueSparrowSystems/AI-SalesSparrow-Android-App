@@ -226,9 +226,8 @@ fun SearchNameSheetContainer(
                                     searchNameTestId = "btn_search_user_user_name_${recordInfo.name}",
                                     onAccountRowClick = {
                                         searchCrmUserNameViewModal.onAccountRowClicked(
-                                            recordInfo.name,
                                             recordInfo.id,
-                                            true
+                                            recordInfo.name,
                                         )
                                         bottomSheetVisible()
                                     },

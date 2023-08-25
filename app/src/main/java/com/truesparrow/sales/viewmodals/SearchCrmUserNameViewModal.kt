@@ -35,17 +35,11 @@ class SearchCrmUserNameViewModal @Inject constructor(
             repository.searchCrmUsers(query);
         }
     }
-//Todo:Ds Change the redirect url
-    fun onAccountRowClicked(
-        accountName: String,
-        accountId: String,
-        isAccountSelectionEnabled: Boolean
-    ) {
-        if (isAccountSelectionEnabled) {
-            NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
 
-        } else {
-            NavigationService.navigateTo("account_details_screen/${accountId}/${accountName}")
-        }
+    fun onAccountRowClicked(
+        crmUserId: String,
+        crmUserName: String,
+    ) {
+        NavigationService.navigateTo("recommended_add_task_screen/${crmUserId}/${crmUserName}")
     }
 }
