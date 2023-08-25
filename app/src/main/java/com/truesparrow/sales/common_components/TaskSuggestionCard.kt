@@ -241,7 +241,6 @@ fun TaskSuggestionCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .width(160.dp)
                         .clickable {
                             toggleSearchNameBottomSheet()
                         }) {

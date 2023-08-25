@@ -161,7 +161,6 @@ fun AddTaskContent(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 interactionSource = NoRippleInteractionSource(),
                 modifier = Modifier
-                    .width(160.dp)
                     .semantics {
                         contentDescription = ""
                     }) {
