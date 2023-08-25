@@ -4,11 +4,12 @@ import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -16,11 +17,14 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,7 +33,9 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*;
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
@@ -38,10 +44,9 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.*;
 import androidx.compose.ui.text.font.*
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
@@ -54,6 +59,7 @@ import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
 import com.truesparrow.sales.common_components.TaskSuggestionCard
 import com.truesparrow.sales.common_components.ToastState
+import com.truesparrow.sales.models.TaskSuggestions
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.util.NetworkResponse
@@ -82,12 +88,52 @@ fun NotesScreen(
     var recommendedPopup by remember { mutableStateOf(false) }
 
 
+    val getCrmActionsResponse by notesViewModel.getCrmActionsLiveData.observeAsState()
+    var getCrmActionLoading by remember { mutableStateOf(false) }
+    var tasks by remember { mutableStateOf(listOf<TaskSuggestions?>(null)) }
+    val scrollState = rememberScrollState()
+
+
+
+    getCrmActionsResponse?.let {
+        when (it) {
+            is NetworkResponse.Success -> {
+                getCrmActionLoading = false
+
+                tasks = (it.data?.add_task_suggestions?.map { task ->
+                    TaskSuggestions(
+                        description = task.description,
+                        due_date = task.due_date,
+                    )
+                } ?: listOf<TaskSuggestions?>(null))
+
+                Log.d("NotesScreen", "Success")
+            }
+
+            is NetworkResponse.Error -> {
+                getCrmActionLoading = false
+                Log.d("NotesScreen", "Error")
+            }
+
+            is NetworkResponse.Loading -> {
+                getCrmActionLoading = true
+                Log.d("NotesScreen", "Loading")
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = accountId) {
+        notesViewModel.getCrmActions(note);
+    }
+
+
     notesViewModel.notesLiveData.observe(LocalLifecycleOwner.current) { response ->
         when (response) {
             is NetworkResponse.Success -> {
                 saveNoteApiInProgress = false;
                 saveNoteApiIsSuccess = true
                 if (!snackbarShown) {
+                    notesViewModel.getCrmActions(note);
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar(
                             "",
@@ -135,7 +181,11 @@ fun NotesScreen(
         }
     }
 
-    Column(modifier = Modifier.padding(vertical = 30.dp, horizontal = 16.dp)) {
+    Column(
+        modifier = Modifier
+            .padding(vertical = 30.dp, horizontal = 16.dp)
+            .verticalScroll(state = scrollState, enabled = true)
+    ) {
         Header(
             note = note,
             accountName = accountName,
@@ -164,82 +214,96 @@ fun NotesScreen(
                 }
         )
 
-        if (true) {
+
+        if (getCrmActionLoading) {
             RecommendedSectionHeader(
+                heading = "Getting recommendations",
                 accountId,
                 accountName = accountName!!,
                 isAccountSelectionEnabled,
                 onPlusClicked = {
                     recommendedPopup = true
-                }
+                },
+                shouldShowPlusIcon = false
             )
-        }
-        Spacer(modifier = Modifier.height(30.dp))
-        TaskSuggestionCard(
-            "Presentation to plan a migration from PHP to Ruby.",
-            crmUserName = "John"
-        )
-        if (recommendedPopup) {
-            Popup(
-                alignment = Alignment.BottomEnd,
-                onDismissRequest = { recommendedPopup = false },
-                offset = IntOffset(-50, 350),
+            Spacer(modifier = Modifier.height(30.dp))
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .dashedBorder(1.dp, 5.dp, Color(0x80545A71))
+                    .fillMaxWidth()
+                    .height(122.dp)
             ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top),
-                    horizontalAlignment = Alignment.Start,
+                CircularProgressIndicator(
+                    color = Color(0xFF212653),
+                    strokeWidth = 2.dp,
                     modifier = Modifier
-                        .border(
-                            width = 1.dp,
-                            color = Color(0xFFDBDEEB),
-                            shape = RoundedCornerShape(size = 4.dp)
-                        )
-                        .width(215.dp)
-                        .height(126.dp)
-                        .background(
-                            color = Color(0xFFFFFFFF),
-                            shape = RoundedCornerShape(size = 4.dp)
-                        )
-                        .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable {
-                            recommendedPopup = false
-                            //TODO: Navigate to Add Tasks Screen
-                        }
+                        .size(20.dp)
+                )
+                Text(
+                    text = "Please wait, we're checking to recommend tasks or events for you.",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                        fontWeight = FontWeight(600),
+                        color = Color(0xFF444A62),
+                        textAlign = TextAlign.Center,
+                        letterSpacing = 0.56.sp,
+                    )
+                )
+            }
+        } else if (tasks.isEmpty()) {
+            EmptyScreen(
+                emptyText = "You are all set, no recommendation for now!",
+                shouldShowIcon = true,
+                height = 95.dp
+            )
+        } else {
+            RecommendedSectionHeader(
+                heading = "We have some recommendations",
+                accountId,
+                accountName = accountName!!,
+                isAccountSelectionEnabled,
+                onPlusClicked = {
+                    recommendedPopup = true
+                },
+                shouldShowPlusIcon = true
+            )
+            Spacer(modifier = Modifier.height(30.dp))
+            tasks.forEach { task ->
+                task?.let {
+                    Column(
+                        modifier = Modifier
+                            .dashedBorder(1.dp, 5.dp, Color(0x80545A71))
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.tasks),
-                            contentDescription = "add_tasks",
-                            contentScale = ContentScale.None
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Text(
-                            text = "Add Tasks",
-                            style = TextStyle(
-                                fontSize = 16.sp,
-                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                                fontWeight = FontWeight(600),
-                                color = Color(0xFF545A71),
-                            )
+                        TaskSuggestionCard(
+                            taskTitle = it.description,
+                            dueDate = it.due_date,
+                            crmUserName = "John",
+                            onDeleteTaskClick = {}
                         )
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
             }
         }
+
 
     }
 }
 
 @Composable
 fun RecommendedSectionHeader(
+    heading: String,
     accountId: String,
     accountName: String,
     isAccountSelectionEnabled: Boolean? = false,
-    onPlusClicked: () -> Unit
+    onPlusClicked: () -> Unit,
+    shouldShowPlusIcon: Boolean
 ) {
 
     Row(
@@ -250,7 +314,7 @@ fun RecommendedSectionHeader(
         CustomTextWithImage(
             imageId = R.drawable.sparkle,
             imageContentDescription = "buildings",
-            text = "We have some recommendations",
+            text = heading,
             imageModifier = Modifier
                 .width(24.dp)
                 .height(24.dp),
@@ -261,20 +325,23 @@ fun RecommendedSectionHeader(
                 color = Color(0xFF212653),
             )
         )
-        Image(
-            painter = painterResource(id = R.drawable.add_icon),
-            contentDescription = "add_notes",
-            modifier = Modifier
-                .width(20.dp)
-                .height(20.dp)
-                .clickable(
-                    interactionSource = MutableInteractionSource(),
-                    indication = null
-                ) {
-                    onPlusClicked()
+        if (shouldShowPlusIcon) {
+            Image(
+                painter = painterResource(id = R.drawable.add_icon),
+                contentDescription = "add_notes",
+                modifier = Modifier
+                    .width(20.dp)
+                    .height(20.dp)
+                    .clickable(
+                        interactionSource = MutableInteractionSource(),
+                        indication = null
+                    ) {
+                        onPlusClicked()
 //                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
-                }
-        )
+                    }
+            )
+        }
+
     }
 
 }

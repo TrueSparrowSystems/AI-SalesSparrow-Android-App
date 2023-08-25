@@ -21,6 +21,7 @@ import retrofit2.http.Query
 
 interface ApiService {
     @GET("./v1/accounts")
+    @Headers("$MOCK_RESPONSE_HEADER: AccountListResponse.json")
     suspend fun getAccounts(@Query("q") query: String): Response<AccountListResponse>
 
     @GET("./v1/auth/salesforce/redirect-url")
@@ -71,6 +72,7 @@ interface ApiService {
     suspend fun getCrmUser(@Query("q") query: String): Response<AccountListResponse>
 
     @POST("./v1/suggestions/crm-actions")
+    @Headers("$MOCK_RESPONSE_HEADER: GetCrmActionsResponse.json")
     suspend fun getCrmActions(
         @Body request: GetCrmActionRequest
     ): Response<GetCrmActionsResponse>
