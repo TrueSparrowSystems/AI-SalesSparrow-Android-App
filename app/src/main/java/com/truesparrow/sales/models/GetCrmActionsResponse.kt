@@ -12,3 +12,8 @@ data class AddTaskSuggestion(
 data class GetCrmActionRequest(
     val text: String
 )
+
+data class TaskSuggestions(
+    val description: String,
+    val due_date: String
+)
