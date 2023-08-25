@@ -57,6 +57,7 @@ import com.truesparrow.sales.common_components.AccountListBottomSheet
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
+import com.truesparrow.sales.common_components.SearchNameBottomSheet
 import com.truesparrow.sales.common_components.TaskSuggestionCard
 import com.truesparrow.sales.common_components.ToastState
 import com.truesparrow.sales.models.TaskSuggestions
@@ -72,7 +73,9 @@ import kotlinx.coroutines.launch
 fun NotesScreen(
     accountName: String? = null,
     accountId: String? = null,
-    isAccountSelectionEnabled: Boolean = false
+    isAccountSelectionEnabled: Boolean = false,
+    crmUserId: String? = null,
+    crmUserName: String? = null,
 ) {
 
     var note by remember { mutableStateOf("") }
@@ -282,7 +285,9 @@ fun NotesScreen(
                         TaskSuggestionCard(
                             taskTitle = it.description,
                             dueDate = it.due_date,
-                            crmUserName = "John",
+                            crmUserName = crmUserName,
+                            accountId = accountId,
+                            accountName = accountName!!,
                             onDeleteTaskClick = {}
                         )
                     }
@@ -305,7 +310,6 @@ fun RecommendedSectionHeader(
     onPlusClicked: () -> Unit,
     shouldShowPlusIcon: Boolean
 ) {
-
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

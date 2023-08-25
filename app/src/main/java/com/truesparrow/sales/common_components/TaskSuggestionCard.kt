@@ -19,7 +19,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
@@ -63,7 +66,12 @@ import java.util.Date
 
 @Composable
 fun TaskSuggestionCard(
-    taskTitle: String, crmUserName: String?, dueDate: String?, onDeleteTaskClick: () -> Unit
+    taskTitle: String,
+    crmUserName: String?,
+    dueDate: String,
+    onDeleteTaskClick: () -> Unit,
+    accountId: String,
+    accountName: String,
 ) {
     var showLoader by remember { mutableStateOf(false) }
     var expanded by remember {
@@ -81,7 +89,11 @@ fun TaskSuggestionCard(
 
 
     if (searchNameBottomSheetVisible) {
-        SearchNameBottomSheet(toggleSearchNameBottomSheet)
+        SearchNameBottomSheet(
+            toggleSearchNameBottomSheet,
+            accountId = accountId,
+            accountName = accountName!!
+        )
     }
 
     val dueDateContext = LocalContext.current
@@ -95,7 +107,7 @@ fun TaskSuggestionCard(
     dueDateDay = dueDateCalendar.get(Calendar.DAY_OF_MONTH)
 
     dueDateCalendar.time = Date()
-    val dueDate = remember { mutableStateOf("") }
+    val dueDate = remember { mutableStateOf(dueDate) }
 
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
@@ -267,7 +279,7 @@ fun TaskSuggestionCard(
                         userAvatarTestId = "user_avatar_search_user"
                     )
                     Text(
-                        text = "Zaire", style = TextStyle(
+                        text = crmUserName ?: "Select", style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(700),

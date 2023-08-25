@@ -1,4 +1,5 @@
 package com.truesparrow.sales.viewmodals
+
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -36,7 +37,15 @@ class SearchCrmUserNameViewModal @Inject constructor(
     fun onAccountRowClicked(
         crmUserId: String,
         crmUserName: String,
+        accountId: String,
+        accountName: String,
+        isNewTask: Boolean = false
     ) {
-        NavigationService.navigateTo("task_screen/${crmUserId}/${crmUserName}")
+        if (isNewTask) {
+            NavigationService.navigateTo("task_screen/${crmUserId}/${crmUserName}")
+        } else {
+            NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/{true}/${crmUserId}/${crmUserName}")
+        }
+
     }
 }

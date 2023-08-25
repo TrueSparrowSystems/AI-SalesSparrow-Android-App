@@ -67,20 +67,17 @@ fun TaskScreen(
     crmUserId: String? = null,
     crmUserName: String? = null,
 ) {
-    Log.i("crmUserId", "$crmUserName")
-    Log.i("crmUserName", "$crmUserId")
 
-    var note by remember { mutableStateOf("Presentation on how we would get prepare and plan a migration from PHP to Ruby. Get number of teams members and detailed estimates for Smagic.  Rachin to lead this. |") }
+    var task by remember { mutableStateOf("Presentation on how we would get prepare and plan a migration from PHP to Ruby. Get number of teams members and detailed estimates for Smagic.  Rachin to lead this. |") }
     Column(modifier = Modifier.padding(vertical = 30.dp, horizontal = 16.dp)) {
-        AddTaskHeader(
-        )
+        AddTaskHeader()
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
             crmUserName = crmUserName, crmUserId = crmUserId
         )
         Spacer(modifier = Modifier.height(20.dp))
-        EditableTextField(note = note, onValueChange = {
-            note = it
+        EditableTextField(note = task, onValueChange = {
+            task = it
         }, modifier = Modifier
             .fillMaxWidth()
             .semantics {
@@ -105,7 +102,7 @@ fun AddTaskContent(
 
 
     if (searchNameBottomSheetVisible) {
-        SearchNameBottomSheet(toggleSearchNameBottomSheet)
+        SearchNameBottomSheet(toggleSearchNameBottomSheet, isNewTask = true)
     }
 
     val dueDateContext = LocalContext.current
@@ -287,8 +284,8 @@ fun AddTaskContent(
 fun AddTaskHeader(
 ) {
 
-    var saveNoteApiInProgress by remember { mutableStateOf(false) }
-    var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
+    var tasksApiInProgress by remember { mutableStateOf(false) }
+    var tasksApiIsSuccess by remember { mutableStateOf(false) }
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -310,11 +307,11 @@ fun AddTaskHeader(
                     onClick = { NavigationService.navigateBack() })
                 .semantics {
                     contentDescription =
-                        if (saveNoteApiIsSuccess) "btn_done_note_screen" else "btn_cancel_create_note"
+                        if (tasksApiIsSuccess) "" else ""
                 },
         )
 
-        val buttonColor = if (saveNoteApiIsSuccess) {
+        val buttonColor = if (tasksApiIsSuccess) {
             Color(0xFF212653).copy(alpha = 0.7f)
         } else {
             Color(0xFF212653)
@@ -333,7 +330,7 @@ fun AddTaskHeader(
                 .height(46.dp)
                 .clip(shape = RoundedCornerShape(size = 5.dp))
                 .semantics {
-                    contentDescription = "btn_save_note"
+                    contentDescription = ""
                 }
 
         ) {
@@ -351,9 +348,9 @@ fun AddTaskHeader(
                 }.build()
 
 
-                if (saveNoteApiInProgress || saveNoteApiIsSuccess) {
+                if (tasksApiInProgress || tasksApiIsSuccess) {
                     Image(
-                        painter = if (saveNoteApiInProgress) {
+                        painter = if (tasksApiInProgress) {
                             rememberAsyncImagePainter(R.drawable.loader, imageLoader)
                         } else {
                             painterResource(id = R.drawable.check)
@@ -366,9 +363,9 @@ fun AddTaskHeader(
                     )
 
                 }
-                Text(text = if (saveNoteApiInProgress) {
+                Text(text = if (tasksApiInProgress) {
                     "Adding Task..."
-                } else if (saveNoteApiIsSuccess) {
+                } else if (tasksApiIsSuccess) {
                     "Saved"
                 } else {
                     "Add Task"
@@ -380,7 +377,7 @@ fun AddTaskHeader(
                     letterSpacing = 0.48.sp,
                 ), modifier = Modifier.semantics {
                     contentDescription =
-                        if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
+                        if (tasksApiIsSuccess) "" else ""
                 })
             }
         }

@@ -106,7 +106,9 @@ fun NavigationService(intent: Intent?) {
             val accountName = it.arguments?.getString("accountName") ?: ""
             val isAccountSelectionEnabled =
                 it.arguments?.getString("isAccountSelectionEnabled")?.toBoolean() ?: false
-            NotesScreen(accountName, accountId, isAccountSelectionEnabled)
+            val crmUserId = it.arguments?.getString("crmUserId") ?: ""
+            val crmUserName = it.arguments?.getString("crmUserName") ?: ""
+            NotesScreen(accountName, accountId, isAccountSelectionEnabled,crmUserId, crmUserName)
         }
         composable(route = Screens.AccountDetailsScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""

@@ -69,6 +69,7 @@ interface ApiService {
 
     //Todo:Ds Change Api url
     @GET("./v1/accounts")
+    @Headers("$MOCK_RESPONSE_HEADER: AccountListResponse.json")
     suspend fun getCrmUser(@Query("q") query: String): Response<AccountListResponse>
 
     @POST("./v1/suggestions/crm-actions")
