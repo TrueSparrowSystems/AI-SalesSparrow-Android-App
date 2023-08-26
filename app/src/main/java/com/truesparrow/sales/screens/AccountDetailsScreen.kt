@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.truesparrow.sales.R
 import com.truesparrow.sales.common_components.AccountCard
+import com.truesparrow.sales.common_components.CustomAlertDialog
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.NotesCard
 import com.truesparrow.sales.common_components.TasksCard
@@ -68,6 +69,7 @@ fun AccountDetails(
     val accountDetailsViewModal: AccountDetailsViewModal = hiltViewModel()
     var isAccountNoteDetailsLoading by remember { mutableStateOf(false) };
     var isAccountTaskDetailsLoading by remember { mutableStateOf(false) };
+    val openDialog = remember { mutableStateOf(false) }
 
     var notes by remember { mutableStateOf<List<Note>?>(null) }
     var tasks by remember { mutableStateOf<List<Task>?>(null) }
@@ -152,6 +154,21 @@ fun AccountDetails(
         verticalArrangement = Arrangement.spacedBy(15.dp)
 
     ) {
+        CustomAlertDialog(
+            title = "Delete Note",
+            message = "Are you sure you want to delete this note?",
+            onConfirmButtonClick = {
+//                                accountDetailsViewModal.deleteNote(
+//                                    accountId = accountId,
+//                                    noteId = note.id
+//                                )
+            },
+            onDismissRequest = {
+                openDialog.value = false
+            },
+            showConfirmationDialog = openDialog.value
+
+        )
 
         AccountDetailsHeader()
         ContactDetailsHeader()
@@ -173,7 +190,12 @@ fun AccountDetails(
                     onClick = {
                         Log.i("AccountDetails", "NoteId: ${note.id}")
                         NavigationService.navigateTo("note_details_screen/${accountId}/${accountName}/${note.id}")
+                    },
+                    onDeleteMenuClick = {
+                        //show confirmation alert dialog
+                        openDialog.value = true
                     }
+
                 )
             }
         }
