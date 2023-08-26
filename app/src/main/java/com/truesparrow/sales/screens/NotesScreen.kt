@@ -59,7 +59,6 @@ import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
 import com.truesparrow.sales.viewmodals.NotesViewModel
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -71,7 +70,6 @@ fun NotesScreen(
     crmUserName: String? = null,
 ) {
     var note by remember { mutableStateOf("") }
-    val snackbarHostState = remember { SnackbarHostState() }
 
 
     val notesViewModel: NotesViewModel = hiltViewModel()
@@ -164,7 +162,6 @@ fun NotesScreen(
             accountId = accountId!!,
             saveNoteApiInProgress = saveNoteApiInProgress,
             saveNoteApiIsSuccess = saveNoteApiIsSuccess,
-            snackbarHostState
         )
         NotesHeader(
             accountName = accountName, isAccountSelectionEnabled = isAccountSelectionEnabled
@@ -391,7 +388,6 @@ fun Header(
     accountId: String,
     saveNoteApiInProgress: Boolean,
     saveNoteApiIsSuccess: Boolean,
-    snackbarState: SnackbarHostState
 ) {
     val notesViewModel: NotesViewModel = hiltViewModel()
 
