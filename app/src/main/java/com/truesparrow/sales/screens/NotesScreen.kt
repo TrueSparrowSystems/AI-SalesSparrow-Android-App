@@ -2,6 +2,7 @@ package com.truesparrow.sales.screens
 
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,8 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,16 +26,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*;
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -57,9 +51,8 @@ import com.truesparrow.sales.common_components.AccountListBottomSheet
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
-import com.truesparrow.sales.common_components.SearchNameBottomSheet
 import com.truesparrow.sales.common_components.TaskSuggestionCard
-import com.truesparrow.sales.common_components.ToastState
+import com.truesparrow.sales.common_components.ToastType
 import com.truesparrow.sales.models.TaskSuggestions
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
@@ -78,15 +71,12 @@ fun NotesScreen(
     crmUserName: String? = null,
 ) {
     var note by remember { mutableStateOf("") }
-    val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val coroutineScope = rememberCoroutineScope()
 
     val notesViewModel: NotesViewModel = hiltViewModel()
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
     var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
-    var snackbarShown by remember { mutableStateOf(false) }
     var recommendedPopup by remember { mutableStateOf(false) }
 
 
@@ -95,6 +85,7 @@ fun NotesScreen(
     var tasks by remember { mutableStateOf(listOf<TaskSuggestions?>(null)) }
     val scrollState = rememberScrollState()
 
+    val saveNoteRespose by notesViewModel.notesLiveData.observeAsState()
 
 
     getCrmActionsResponse?.let {
@@ -110,10 +101,12 @@ fun NotesScreen(
                 } ?: listOf<TaskSuggestions?>(null))
 
                 Log.d("NotesScreen", "Success")
+
             }
 
             is NetworkResponse.Error -> {
                 getCrmActionLoading = false
+
                 Log.d("NotesScreen", "Error")
             }
 
@@ -124,38 +117,32 @@ fun NotesScreen(
         }
     }
 
-    LaunchedEffect(key1 = accountId) {
+    LaunchedEffect(true) {
         notesViewModel.getCrmActions(note);
     }
 
 
-    notesViewModel.notesLiveData.observe(LocalLifecycleOwner.current) { response ->
+    saveNoteRespose?.let { response ->
         when (response) {
             is NetworkResponse.Success -> {
                 saveNoteApiInProgress = false;
                 saveNoteApiIsSuccess = true
-                if (!snackbarShown) {
-                    notesViewModel.getCrmActions(note);
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(
-                            "", duration = SnackbarDuration.Short
-                        )
-                    }
-                    snackbarShown = true
-                }
-
+                CustomToast(
+                    message = "Note is saved to your Salesforce Account",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Success
+                )
+                notesViewModel.getCrmActions(note);
             }
 
             is NetworkResponse.Error -> {
                 saveNoteApiInProgress = false;
-                if (!snackbarShown) {
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(
-                            "", duration = SnackbarDuration.Short
-                        )
-                    }
-                    snackbarShown = true
-                }
+                CustomToast(
+                    message = response.message
+                        ?: "Failed to save the note to your Salesforce Account",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Error
+                )
 
             }
 
@@ -163,21 +150,6 @@ fun NotesScreen(
                 saveNoteApiInProgress = true;
                 Log.d("NotesScreen", "Loading")
             }
-        }
-    }
-
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = statusBarHeight)
-            .zIndex(1f)
-    ) {
-        SnackbarHost(modifier = Modifier.align(Alignment.TopStart), hostState = snackbarHostState) {
-            CustomToast(
-                toastState = if (saveNoteApiIsSuccess) ToastState.SUCCESS else ToastState.ERROR,
-                message = if (saveNoteApiIsSuccess) "Note is saved to your Salesforce Account" else "Failed to save the note to your Salesforce Account"
-            )
         }
     }
 
@@ -280,8 +252,6 @@ fun NotesScreen(
 
             }
         }
-
-
     }
 }
 
@@ -398,9 +368,9 @@ fun NotesHeader(accountName: String?, isAccountSelectionEnabled: Boolean) {
                             fontFamily = customFontFamily,
                         ),
                         modifier = Modifier.semantics {
-                                contentDescription =
-                                    if (accountName.isNullOrBlank()) "txt_create_note_selected_account" else "txt_create_note_select_account"
-                            })
+                            contentDescription =
+                                if (accountName.isNullOrBlank()) "txt_create_note_selected_account" else "txt_create_note_select_account"
+                        })
                 }
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,

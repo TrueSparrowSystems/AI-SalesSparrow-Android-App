@@ -1,137 +1,113 @@
 package com.truesparrow.sales.common_components
 
+import android.widget.Toast
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.truesparrow.sales.R
-
-
-enum class ToastState(val value: String) {
-    SUCCESS("success"),
-    ERROR("error"),
-    WARNING("warning"),
-    INFO("info")
-}
-
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CustomToast(
-    toastState: ToastState,
     message: String,
+    duration: Int = Toast.LENGTH_SHORT,
+    type: ToastType,
+    testTag: String? = null
 ) {
-    val backgroundColor = when (toastState) {
-        ToastState.SUCCESS -> Color(0xFF63E17D)
-        ToastState.ERROR ->  Color(0xFFFF3B30)
-        else -> Color.Red
-    }
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-        verticalAlignment = Alignment.Bottom,
+    var show by remember { mutableStateOf(true) }
+    if (show) {
+        val coroutineScope = rememberCoroutineScope()
 
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(93.dp)
-            .background(backgroundColor)
-            .padding(start = 24.dp, top = 10.dp, end = 24.dp, bottom = 10.dp)
-            .zIndex(Float.MAX_VALUE).semantics {
-                testTagsAsResourceId = true
-                testTag = "toastMessageRowTestId"
-            }
+        val opacity by animateFloatAsState(
+            targetValue = if (show) 1f else 0f,
+            animationSpec = tween(durationMillis = 300)
+        )
 
-    ) {
-        when (toastState) {
-            ToastState.SUCCESS -> {
+        val backgroundColor = when (type) {
+            ToastType.Info -> Color(0xFF2196F3)
+            ToastType.Warning -> Color(0xFFFFC107)
+            ToastType.Error -> Color(0xFFF44336)
+            ToastType.Success -> Color(0xFF4CAF50)
+        }
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-                    verticalAlignment = Alignment.Top,
-                ) {
-                    Image(
-//                        TODO: Change it with suitable icon
-                        painter = painterResource(id = R.drawable.success_toast_check),
-                        contentDescription = "Success",
-                        modifier = Modifier
-                            .height(24.dp)
-                            .width(28.dp)
-                    )
-                    Text(
-                        text = message,
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            lineHeight = 24.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(500),
-                            color = Color(0xFFFFFFFF),
-                        )
-                    )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+            verticalAlignment = Alignment.Bottom,
+
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(93.dp)
+                .alpha(opacity)
+                .background(backgroundColor)
+                .padding(
+                    start = 24.dp,
+                    top = 10.dp,
+                    end = 24.dp,
+                    bottom = 10.dp
+                )
+                .zIndex(Float.MAX_VALUE)
+                .semantics {
+                    testTagsAsResourceId = true
+                    testTag
                 }
-            }
 
-            ToastState.ERROR -> {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-                    verticalAlignment = Alignment.Top,
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.success_toast_check),
-                        contentDescription = "Error",
-                        modifier = Modifier
-                            .height(24.dp)
-                            .width(28.dp)
+        ) {
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+                verticalAlignment = Alignment.Top,
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.success_toast_check),
+                    contentDescription = "Success",
+                    modifier = Modifier
+                        .height(24.dp)
+                        .width(28.dp)
+                )
+                Text(
+                    text = message,
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        lineHeight = 24.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                        fontWeight = FontWeight(500),
+                        color = Color(0xFFFFFFFF),
                     )
-                    Text(
-                        text = message,
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            lineHeight = 24.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(500),
-                            color = Color(0xFFFFFFFF),
-                        )
-                    )
+                )
+            }
+        }
+
+        LaunchedEffect(key1 = show) {
+            if (show) {
+                coroutineScope.launch {
+                    delay(if (duration == Toast.LENGTH_SHORT) 2000 else 3500)
+                    show = false
                 }
-            }
-
-            ToastState.WARNING -> {
-                // Compose elements for warning state
-            }
-
-            ToastState.INFO -> {
-                // Compose elements for info state
             }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun CustomToastPreview() {
-    CustomToast(
-        toastState = ToastState.ERROR,
-        message = "Note is saved to your Salesforce Account"
-    )
+enum class ToastType {
+    Info, Warning, Error, Success
 }
