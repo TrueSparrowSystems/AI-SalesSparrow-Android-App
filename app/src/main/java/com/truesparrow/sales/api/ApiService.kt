@@ -15,6 +15,7 @@ import com.truesparrow.sales.models.NotesDetailResponse
 import com.truesparrow.sales.models.SaveNoteRequest
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
@@ -52,6 +53,13 @@ interface ApiService {
     suspend fun getAccountNotes(
         @Path(value = "account_id", encoded = true) accountId: String
     ): Response<AccountNotesResponse>
+
+    @DELETE("v1/accounts/{account_id}/notes/{note_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: DeleteNoteResponse.json")
+    suspend fun deleteNote(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "note_id") noteId: String
+    ): Response<Unit>
 
     @GET("v1/accounts/{account_id}/notes/{note_id}")
     @Headers("$MOCK_RESPONSE_HEADER: NoteDetailsResponse.json")

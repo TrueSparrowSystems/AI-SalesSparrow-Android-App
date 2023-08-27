@@ -54,8 +54,9 @@ fun NotesCard(
     username: String,
     date: String,
     notes: String,
+    noteId: String = "",
     onClick: () -> Unit,
-    onDeleteMenuClick: () -> Unit = {}
+    onDeleteMenuClick: (noteId: String) -> Unit = {}
 ) {
     var formattedTime: String = "";
     try {
@@ -150,7 +151,10 @@ fun NotesCard(
                     CustomDropDownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false },
-                        onDeleteMenuClick = { onDeleteMenuClick() }
+                        onDeleteMenuClick = {
+                            Log.i("NotesCard", "NotesCard: $noteId")
+                            onDeleteMenuClick(noteId)
+                        }
                     )
                 }
 

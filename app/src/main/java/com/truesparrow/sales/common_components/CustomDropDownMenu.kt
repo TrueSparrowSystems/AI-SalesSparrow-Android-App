@@ -42,8 +42,8 @@ fun CustomDropDownMenu(
         )
     ) {
         DropdownMenuItem(onClick = {
-            onDeleteMenuClick()
             onDismissRequest()
+            onDeleteMenuClick()
         }) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
