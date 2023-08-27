@@ -20,6 +20,11 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
     val accountTasks: LiveData<NetworkResponse<AccountTasksResponse>>
         get() = _accountTasks
 
+
+    private val _deleteAccountNote = MutableLiveData<NetworkResponse<Unit>>()
+    val deletAccountNote: LiveData<NetworkResponse<Unit>>
+        get() = _deleteAccountNote
+
     suspend fun getAccountNotes(accountId: String) {
 
         try {
@@ -60,5 +65,26 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
             _accountTasks.postValue(NetworkResponse.Error("Something went wrong"))
         }
     }
+
+    suspend fun deleteAccountNote(accountId: String, noteId: String) {
+        try {
+            _deleteAccountNote.postValue(NetworkResponse.Loading())
+            val response = apiService.deleteNote(accountId, noteId)
+
+            if (response.isSuccessful && response.body() != null) {
+                _deleteAccountNote.postValue(NetworkResponse.Success(response.body()!!))
+            } else if (response.errorBody() != null) {
+                val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
+                _deleteAccountNote.postValue(NetworkResponse.Error(errorObj.getString("message")))
+            } else {
+                Log.i("AccountDetails", "Exception: $response")
+                _deleteAccountNote.postValue(NetworkResponse.Error("Error went wrong"))
+            }
+        } catch (e: Exception) {
+            Log.i("AccountDetails", "Exception: ${e.message}")
+            _deleteAccountNote.postValue(NetworkResponse.Error("Something went wrong"))
+        }
+    }
+
 }
 

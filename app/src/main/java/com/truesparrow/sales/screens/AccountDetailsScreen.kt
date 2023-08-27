@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.truesparrow.sales.R
 import com.truesparrow.sales.common_components.AccountCard
+import com.truesparrow.sales.common_components.CustomAlertDialog
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.NotesCard
 import com.truesparrow.sales.common_components.TasksCard
@@ -68,6 +69,7 @@ fun AccountDetails(
     val accountDetailsViewModal: AccountDetailsViewModal = hiltViewModel()
     var isAccountNoteDetailsLoading by remember { mutableStateOf(false) };
     var isAccountTaskDetailsLoading by remember { mutableStateOf(false) };
+    val openDialog = remember { mutableStateOf(false) }
 
     var notes by remember { mutableStateOf<List<Note>?>(null) }
     var tasks by remember { mutableStateOf<List<Task>?>(null) }
@@ -75,6 +77,10 @@ fun AccountDetails(
     val accountNotesResponse by accountDetailsViewModal.accountDetailsLiveData.observeAsState()
 
     val accountTasksResponse by accountDetailsViewModal.accountTasksLiveData.observeAsState()
+
+    val deleteAccountNoteResponse by accountDetailsViewModal.deleteAccountNoteLiveData.observeAsState()
+
+    val noteId = remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = accountId) {
         accountDetailsViewModal.getAccountNotes(accountId = accountId)
@@ -139,9 +145,24 @@ fun AccountDetails(
                 isAccountTaskDetailsLoading = true
                 Log.i("AccountDetails", "Loading")
             }
-
         }
+    }
 
+    deleteAccountNoteResponse?.let {
+        when (it) {
+            is NetworkResponse.Success -> {
+                Log.i("AccountDetails", "Success: ${it.data}")
+                accountDetailsViewModal.getAccountNotes(accountId = accountId)
+            }
+
+            is NetworkResponse.Error -> {
+                Log.i("AccountDetails", "Failure: ${it.message}")
+            }
+
+            is NetworkResponse.Loading -> {
+                Log.i("AccountDetails", "Loading")
+            }
+        }
     }
 
 
@@ -152,6 +173,22 @@ fun AccountDetails(
         verticalArrangement = Arrangement.spacedBy(15.dp)
 
     ) {
+        CustomAlertDialog(
+            title = "Delete Note",
+            message = "Are you sure you want to delete this note?",
+            onConfirmButtonClick = {
+                accountDetailsViewModal.deleteAccountNote(
+                    accountId = accountId,
+                    noteId = noteId.value
+                )
+                openDialog.value = false
+            },
+            onDismissRequest = {
+                openDialog.value = false
+            },
+            showConfirmationDialog = openDialog.value
+
+        )
 
         AccountDetailsHeader()
         ContactDetailsHeader()
@@ -170,10 +207,17 @@ fun AccountDetails(
                     username = note.creator,
                     notes = note.text_preview,
                     date = note.last_modified_time,
+                    noteId = note.id,
                     onClick = {
                         Log.i("AccountDetails", "NoteId: ${note.id}")
                         NavigationService.navigateTo("note_details_screen/${accountId}/${accountName}/${note.id}")
+                    },
+                    onDeleteMenuClick = { noteID ->
+                        Log.i("AccountDetails onDeleteMenuClick", "NoteId: ${note.id}")
+                        noteId.value = noteID
+                        openDialog.value = true
                     }
+
                 )
             }
         }
