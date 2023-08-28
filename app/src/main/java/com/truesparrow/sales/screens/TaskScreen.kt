@@ -74,20 +74,20 @@ import java.util.Date
 
 @Composable
 fun TaskScreen(
+    id : String = "",
     crmUserId: String? = null,
     crmUserName: String? = null,
     dueDate: String? = null,
     globalStateViewModel: GlobalStateViewModel
 ) {
 
-    var task by remember { mutableStateOf("") }
-
-    globalStateViewModel.setTaskDesc(task)
-
+    Log.i("Valesss","${id} ${crmUserId} ${dueDate}")
+    var task by remember { mutableStateOf(globalStateViewModel.getTaskDescById(id)?.value) }
     val tasksViewModel: TasksViewModal = hiltViewModel()
     var createTaskApiInProgress by remember { mutableStateOf(false) }
     var createTaskApiIsSuccess by remember { mutableStateOf(false) }
 
+    globalStateViewModel.setValuesById(id, taskDesc = task)
 
     val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
 
@@ -125,21 +125,22 @@ fun TaskScreen(
             crmUserId = crmUserId,
             dueDate = dueDate?.replace("-", "/"),
             task = task,
-
             )
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
+            id = id,
             crmUserName = crmUserName,
             crmUserId = crmUserId,
             dueDate = dueDate?.replace("-", "/"),
             globalStateViewModel = globalStateViewModel
         )
         Spacer(modifier = Modifier.height(20.dp))
-        EditableTextField(note = task ?: "", placeholderText = if (task.isEmpty()) {
+        EditableTextField(note = task ?: "", placeholderText = if (true) {
             "Add task"
         } else {
             ""
         }, onValueChange = {
+            globalStateViewModel.setValuesById(id, taskDesc = it)
             task = it
         }, modifier = Modifier
             .fillMaxWidth()
@@ -156,7 +157,8 @@ fun AddTaskContent(
     crmUserName: String? = null,
     crmUserId: String? = null,
     dueDate: String? = null,
-    globalStateViewModel: GlobalStateViewModel
+    globalStateViewModel: GlobalStateViewModel,
+    id : String
 ) {
 
     var searchNameBottomSheetVisible by remember { mutableStateOf(false) }
@@ -170,7 +172,8 @@ fun AddTaskContent(
         SearchNameBottomSheet(
             toggleSearchNameBottomSheet,
             isNewTask = true,
-            globalStateViewModel = globalStateViewModel
+            globalStateViewModel = globalStateViewModel,
+            id = id
         )
     }
 
@@ -194,7 +197,7 @@ fun AddTaskContent(
         }, dueDateYear, dueDateMonth, dueDateDay
     )
 
-    globalStateViewModel.setDueDate(selectedDueDate.value)
+    globalStateViewModel.setValuesById(id, dueDate = selectedDueDate.value)
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
         verticalAlignment = Alignment.CenterVertically,
@@ -367,7 +370,6 @@ fun AddTaskHeader(
 ) {
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
-
 
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,

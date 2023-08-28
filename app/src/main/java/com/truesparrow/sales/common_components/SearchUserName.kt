@@ -39,7 +39,8 @@ fun SearchUserName(
     crmUserId : String,
     searchNameTestId: String,
     onAccountRowClick: () -> Unit,
-    globalStateViewModel : GlobalStateViewModel
+    globalStateViewModel : GlobalStateViewModel,
+    id : String
 ) {
     Column(
         modifier = Modifier
@@ -56,10 +57,9 @@ fun SearchUserName(
                     testTag = searchNameTestId
                 }
                 .clickable {
-                    globalStateViewModel.setCrmUserName(firstName)
-                    globalStateViewModel.setCrmUserId(crmUserId)
+                    globalStateViewModel.setValuesById(id, crmUserName = firstName)
+                    globalStateViewModel.setValuesById(id, crmUserId = crmUserId)
                     onAccountRowClick()
-
                 }
 
             ) {

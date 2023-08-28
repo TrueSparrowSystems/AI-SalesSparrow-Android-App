@@ -64,9 +64,10 @@ import java.util.Date
 
 @Composable
 fun TaskSuggestionCard(
+    id: String,
     taskTitle: String = "",
-    crmUserName: String = "",
     crmUserId: String = "",
+    crmUserName: String = "",
     dueDate: String = "",
     onDeleteTaskClick: () -> Unit,
     accountId: String,
@@ -77,9 +78,10 @@ fun TaskSuggestionCard(
         mutableStateOf(false)
     }
 
-    val taskDesc = globalStateViewModel.getTaskDesc().observeAsState(initial = "")
-    val userName = globalStateViewModel.getCrmUserName().observeAsState(initial = "")
-    val dDate = globalStateViewModel.getDueDate().observeAsState(initial = "")
+    val taskDesc = globalStateViewModel.getTaskDescById(id)?.value ?: ""
+    val userId = globalStateViewModel.getCrmUserIdById(id)?.value ?: ""
+    val userName = globalStateViewModel.getCrmUserNameById(id)?.value ?: "Select"
+    val dDate = globalStateViewModel.getDueDateById(id)?.value ?: "Select"
 
 
     var pressOffset by remember { mutableStateOf(DpOffset.Zero) }
@@ -98,6 +100,7 @@ fun TaskSuggestionCard(
             toggleSearchNameBottomSheet,
             globalStateViewModel = globalStateViewModel,
             accountId = accountId,
+            id = id,
             accountName = accountName!!
         )
     }
@@ -113,7 +116,7 @@ fun TaskSuggestionCard(
     dueDateDay = dueDateCalendar.get(Calendar.DAY_OF_MONTH)
 
     dueDateCalendar.time = Date()
-    val dueDate = remember { mutableStateOf(dueDate) }
+    val dueDate = remember { mutableStateOf(dDate) }
 
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
@@ -121,12 +124,8 @@ fun TaskSuggestionCard(
         }, dueDateYear, dueDateMonth, dueDateDay
     )
 
+    globalStateViewModel.setValuesById(id, dueDate = dueDate.value)
 
-    val dueDateV = if (dueDate.value.isNotEmpty()) {
-        dueDate.value?.replace("/", "-")
-    } else {
-        "Select"
-    }
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
     var createTaskApiInProgress by remember { mutableStateOf(false) }
@@ -254,6 +253,7 @@ fun TaskSuggestionCard(
 
             }
 
+            val modifiedDate = dDate.replace("/", "-")
             Column(verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier
@@ -261,13 +261,17 @@ fun TaskSuggestionCard(
                     .background(color = Color(0xFFF6F7F8), shape = RoundedCornerShape(size = 5.dp))
                     .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
                     .clickable {
-                        NavigationService.navigateTo("task_screen/${crmUserId}/${crmUserName}/${dueDateV}")
+                        NavigationService.navigateTo(
+                            "task_screen/${id}/${userId}/${userName}/${modifiedDate}"
+                        )
                     }
 
             ) {
                 Text(
-                    text = taskDesc.value.ifEmpty {
-                        taskTitle
+                    text = taskDesc.ifEmpty {
+                        taskTitle.ifEmpty {
+                            "Select"
+                        }
                     }, style = TextStyle(
                         fontSize = 16.sp,
                         fontFamily = FontFamily(Font(R.font.nunito_regular)),
@@ -327,7 +331,7 @@ fun TaskSuggestionCard(
                         userAvatarTestId = "user_avatar_search_user"
                     )
                     Text(
-                        text = userName.value.ifEmpty {
+                        text = userName.ifEmpty {
                             crmUserName.ifEmpty { "Select" }
                         }, style = TextStyle(
                             fontSize = 12.sp,
@@ -374,7 +378,7 @@ fun TaskSuggestionCard(
                     )
 
                     Text(
-                        text = dDate.value.ifEmpty {
+                        text = dDate.ifEmpty {
                             dueDate.value.replace("-", "/").ifEmpty { "Select" }
                         }, style = TextStyle(
                             fontSize = 12.sp,
@@ -395,9 +399,9 @@ fun TaskSuggestionCard(
                     createTaskApiInProgress = true
                     tasksViewModel.createTask(
                         accountId = accountId!!,
-                        crmOrganizationUserId = crmUserId!!,
-                        description = taskTitle!!,
-                        dueDate = dueDate.value,
+                        crmOrganizationUserId = userId,
+                        description = taskDesc,
+                        dueDate = dDate,
                     )
                 },
                     contentPadding = PaddingValues(all = 8.dp),

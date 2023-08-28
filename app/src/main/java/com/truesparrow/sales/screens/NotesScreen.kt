@@ -59,6 +59,8 @@ import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
 import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 import com.truesparrow.sales.viewmodals.NotesViewModel
+import java.security.MessageDigest
+import java.util.UUID
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -85,17 +87,17 @@ fun NotesScreen(
 
     val saveNoteRespose by notesViewModel.notesLiveData.observeAsState()
 
-
     getCrmActionsResponse?.let {
         when (it) {
             is NetworkResponse.Success -> {
                 getCrmActionLoading = false
-
                 tasks = (it.data?.add_task_suggestions?.map { task ->
+                    var index = 0;
+                    val id = "${task.description}${task.due_date}${index++}"
                     TaskSuggestions(
-                        description = task.description,
-                        due_date = task.due_date,
+                        description = task.description, due_date = task.due_date, id = id
                     )
+
                 } ?: listOf<TaskSuggestions?>(null))
 
                 Log.d("NotesScreen", "Success")
@@ -231,13 +233,40 @@ fun NotesScreen(
             Spacer(modifier = Modifier.height(30.dp))
             tasks.forEach { task ->
                 task?.let {
+
+                    val taskDesc = viewModel.getTaskDescById(it.id)?.value ?: ""
+                    val userId = viewModel.getCrmUserIdById(it.id)?.value ?: ""
+                    val userName = viewModel.getCrmUserNameById(it.id)?.value ?: ""
+                    val dDate = viewModel.getDueDateById(it.id)?.value ?: ""
+
+                    viewModel.setValuesById(
+                        id = it.id, taskDesc = if (taskDesc.isEmpty()) {
+                            it.description
+                        } else {
+                            taskDesc
+                        }, crmUserId = if (userId.isEmpty()) {
+                            crmUserId
+                        } else {
+                            userId
+                        }, crmUserName = if (userName.isEmpty()) {
+                            crmUserName
+                        } else {
+                            userName
+                        }, dueDate = if (dDate.isEmpty()) {
+                            it.due_date
+                        } else {
+                            dDate
+                        }
+                    )
+
                     Column(
                         modifier = Modifier
                             .dashedBorder(1.dp, 5.dp, Color(0x80545A71))
                             .fillMaxWidth()
                             .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
                     ) {
-                        TaskSuggestionCard(taskTitle = it.description,
+                        TaskSuggestionCard(id = it.id,
+                            taskTitle = it.description,
                             dueDate = it.due_date,
                             crmUserName = crmUserName,
                             crmUserId = crmUserId,
@@ -253,6 +282,7 @@ fun NotesScreen(
         }
     }
 }
+
 
 @Composable
 fun RecommendedSectionHeader(
