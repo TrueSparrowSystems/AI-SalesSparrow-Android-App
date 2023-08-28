@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.os.Build
 import android.util.Log
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,14 +21,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,7 +36,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -51,17 +49,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.truesparrow.sales.R
 import com.truesparrow.sales.services.NavigationService
-import com.truesparrow.sales.util.Screens
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.truesparrow.sales.util.NetworkResponse
+import com.truesparrow.sales.viewmodals.TasksViewModal
 import java.util.Calendar
 import java.util.Date
 
@@ -74,7 +70,6 @@ fun TaskSuggestionCard(
     accountId: String,
     accountName: String,
 ) {
-    var showLoader by remember { mutableStateOf(false) }
     var expanded by remember {
         mutableStateOf(false)
     }
@@ -113,6 +108,49 @@ fun TaskSuggestionCard(
             dueDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
         }, dueDateYear, dueDateMonth, dueDateDay
     )
+
+    val dueDateV = if (dueDate.value.isNotEmpty()) {
+        dueDate.value?.replace("/", "-")
+    } else {
+        "Select"
+    }
+
+    val tasksViewModel: TasksViewModal = hiltViewModel()
+    var createTaskApiInProgress by remember { mutableStateOf(false) }
+    var createTaskApiIsSuccess by remember { mutableStateOf(false) }
+
+
+    val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
+
+    createTaskResponse?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                createTaskApiInProgress = false;
+                createTaskApiIsSuccess = true
+                CustomToast(
+                    message = "Task Added.",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Success
+                )
+            }
+
+            is NetworkResponse.Error -> {
+                createTaskApiInProgress = false;
+                CustomToast(
+                    message = response.message ?: "Failed to create the task",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Error
+                )
+            }
+            is NetworkResponse.Loading -> {
+                createTaskApiInProgress = true;
+                Log.d("TaskScreen", "Loading")
+            }
+        }
+    }
+
+
+
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -204,13 +242,6 @@ fun TaskSuggestionCard(
 
             }
 
-
-            val dueDateV = if (dueDate.value.isNotEmpty()) {
-                dueDate.value?.replace("/", "-")
-            } else {
-                "Select"
-            }
-
             Column(verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier
@@ -247,8 +278,8 @@ fun TaskSuggestionCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable {
-                            toggleSearchNameBottomSheet()
-                        }) {
+                        toggleSearchNameBottomSheet()
+                    }) {
 
                     Text(
                         text = "Assign to", style = TextStyle(
@@ -348,11 +379,13 @@ fun TaskSuggestionCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(onClick = {
-                    showLoader = true
-                    CoroutineScope(Dispatchers.Main).launch {
-                        delay(3000)
-                        showLoader = false
-                    }
+                    createTaskApiInProgress = true
+                    tasksViewModel.createTask(
+                        accountId = accountId!!,
+                        crmOrganizationUserId ="00U1e000003TnVXEA1",
+                        description = taskTitle!!,
+                        dueDate = dueDate.value,
+                    )
                 },
                     contentPadding = PaddingValues(all = 8.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -383,7 +416,7 @@ fun TaskSuggestionCard(
                             }
                         }.build()
 
-                        if (showLoader) {
+                        if (createTaskApiInProgress) {
                             Image(
                                 painter = rememberAsyncImagePainter(R.drawable.loader, imageLoader),
                                 contentDescription = "Loader",
@@ -394,7 +427,7 @@ fun TaskSuggestionCard(
                             )
                         }
 
-                        Text(text = if (showLoader) {
+                        Text(text = if (createTaskApiInProgress) {
                             "Adding Task..."
                         } else {
                             "Add Task"

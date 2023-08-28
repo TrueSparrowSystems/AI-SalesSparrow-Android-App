@@ -2,7 +2,9 @@ package com.truesparrow.sales.screens
 
 import android.app.DatePickerDialog
 import android.os.Build
+import android.util.Log
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,30 +50,77 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.truesparrow.sales.R
+import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
 import com.truesparrow.sales.common_components.SearchNameBottomSheet
+import com.truesparrow.sales.common_components.ToastType
 import com.truesparrow.sales.common_components.UserAvatar
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
+import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
+import com.truesparrow.sales.viewmodals.TasksViewModal
 import java.util.Calendar
 import java.util.Date
 
 @Composable
 fun TaskScreen(
-    crmUserId: String? = null,
-    crmUserName: String? = null,
-    dueDate: String? = null
+    crmUserId: String? = null, crmUserName: String? = null, dueDate: String? = null
 ) {
 
     var task by remember { mutableStateOf("Presentation on how we would get prepare and plan a migration from PHP to Ruby. Get number of teams members and detailed estimates for Smagic.  Rachin to lead this. |") }
+
+    val tasksViewModel: TasksViewModal = hiltViewModel()
+    var createTaskApiInProgress by remember { mutableStateOf(false) }
+    var createTaskApiIsSuccess by remember { mutableStateOf(false) }
+
+
+    val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
+
+    createTaskResponse?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                createTaskApiInProgress = false;
+                createTaskApiIsSuccess = true
+                CustomToast(
+                    message = "Task Added.",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Success
+                )
+            }
+
+            is NetworkResponse.Error -> {
+                createTaskApiInProgress = false;
+                CustomToast(
+                    message = response.message ?: "Failed to create the task",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Error
+                )
+
+            }
+
+            is NetworkResponse.Loading -> {
+                createTaskApiInProgress = true;
+                Log.d("TaskScreen", "Loading")
+            }
+        }
+    }
+
     Column(modifier = Modifier.padding(vertical = 30.dp, horizontal = 16.dp)) {
-        AddTaskHeader()
+        AddTaskHeader(
+            createTaskApiInProgress = createTaskApiInProgress,
+            createTasksApiIsSuccess = createTaskApiIsSuccess,
+            crmUserId = crmUserId,
+            dueDate = dueDate?.replace("-", "/"),
+            task = task,
+
+            )
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
             crmUserName = crmUserName, crmUserId = crmUserId, dueDate = dueDate?.replace("-", "/")
@@ -265,7 +315,7 @@ fun AddTaskContent(
                         text = if (selectedDueDate.value.isNotEmpty()) {
                             selectedDueDate.value
                         } else {
-                            dueDate?:"Select"
+                            dueDate ?: "Select"
                         },
                         color = Color(0xff444A62),
                         style = TextStyle(
@@ -293,10 +343,17 @@ fun AddTaskContent(
 
 @Composable
 fun AddTaskHeader(
+    createTaskApiInProgress: Boolean,
+    createTasksApiIsSuccess: Boolean,
+    crmUserId: String? = null,
+    dueDate: String? = null,
+    task: String? = null
+
 ) {
 
-    var tasksApiInProgress by remember { mutableStateOf(false) }
-    var tasksApiIsSuccess by remember { mutableStateOf(false) }
+    val tasksViewModel: TasksViewModal = hiltViewModel()
+
+
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -317,16 +374,23 @@ fun AddTaskHeader(
                     indication = null,
                     onClick = { NavigationService.navigateBack() })
                 .semantics {
-                    contentDescription = if (tasksApiIsSuccess) "" else ""
+                    contentDescription = if (createTasksApiIsSuccess) "" else ""
                 },
         )
 
-        val buttonColor = if (tasksApiIsSuccess) {
+        val buttonColor = if (createTasksApiIsSuccess) {
             Color(0xFF212653).copy(alpha = 0.7f)
         } else {
             Color(0xFF212653)
         }
-        Button(onClick = {},
+        Button(onClick = {
+            tasksViewModel.createTask(
+                accountId = "0011e00000dWhY5AAK",
+                crmOrganizationUserId = crmUserId!!,
+                description = task!!,
+                dueDate = dueDate !!,
+            )
+        },
             enabled = true,
             contentPadding = PaddingValues(all = 8.dp),
             colors = ButtonDefaults.buttonColors(
@@ -358,9 +422,9 @@ fun AddTaskHeader(
                 }.build()
 
 
-                if (tasksApiInProgress || tasksApiIsSuccess) {
+                if (createTaskApiInProgress || createTasksApiIsSuccess) {
                     Image(
-                        painter = if (tasksApiInProgress) {
+                        painter = if (createTaskApiInProgress) {
                             rememberAsyncImagePainter(R.drawable.loader, imageLoader)
                         } else {
                             painterResource(id = R.drawable.check)
@@ -373,9 +437,9 @@ fun AddTaskHeader(
                     )
 
                 }
-                Text(text = if (tasksApiInProgress) {
+                Text(text = if (createTaskApiInProgress) {
                     "Adding Task..."
-                } else if (tasksApiIsSuccess) {
+                } else if (createTasksApiIsSuccess) {
                     "Saved"
                 } else {
                     "Add Task"
@@ -386,7 +450,7 @@ fun AddTaskHeader(
                     color = Color(0xFFFFFFFF),
                     letterSpacing = 0.48.sp,
                 ), modifier = Modifier.semantics {
-                    contentDescription = if (tasksApiIsSuccess) "" else ""
+                    contentDescription = if (createTasksApiIsSuccess) "" else ""
                 })
             }
         }
