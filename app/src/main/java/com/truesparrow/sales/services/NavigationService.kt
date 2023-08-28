@@ -91,7 +91,8 @@ fun NavigationService(intent: Intent?, viewModel: GlobalStateViewModel) {
         composable(route = Screens.SplashScreen.route) {
             SplashScreen()
         }
-        composable(route = Screens.LoginScreen.route,
+        composable(
+            route = Screens.LoginScreen.route,
             deepLinks = listOf(navDeepLink {
                 uriPattern = BuildConfig.REDIRECT_URI
                 action = Intent.ACTION_VIEW
@@ -107,9 +108,8 @@ fun NavigationService(intent: Intent?, viewModel: GlobalStateViewModel) {
             val accountName = it.arguments?.getString("accountName") ?: ""
             val isAccountSelectionEnabled =
                 it.arguments?.getString("isAccountSelectionEnabled")?.toBoolean() ?: false
-            val crmUserId = it.arguments?.getString("crmUserId") ?: ""
-            val crmUserName = it.arguments?.getString("crmUserName") ?: ""
-            NotesScreen(accountName, accountId, isAccountSelectionEnabled,crmUserId, crmUserName, viewModel)
+            val id = it.arguments?.getString("id") ?: ""
+            NotesScreen(accountName, accountId, isAccountSelectionEnabled, id, viewModel)
         }
         composable(route = Screens.AccountDetailsScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
@@ -119,11 +119,11 @@ fun NavigationService(intent: Intent?, viewModel: GlobalStateViewModel) {
         composable(route = Screens.SettingsScreen.route) {
             SettingsScreen()
         }
-        composable(route = Screens.NoteDetailsScreen.route){
+        composable(route = Screens.NoteDetailsScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
             val accountName = it.arguments?.getString("accountName") ?: ""
             val noteId = it.arguments?.getString("noteId") ?: ""
-            NoteDetailScreen(accountId, accountName,noteId)
+            NoteDetailScreen(accountId, accountName, noteId)
         }
 
         composable(route = Screens.TaskScreen.route) {
@@ -132,7 +132,7 @@ fun NavigationService(intent: Intent?, viewModel: GlobalStateViewModel) {
             val crmUserName = it.arguments?.getString("crmUserName") ?: ""
             val dueDate = it.arguments?.getString("dueDate") ?: ""
 
-            TaskScreen(id, crmUserId, crmUserName, dueDate, viewModel)
+            TaskScreen(id, viewModel)
         }
     }
 }

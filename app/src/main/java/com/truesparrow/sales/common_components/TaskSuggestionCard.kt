@@ -65,10 +65,6 @@ import java.util.Date
 @Composable
 fun TaskSuggestionCard(
     id: String,
-    taskTitle: String = "",
-    crmUserId: String = "",
-    crmUserName: String = "",
-    dueDate: String = "",
     onDeleteTaskClick: () -> Unit,
     accountId: String,
     accountName: String,
@@ -116,15 +112,13 @@ fun TaskSuggestionCard(
     dueDateDay = dueDateCalendar.get(Calendar.DAY_OF_MONTH)
 
     dueDateCalendar.time = Date()
-    val dueDate = remember { mutableStateOf(dDate) }
 
+    val dueDate = remember { mutableStateOf(dDate) }
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
             dueDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
         }, dueDateYear, dueDateMonth, dueDateDay
     )
-
-    globalStateViewModel.setValuesById(id, dueDate = dueDate.value)
 
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
@@ -253,7 +247,6 @@ fun TaskSuggestionCard(
 
             }
 
-            val modifiedDate = dDate.replace("/", "-")
             Column(verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
                 horizontalAlignment = Alignment.Start,
                 modifier = Modifier
@@ -262,16 +255,14 @@ fun TaskSuggestionCard(
                     .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
                     .clickable {
                         NavigationService.navigateTo(
-                            "task_screen/${id}/${userId}/${userName}/${modifiedDate}"
+                            "task_screen/${id}"
                         )
                     }
 
             ) {
                 Text(
                     text = taskDesc.ifEmpty {
-                        taskTitle.ifEmpty {
-                            "Select"
-                        }
+                        "Select"
                     }, style = TextStyle(
                         fontSize = 16.sp,
                         fontFamily = FontFamily(Font(R.font.nunito_regular)),
@@ -332,7 +323,7 @@ fun TaskSuggestionCard(
                     )
                     Text(
                         text = userName.ifEmpty {
-                            crmUserName.ifEmpty { "Select" }
+                            "Select"
                         }, style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
@@ -357,7 +348,11 @@ fun TaskSuggestionCard(
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { mDatePickerDialog.show() }) {
+                    modifier = Modifier.clickable {
+                        mDatePickerDialog.show()
+                        globalStateViewModel.setValuesById(id, dueDate = dueDate.value)
+
+                    }) {
 
                     Text(
                         text = "Due", style = TextStyle(

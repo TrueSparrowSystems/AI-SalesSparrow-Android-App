@@ -47,12 +47,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
@@ -74,27 +71,37 @@ import java.util.Date
 
 @Composable
 fun TaskScreen(
-    id : String = "",
-    crmUserId: String? = null,
-    crmUserName: String? = null,
-    dueDate: String? = null,
+    id: String,
     globalStateViewModel: GlobalStateViewModel
 ) {
 
-    Log.i("Valesss","${id} ${crmUserId} ${dueDate}")
-    var task by remember { mutableStateOf(globalStateViewModel.getTaskDescById(id)?.value) }
+    var taskDesc = ""
+    var crmUserId = ""
+    var crmUserName = "Select"
+    var dueDate = "Select"
+
+    if (id != "1") {
+        taskDesc = globalStateViewModel.getTaskDescById(id)?.value ?: ""
+        crmUserId = globalStateViewModel.getCrmUserIdById(id)?.value ?: ""
+        crmUserName = globalStateViewModel.getCrmUserNameById(id)?.value ?: "Select"
+        dueDate = globalStateViewModel.getDueDateById(id)?.value ?: "Select"
+    }
+
+    Log.i("Daresss", "${dueDate} ${crmUserName} ${taskDesc}")
+
+
+    var task by remember { mutableStateOf(taskDesc) }
     val tasksViewModel: TasksViewModal = hiltViewModel()
     var createTaskApiInProgress by remember { mutableStateOf(false) }
     var createTaskApiIsSuccess by remember { mutableStateOf(false) }
 
     globalStateViewModel.setValuesById(id, taskDesc = task)
-
     val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
 
     createTaskResponse?.let { response ->
         when (response) {
             is NetworkResponse.Success -> {
-                createTaskApiInProgress = false;
+                createTaskApiInProgress = false
                 createTaskApiIsSuccess = true
                 CustomToast(
                     message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
@@ -102,7 +109,7 @@ fun TaskScreen(
             }
 
             is NetworkResponse.Error -> {
-                createTaskApiInProgress = false;
+                createTaskApiInProgress = false
                 CustomToast(
                     message = response.message ?: "Failed to create the task",
                     duration = Toast.LENGTH_SHORT,
@@ -112,7 +119,7 @@ fun TaskScreen(
             }
 
             is NetworkResponse.Loading -> {
-                createTaskApiInProgress = true;
+                createTaskApiInProgress = true
                 Log.d("TaskScreen", "Loading")
             }
         }
@@ -123,19 +130,19 @@ fun TaskScreen(
             createTaskApiInProgress = createTaskApiInProgress,
             createTasksApiIsSuccess = createTaskApiIsSuccess,
             crmUserId = crmUserId,
-            dueDate = dueDate?.replace("-", "/"),
+            dueDate = dueDate.replace("-", "/"),
             task = task,
-            )
+        )
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
             id = id,
             crmUserName = crmUserName,
             crmUserId = crmUserId,
-            dueDate = dueDate?.replace("-", "/"),
+            dueDate = dueDate.replace("-", "/"),
             globalStateViewModel = globalStateViewModel
         )
         Spacer(modifier = Modifier.height(20.dp))
-        EditableTextField(note = task ?: "", placeholderText = if (true) {
+        EditableTextField(note = task, placeholderText = if (id == "1") {
             "Add task"
         } else {
             ""
@@ -154,11 +161,11 @@ fun TaskScreen(
 
 @Composable
 fun AddTaskContent(
-    crmUserName: String? = null,
-    crmUserId: String? = null,
-    dueDate: String? = null,
+    crmUserName: String,
+    crmUserId: String,
+    dueDate: String,
     globalStateViewModel: GlobalStateViewModel,
-    id : String
+    id: String
 ) {
 
     var searchNameBottomSheetVisible by remember { mutableStateOf(false) }
@@ -198,6 +205,7 @@ fun AddTaskContent(
     )
 
     globalStateViewModel.setValuesById(id, dueDate = selectedDueDate.value)
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
         verticalAlignment = Alignment.CenterVertically,
@@ -240,7 +248,7 @@ fun AddTaskContent(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (crmUserId != "1") {
+                    if (id != "1") {
                         UserAvatar(
                             id = "1",
                             firstName = "D",
@@ -264,7 +272,7 @@ fun AddTaskContent(
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = crmUserName ?: "Select",
+                        text = crmUserName,
                         color = selectTabColor,
                         style = TextStyle(
                             fontSize = 14.sp,
@@ -330,11 +338,7 @@ fun AddTaskContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = if (selectedDueDate.value.isNotEmpty()) {
-                            selectedDueDate.value
-                        } else {
-                            dueDate ?: "Select"
-                        },
+                        text = globalStateViewModel.getDueDateById(id)?.value ?: "Select",
                         color = Color(0xff444A62),
                         style = TextStyle(
                             fontSize = 14.sp,

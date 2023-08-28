@@ -235,8 +235,6 @@ fun SearchNameSheetContainer(
                                     id = id,
                                     onAccountRowClick = {
                                         searchCrmUserNameViewModal.onAccountRowClicked(
-                                            recordInfo.id,
-                                            recordInfo.name,
                                             accountId = accountId,
                                             accountName = accountName!!,
                                             isNewTask = isNewTask,

@@ -68,11 +68,14 @@ fun NotesScreen(
     accountName: String? = null,
     accountId: String? = null,
     isAccountSelectionEnabled: Boolean = false,
-    crmUserId: String? = null,
-    crmUserName: String? = null,
+    id : String,
     viewModel: GlobalStateViewModel,
 ) {
     var note by remember { mutableStateOf("") }
+
+    val crmUserId = viewModel.getCrmUserIdById(id)?.value ?: ""
+    val crmUserName = viewModel.getCrmUserNameById(id)?.value ?: "Select"
+
 
     val notesViewModel: NotesViewModel = hiltViewModel()
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
@@ -265,11 +268,8 @@ fun NotesScreen(
                             .fillMaxWidth()
                             .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
                     ) {
-                        TaskSuggestionCard(id = it.id,
-                            taskTitle = it.description,
-                            dueDate = it.due_date,
-                            crmUserName = crmUserName,
-                            crmUserId = crmUserId,
+                        TaskSuggestionCard(
+                            id = it.id,
                             accountId = accountId,
                             accountName = accountName!!,
                             globalStateViewModel = viewModel,
@@ -321,7 +321,7 @@ fun RecommendedSectionHeader(
                         interactionSource = MutableInteractionSource(), indication = null
                     ) {
                         onPlusClicked()
-                        NavigationService.navigateTo("task_screen/1/Select/Select")
+                        NavigationService.navigateTo("task_screen/1")
                     })
         }
 
