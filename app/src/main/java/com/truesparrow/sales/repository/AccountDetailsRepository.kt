@@ -71,17 +71,20 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
             _deleteAccountNote.postValue(NetworkResponse.Loading())
             val response = apiService.deleteNote(accountId, noteId)
 
-            if (response.isSuccessful && response.body() != null) {
-                _deleteAccountNote.postValue(NetworkResponse.Success(response.body()!!))
-            } else if (response.errorBody() != null) {
+            if (response.code() == 204) {
+                Log.i("deleteAccountNote", "Success: ${response.body()}")
+                _deleteAccountNote.postValue(NetworkResponse.Success(Unit))
+            }
+            else if (response.errorBody() != null) {
+                Log.i("deleteAccountNote", "Error: ${response.body()}")
                 val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
                 _deleteAccountNote.postValue(NetworkResponse.Error(errorObj.getString("message")))
             } else {
-                Log.i("AccountDetails", "Exception: $response")
-                _deleteAccountNote.postValue(NetworkResponse.Error("Error went wrong"))
+                Log.i("deleteAccountNote", "Exception: $response")
+                _deleteAccountNote.postValue(NetworkResponse.Error("Something went wrong"))
             }
         } catch (e: Exception) {
-            Log.i("AccountDetails", "Exception: ${e.message}")
+            Log.i("deleteAccountNote", "Exception: ${e.message}")
             _deleteAccountNote.postValue(NetworkResponse.Error("Something went wrong"))
         }
     }

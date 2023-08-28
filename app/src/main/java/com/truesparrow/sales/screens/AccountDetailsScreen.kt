@@ -50,8 +50,10 @@ import com.truesparrow.sales.R
 import com.truesparrow.sales.common_components.AccountCard
 import com.truesparrow.sales.common_components.CustomAlertDialog
 import com.truesparrow.sales.common_components.CustomTextWithImage
+import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.NotesCard
 import com.truesparrow.sales.common_components.TasksCard
+import com.truesparrow.sales.common_components.ToastType
 import com.truesparrow.sales.models.Note
 import com.truesparrow.sales.models.Task
 import com.truesparrow.sales.services.NavigationService
@@ -71,8 +73,8 @@ fun AccountDetails(
     var isAccountTaskDetailsLoading by remember { mutableStateOf(false) };
     val openDialog = remember { mutableStateOf(false) }
 
-    var notes by remember { mutableStateOf<List<Note>?>(null) }
-    var tasks by remember { mutableStateOf<List<Task>?>(null) }
+    var notes = accountDetailsViewModal.notes.observeAsState()?.value
+    var tasks = accountDetailsViewModal.tasks.observeAsState()?.value
 
     val accountNotesResponse by accountDetailsViewModal.accountDetailsLiveData.observeAsState()
 
@@ -87,12 +89,11 @@ fun AccountDetails(
         accountDetailsViewModal.getAccountTasks(accountId = accountId)
     }
 
-
     accountNotesResponse?.let {
         when (it) {
             is NetworkResponse.Success -> {
                 isAccountNoteDetailsLoading = false
-                notes = it.data?.note_ids?.map { noteId ->
+                val newNotes = it.data?.note_ids?.map { noteId ->
                     val noteDetails = it.data?.note_map_by_id?.get(noteId)
                     Note(
                         creator = noteDetails?.creator ?: "",
@@ -101,6 +102,8 @@ fun AccountDetails(
                         text_preview = noteDetails?.text_preview ?: ""
                     )
                 }
+
+                accountDetailsViewModal.setNotes(newNotes ?: emptyList())
                 Log.i("AccountDetails", "Success: ${it.data}")
             }
 
@@ -122,7 +125,7 @@ fun AccountDetails(
         when (it) {
             is NetworkResponse.Success -> {
                 isAccountTaskDetailsLoading = false
-                tasks = it.data?.task_ids?.map { taskId ->
+                val newTasks = it.data?.task_ids?.map { taskId ->
                     val taskDetails = it.data?.task_map_by_id?.get(taskId)
                     Task(
                         creator_name = taskDetails?.creator_name ?: "",
@@ -133,6 +136,7 @@ fun AccountDetails(
                         last_modified_time = taskDetails?.last_modified_time ?: ""
                     )
                 }
+                accountDetailsViewModal.setTasks(newTasks ?: emptyList())
                 Log.i("AccountDetails", "Success: ${it.data}")
             }
 
@@ -151,16 +155,22 @@ fun AccountDetails(
     deleteAccountNoteResponse?.let {
         when (it) {
             is NetworkResponse.Success -> {
-                Log.i("AccountDetails", "Success: ${it.data}")
-                accountDetailsViewModal.getAccountNotes(accountId = accountId)
+                Log.i("AccountDetails deleteAccount Success", "Success: ${it.data}")
+                LaunchedEffect(key1 = accountId) {
+                    accountDetailsViewModal.getAccountNotes(accountId = accountId)
+                }
+                CustomToast(message = "Note Deleted", type = ToastType.Success)
+//                val updatedNotes = notes?.filter { note -> note.id != noteId.value }
+//                accountDetailsViewModal.setNotes(updatedNotes ?: emptyList())
             }
 
             is NetworkResponse.Error -> {
-                Log.i("AccountDetails", "Failure: ${it.message}")
+                CustomToast(message = it.message ?: "Something went wrong", type = ToastType.Error)
+                Log.i("AccountDetails deleteAccount Error", "Failure: ${it.message}")
             }
 
             is NetworkResponse.Loading -> {
-                Log.i("AccountDetails", "Loading")
+                Log.i("AccountDetails deleteAccount Loading", "Loading")
             }
         }
     }
