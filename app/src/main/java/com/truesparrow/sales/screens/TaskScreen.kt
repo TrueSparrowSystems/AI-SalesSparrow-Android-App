@@ -2,7 +2,9 @@ package com.truesparrow.sales.screens
 
 import android.app.DatePickerDialog
 import android.os.Build
+import android.util.Log
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,43 +47,105 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.truesparrow.sales.R
+import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
 import com.truesparrow.sales.common_components.SearchNameBottomSheet
+import com.truesparrow.sales.common_components.ToastType
 import com.truesparrow.sales.common_components.UserAvatar
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
+import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
+import com.truesparrow.sales.viewmodals.GlobalStateViewModel
+import com.truesparrow.sales.viewmodals.TasksViewModal
 import java.util.Calendar
 import java.util.Date
 
 @Composable
 fun TaskScreen(
-    crmUserId: String? = null,
-    crmUserName: String? = null,
-    dueDate: String? = null
+    accountId: String? = null,
+    id: String = "1",
+    globalStateViewModel: GlobalStateViewModel
 ) {
 
-    var task by remember { mutableStateOf("Presentation on how we would get prepare and plan a migration from PHP to Ruby. Get number of teams members and detailed estimates for Smagic.  Rachin to lead this. |") }
+    var taskDesc = ""
+    var crmUserId = ""
+    var dueDate = "Select"
+
+    if (id != "1") {
+        taskDesc = globalStateViewModel.getTaskDescById(id)?.value ?: ""
+        crmUserId = globalStateViewModel.getCrmUserIdById(id)?.value ?: ""
+        dueDate = globalStateViewModel.getDueDateById(id)?.value ?: "Select"
+    }
+
+
+    var task by remember { mutableStateOf(taskDesc) }
+    val tasksViewModel: TasksViewModal = hiltViewModel()
+    var createTaskApiInProgress by remember { mutableStateOf(false) }
+    var createTaskApiIsSuccess by remember { mutableStateOf(false) }
+
+    globalStateViewModel.setValuesById(id, taskDesc = task)
+    val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
+
+    createTaskResponse?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                createTaskApiInProgress = false
+                createTaskApiIsSuccess = true
+                CustomToast(
+                    message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
+                )
+            }
+
+            is NetworkResponse.Error -> {
+                createTaskApiInProgress = false
+                CustomToast(
+                    message = response.message ?: "Failed to create the task",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Error
+                )
+
+            }
+
+            is NetworkResponse.Loading -> {
+                createTaskApiInProgress = true
+                Log.d("TaskScreen", "Loading")
+            }
+        }
+    }
+
     Column(modifier = Modifier.padding(vertical = 30.dp, horizontal = 16.dp)) {
-        AddTaskHeader()
-        Spacer(modifier = Modifier.height(20.dp))
-        AddTaskContent(
-            crmUserName = crmUserName, crmUserId = crmUserId, dueDate = dueDate?.replace("-", "/")
+        AddTaskHeader(
+            createTaskApiInProgress = createTaskApiInProgress,
+            createTasksApiIsSuccess = createTaskApiIsSuccess,
+            accountId = accountId,
+            globalStateViewModel = globalStateViewModel,
+            id = id
         )
         Spacer(modifier = Modifier.height(20.dp))
-        EditableTextField(note = task ?: "", placeholderText = if (task == null) {
+        AddTaskContent(
+            id = id,
+            accountId = accountId,
+            crmUserName = globalStateViewModel.getCrmUserNameById(id)?.value ?: "Select",
+            crmUserId = crmUserId,
+            dueDate = dueDate,
+            globalStateViewModel = globalStateViewModel
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        EditableTextField(note = task, placeholderText = if (id == "1") {
             "Add task"
         } else {
             ""
         }, onValueChange = {
+            globalStateViewModel.setValuesById(id, taskDesc = it)
             task = it
         }, modifier = Modifier
             .fillMaxWidth()
@@ -94,9 +159,12 @@ fun TaskScreen(
 
 @Composable
 fun AddTaskContent(
-    crmUserName: String? = null,
-    crmUserId: String? = null,
-    dueDate: String? = null,
+    crmUserName: String,
+    crmUserId: String,
+    dueDate: String,
+    globalStateViewModel: GlobalStateViewModel,
+    id: String,
+    accountId : String? = null
 ) {
 
     var searchNameBottomSheetVisible by remember { mutableStateOf(false) }
@@ -107,7 +175,13 @@ fun AddTaskContent(
 
 
     if (searchNameBottomSheetVisible) {
-        SearchNameBottomSheet(toggleSearchNameBottomSheet, isNewTask = true)
+        SearchNameBottomSheet(
+            toggleSearchNameBottomSheet,
+            accountId = accountId!!,
+            isNewTask = true,
+            globalStateViewModel = globalStateViewModel,
+            id = id
+        )
     }
 
     val dueDateContext = LocalContext.current
@@ -121,14 +195,15 @@ fun AddTaskContent(
     dueDateDay = dueDateCalendar.get(Calendar.DAY_OF_MONTH)
 
     dueDateCalendar.time = Date()
-    val selectedDueDate = remember { mutableStateOf("") }
-
+    val selectedDueDate = remember { mutableStateOf(dueDate) }
 
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            selectedDueDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
+            selectedDueDate.value = "$mYear-${mMonth + 1}-$mDayOfMonth"
         }, dueDateYear, dueDateMonth, dueDateDay
     )
+
+    globalStateViewModel.setValuesById(id, dueDate = selectedDueDate.value)
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
@@ -172,7 +247,7 @@ fun AddTaskContent(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (crmUserId != "1") {
+                    if (id != "1") {
                         UserAvatar(
                             id = "1",
                             firstName = "D",
@@ -196,7 +271,7 @@ fun AddTaskContent(
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = crmUserName ?: "Select",
+                        text = crmUserName,
                         color = selectTabColor,
                         style = TextStyle(
                             fontSize = 14.sp,
@@ -262,10 +337,8 @@ fun AddTaskContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = if (selectedDueDate.value.isNotEmpty()) {
-                            selectedDueDate.value
-                        } else {
-                            dueDate?:"Select"
+                        text = selectedDueDate.value.ifEmpty {
+                            dueDate
                         },
                         color = Color(0xff444A62),
                         style = TextStyle(
@@ -293,10 +366,15 @@ fun AddTaskContent(
 
 @Composable
 fun AddTaskHeader(
+    createTaskApiInProgress: Boolean,
+    createTasksApiIsSuccess: Boolean,
+    accountId : String? = null,
+    globalStateViewModel : GlobalStateViewModel,
+    id: String
 ) {
 
-    var tasksApiInProgress by remember { mutableStateOf(false) }
-    var tasksApiIsSuccess by remember { mutableStateOf(false) }
+    val tasksViewModel: TasksViewModal = hiltViewModel()
+
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -317,16 +395,24 @@ fun AddTaskHeader(
                     indication = null,
                     onClick = { NavigationService.navigateBack() })
                 .semantics {
-                    contentDescription = if (tasksApiIsSuccess) "" else ""
+                    contentDescription = if (createTasksApiIsSuccess) "" else ""
                 },
         )
 
-        val buttonColor = if (tasksApiIsSuccess) {
+        val buttonColor = if (createTasksApiIsSuccess) {
             Color(0xFF212653).copy(alpha = 0.7f)
         } else {
             Color(0xFF212653)
         }
-        Button(onClick = {},
+
+        Button(onClick = {
+            tasksViewModel.createTask(
+                accountId = accountId!!,
+                crmOrganizationUserId = globalStateViewModel.getCrmUserIdById(id)?.value ?: "",
+                description = globalStateViewModel.getTaskDescById(id)?.value ?: "",
+                dueDate = globalStateViewModel.getDueDateById(id)?.value ?: "",
+            )
+        },
             enabled = true,
             contentPadding = PaddingValues(all = 8.dp),
             colors = ButtonDefaults.buttonColors(
@@ -358,9 +444,9 @@ fun AddTaskHeader(
                 }.build()
 
 
-                if (tasksApiInProgress || tasksApiIsSuccess) {
+                if (createTaskApiInProgress || createTasksApiIsSuccess) {
                     Image(
-                        painter = if (tasksApiInProgress) {
+                        painter = if (createTaskApiInProgress) {
                             rememberAsyncImagePainter(R.drawable.loader, imageLoader)
                         } else {
                             painterResource(id = R.drawable.check)
@@ -373,9 +459,9 @@ fun AddTaskHeader(
                     )
 
                 }
-                Text(text = if (tasksApiInProgress) {
+                Text(text = if (createTaskApiInProgress) {
                     "Adding Task..."
-                } else if (tasksApiIsSuccess) {
+                } else if (createTasksApiIsSuccess) {
                     "Saved"
                 } else {
                     "Add Task"
@@ -386,15 +472,15 @@ fun AddTaskHeader(
                     color = Color(0xFFFFFFFF),
                     letterSpacing = 0.48.sp,
                 ), modifier = Modifier.semantics {
-                    contentDescription = if (tasksApiIsSuccess) "" else ""
+                    contentDescription = if (createTasksApiIsSuccess) "" else ""
                 })
             }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun TaskScreenPreview() {
-    TaskScreen()
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun TaskScreenPreview() {
+//    TaskScreen()
+//}

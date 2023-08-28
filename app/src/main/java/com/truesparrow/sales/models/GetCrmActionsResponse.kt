@@ -15,5 +15,6 @@ data class GetCrmActionRequest(
 
 data class TaskSuggestions(
     val description: String,
-    val due_date: String
+    val due_date: String,
+    val id : String
 )

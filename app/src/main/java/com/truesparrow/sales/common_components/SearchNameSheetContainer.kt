@@ -54,6 +54,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.Observer
 import com.truesparrow.sales.util.NetworkResponse
+import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 import com.truesparrow.sales.viewmodals.SearchCrmUserNameViewModal
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -63,6 +64,8 @@ fun SearchNameSheetContainer(
     accountId: String,
     accountName: String,
     isNewTask : Boolean,
+    globalStateViewModel : GlobalStateViewModel,
+    id : String
 ) {
     val searchCrmUserNameViewModal: SearchCrmUserNameViewModal = hiltViewModel()
     var searchQuery by remember { mutableStateOf("") }
@@ -226,14 +229,16 @@ fun SearchNameSheetContainer(
                                 SearchUserName(
                                     firstName = recordInfo.name,
                                     lastName = recordInfo.name,
+                                    crmUserId = recordInfo.id,
                                     searchNameTestId = "btn_search_user_user_name_${recordInfo.name}",
+                                    globalStateViewModel = globalStateViewModel,
+                                    id = id,
                                     onAccountRowClick = {
                                         searchCrmUserNameViewModal.onAccountRowClicked(
-                                            recordInfo.id,
-                                            recordInfo.name,
                                             accountId = accountId,
                                             accountName = accountName!!,
-                                            isNewTask = isNewTask
+                                            isNewTask = isNewTask,
+                                            id = id,
                                         )
                                         bottomSheetVisible()
                                     },
