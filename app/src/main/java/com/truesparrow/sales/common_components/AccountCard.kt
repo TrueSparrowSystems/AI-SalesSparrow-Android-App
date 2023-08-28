@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import com.truesparrow.sales.ui.theme.Typography
 import com.truesparrow.sales.ui.theme.eastBay
 import com.truesparrow.sales.ui.theme.port_gore
@@ -65,40 +64,46 @@ fun AccountCard(
                 text = accountName, Typography.titleMedium, color = port_gore
             )
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.link_icon),
-                    contentDescription = null,
-                )
-                Text(
-                    text = website,
-                    color = port_gore,
-                    style = Typography.labelMedium,
-                    modifier = Modifier.clickable {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(website))
-                        Log.i("SalesSparow", "handleDeepLink authCode: $intent")
-                        context.startActivity(intent);
-                    }
-                )
+            if (website.isNotEmpty()){
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.link_icon),
+                        contentDescription = null,
+                    )
+                    Text(
+                        text = website,
+                        color = port_gore,
+                        style = Typography.labelMedium,
+                        modifier = Modifier.clickable {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(website))
+                            Log.i("SalesSparow", "handleDeepLink authCode: $intent")
+                            context.startActivity(intent);
+                        }
+                    )
+                }
             }
+
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            CustomText(
-                text = "CONTACT", Typography.titleSmall, color = eastBay.copy(alpha = 0.7f)
-            )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = contactName,
-                    color = port_gore,
-                    style = Typography.labelMedium,
-                    modifier = Modifier.clickable {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(website))
-                        Log.i("SalesSparow", "handleDeepLink authCode: $intent")
-                        context.startActivity(intent);
-                    }
+            if (contactName.isNotEmpty()){
+                CustomText(
+                    text = "CONTACT", Typography.titleSmall, color = eastBay.copy(alpha = 0.7f)
                 )
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = contactName,
+                        color = port_gore,
+                        style = Typography.labelMedium,
+                        modifier = Modifier.clickable {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(website))
+                            Log.i("SalesSparow", "handleDeepLink authCode: $intent")
+                            context.startActivity(intent);
+                        }
+                    )
+                }
+
             }
 
         }
