@@ -191,7 +191,7 @@ fun NotesScreen(
             RecommendedSectionHeader(
                 heading = "Getting recommendations", onPlusClicked = {
                     recommendedPopup = true
-                }, shouldShowPlusIcon = false, crmUserId = crmUserId!!, crmUserName = crmUserName!!
+                }, shouldShowPlusIcon = false, crmUserId = crmUserId!!, crmUserName = crmUserName!!, accountId = accountId!!
             )
             Spacer(modifier = Modifier.height(30.dp))
             Column(
@@ -232,6 +232,7 @@ fun NotesScreen(
                 shouldShowPlusIcon = true,
                 crmUserName = crmUserName!!,
                 crmUserId = crmUserId!!,
+                accountId = accountId!!
             )
             Spacer(modifier = Modifier.height(30.dp))
             tasks.forEach { task ->
@@ -289,6 +290,7 @@ fun RecommendedSectionHeader(
     heading: String,
     crmUserName: String,
     crmUserId: String,
+    accountId : String,
     onPlusClicked: () -> Unit,
     shouldShowPlusIcon: Boolean,
 ) {
@@ -321,7 +323,7 @@ fun RecommendedSectionHeader(
                         interactionSource = MutableInteractionSource(), indication = null
                     ) {
                         onPlusClicked()
-                        NavigationService.navigateTo("task_screen/1")
+                        NavigationService.navigateTo("task_screen/${accountId}/1")
                     })
         }
 

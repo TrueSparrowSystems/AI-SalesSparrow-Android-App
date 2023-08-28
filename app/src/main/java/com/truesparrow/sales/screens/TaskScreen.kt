@@ -71,7 +71,9 @@ import java.util.Date
 
 @Composable
 fun TaskScreen(
-    id: String, globalStateViewModel: GlobalStateViewModel
+    accountId: String? = null,
+    id: String,
+    globalStateViewModel: GlobalStateViewModel
 ) {
 
     var taskDesc = ""
@@ -129,10 +131,12 @@ fun TaskScreen(
             crmUserId = crmUserId,
             dueDate = dueDate.replace("-", "/"),
             task = task,
+            accountId = accountId
         )
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
             id = id,
+            accountId = accountId,
             crmUserName = crmUserName,
             crmUserId = crmUserId,
             dueDate = dueDate.replace("-", "/"),
@@ -162,7 +166,8 @@ fun AddTaskContent(
     crmUserId: String,
     dueDate: String,
     globalStateViewModel: GlobalStateViewModel,
-    id: String
+    id: String,
+    accountId : String? = null
 ) {
 
     var searchNameBottomSheetVisible by remember { mutableStateOf(false) }
@@ -175,6 +180,7 @@ fun AddTaskContent(
     if (searchNameBottomSheetVisible) {
         SearchNameBottomSheet(
             toggleSearchNameBottomSheet,
+            accountId = accountId!!,
             isNewTask = true,
             globalStateViewModel = globalStateViewModel,
             id = id
@@ -367,8 +373,8 @@ fun AddTaskHeader(
     createTasksApiIsSuccess: Boolean,
     crmUserId: String? = null,
     dueDate: String? = null,
-    task: String? = null
-
+    task: String? = null,
+    accountId : String? = null
 ) {
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
@@ -404,7 +410,7 @@ fun AddTaskHeader(
         }
         Button(onClick = {
             tasksViewModel.createTask(
-                accountId = "0011e00000dWhY5AAK",
+                accountId = accountId!!,
                 crmOrganizationUserId = crmUserId!!,
                 description = task!!,
                 dueDate = dueDate!!,

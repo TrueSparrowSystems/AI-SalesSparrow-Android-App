@@ -128,11 +128,8 @@ fun NavigationService(intent: Intent?, viewModel: GlobalStateViewModel) {
 
         composable(route = Screens.TaskScreen.route) {
             val id = it.arguments?.getString("id") ?: ""
-            val crmUserId = it.arguments?.getString("crmUserId") ?: ""
-            val crmUserName = it.arguments?.getString("crmUserName") ?: ""
-            val dueDate = it.arguments?.getString("dueDate") ?: ""
-
-            TaskScreen(id, viewModel)
+            val accountId = it.arguments?.getString("accountId") ?: ""
+            TaskScreen(accountId, id, viewModel)
         }
     }
 }
