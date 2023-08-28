@@ -72,19 +72,17 @@ import java.util.Date
 @Composable
 fun TaskScreen(
     accountId: String? = null,
-    id: String,
+    id: String = "1",
     globalStateViewModel: GlobalStateViewModel
 ) {
 
     var taskDesc = ""
     var crmUserId = ""
-    var crmUserName = "Select"
     var dueDate = "Select"
 
     if (id != "1") {
         taskDesc = globalStateViewModel.getTaskDescById(id)?.value ?: ""
         crmUserId = globalStateViewModel.getCrmUserIdById(id)?.value ?: ""
-        crmUserName = globalStateViewModel.getCrmUserNameById(id)?.value ?: "Select"
         dueDate = globalStateViewModel.getDueDateById(id)?.value ?: "Select"
     }
 
@@ -128,16 +126,15 @@ fun TaskScreen(
         AddTaskHeader(
             createTaskApiInProgress = createTaskApiInProgress,
             createTasksApiIsSuccess = createTaskApiIsSuccess,
-            crmUserId = crmUserId,
-            dueDate = dueDate.replace("-", "/"),
-            task = task,
-            accountId = accountId
+            accountId = accountId,
+            globalStateViewModel = globalStateViewModel,
+            id = id
         )
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
             id = id,
             accountId = accountId,
-            crmUserName = crmUserName,
+            crmUserName = globalStateViewModel.getCrmUserNameById(id)?.value ?: "Select",
             crmUserId = crmUserId,
             dueDate = dueDate.replace("-", "/"),
             globalStateViewModel = globalStateViewModel
@@ -371,10 +368,9 @@ fun AddTaskContent(
 fun AddTaskHeader(
     createTaskApiInProgress: Boolean,
     createTasksApiIsSuccess: Boolean,
-    crmUserId: String? = null,
-    dueDate: String? = null,
-    task: String? = null,
-    accountId : String? = null
+    accountId : String? = null,
+    globalStateViewModel : GlobalStateViewModel,
+    id: String
 ) {
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
@@ -408,12 +404,13 @@ fun AddTaskHeader(
         } else {
             Color(0xFF212653)
         }
+
         Button(onClick = {
             tasksViewModel.createTask(
                 accountId = accountId!!,
-                crmOrganizationUserId = crmUserId!!,
-                description = task!!,
-                dueDate = dueDate!!,
+                crmOrganizationUserId = globalStateViewModel.getCrmUserIdById(id)?.value ?: "",
+                description = globalStateViewModel.getTaskDescById(id)?.value ?: "",
+                dueDate = globalStateViewModel.getDueDateById(id)?.value ?: "",
             )
         },
             enabled = true,
