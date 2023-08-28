@@ -71,7 +71,8 @@ fun AccountDetails(
     val accountDetailsViewModal: AccountDetailsViewModal = hiltViewModel()
     var isAccountNoteDetailsLoading by remember { mutableStateOf(false) };
     var isAccountTaskDetailsLoading by remember { mutableStateOf(false) };
-    val openDialog = remember { mutableStateOf(false) }
+    val openDialogForNote = remember { mutableStateOf(false) }
+    val openDialogForTask = remember { mutableStateOf(false) }
 
     var notes = accountDetailsViewModal.notes.observeAsState()?.value
     var tasks = accountDetailsViewModal.tasks.observeAsState()?.value
@@ -82,7 +83,10 @@ fun AccountDetails(
 
     val deleteAccountNoteResponse by accountDetailsViewModal.deleteAccountNoteLiveData.observeAsState()
 
+    val deleteAccountTaskResponse by accountDetailsViewModal.deleteAccountTaskLiveData.observeAsState()
+
     val noteId = remember { mutableStateOf("") }
+    val taskId = remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = accountId) {
         accountDetailsViewModal.getAccountNotes(accountId = accountId)
@@ -175,6 +179,25 @@ fun AccountDetails(
         }
     }
 
+    deleteAccountTaskResponse?.let {
+        when (it) {
+            is NetworkResponse.Success -> {
+                Log.i("AccountDetails deleteAccount Success", "Success: ${it.data}")
+                LaunchedEffect(key1 = accountId) {
+                    accountDetailsViewModal.getAccountTasks(accountId = accountId)
+                }
+                CustomToast(message = "Task Deleted", type = ToastType.Success)
+            }
+            is NetworkResponse.Error -> {
+                CustomToast(message = it.message ?: "Something went wrong", type = ToastType.Error)
+                Log.i("AccountDetails deleteAccount Error", "Failure: ${it.message}")
+            }
+            is NetworkResponse.Loading -> {
+                Log.i("AccountDetails deleteAccount Loading", "Loading")
+            }
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -191,13 +214,28 @@ fun AccountDetails(
                     accountId = accountId,
                     noteId = noteId.value
                 )
-                openDialog.value = false
+                openDialogForNote.value = false
             },
             onDismissRequest = {
-                openDialog.value = false
+                openDialogForNote.value = false
             },
-            showConfirmationDialog = openDialog.value
+            showConfirmationDialog = openDialogForNote.value
+        )
 
+        CustomAlertDialog(
+            title = "Delete Task",
+            message = "Are you sure you want to delete this task?",
+            onConfirmButtonClick = {
+                accountDetailsViewModal.deleteAccountTask(
+                    accountId = accountId,
+                    taskId = taskId.value
+                )
+                openDialogForTask.value = false
+            },
+            onDismissRequest = {
+                openDialogForTask.value = false
+            },
+            showConfirmationDialog = openDialogForTask.value
         )
 
         AccountDetailsHeader()
@@ -225,7 +263,7 @@ fun AccountDetails(
                     onDeleteMenuClick = { noteID ->
                         Log.i("AccountDetails onDeleteMenuClick", "NoteId: ${note.id}")
                         noteId.value = noteID
-                        openDialog.value = true
+                        openDialogForNote.value = true
                     }
 
                 )
@@ -251,6 +289,12 @@ fun AccountDetails(
                     onClick = {
                         Log.i("AccountDetails", "TaskId: ${task.id}")
                         NavigationService.navigateTo("task_details_screen/${accountId}/${accountName}/${task.id}")
+                    },
+                    taskId = task.id,
+                    onDeleteMenuClick = { task ->
+                        Log.i("AccountDetails onDeleteMenuClick", "TaskId: $task")
+                        taskId.value = task
+                        openDialogForTask.value = true
                     }
                 )
             }

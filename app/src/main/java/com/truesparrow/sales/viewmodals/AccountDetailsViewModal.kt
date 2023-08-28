@@ -45,6 +45,18 @@ class AccountDetailsViewModal @Inject constructor(
     val deleteAccountNoteLiveData: LiveData<NetworkResponse<Unit>>
         get() = accountDetailsRepository.deletAccountNote
 
+    val deleteAccountTaskLiveData: LiveData<NetworkResponse<Unit>>
+        get() = accountDetailsRepository.deletAccountTask
+
+    fun deleteAccountTask(accountId: String, taskId: String) {
+        viewModelScope.launch {
+            accountDetailsRepository.deleteAccountTask(
+                accountId,
+                taskId
+            )
+        }
+    }
+
 
     fun getAccountNotes(accountId: String) {
         Log.i("AccountDetails", "Account Id: $accountId")
