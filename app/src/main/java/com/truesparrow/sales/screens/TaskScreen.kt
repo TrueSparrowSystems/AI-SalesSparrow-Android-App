@@ -136,7 +136,7 @@ fun TaskScreen(
             accountId = accountId,
             crmUserName = globalStateViewModel.getCrmUserNameById(id)?.value ?: "Select",
             crmUserId = crmUserId,
-            dueDate = dueDate.replace("-", "/"),
+            dueDate = dueDate,
             globalStateViewModel = globalStateViewModel
         )
         Spacer(modifier = Modifier.height(20.dp))
