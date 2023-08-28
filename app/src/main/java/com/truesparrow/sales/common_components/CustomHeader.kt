@@ -53,7 +53,8 @@ fun CustomHeader(
     shouldShowAvatarComponent: Boolean = false,
     userId: String? = null,
     userName: String? = null,
-    userAvatarModifier: Modifier? = Modifier
+    userAvatarModifier: Modifier? = Modifier,
+    rightButtonModifier: Modifier? = Modifier
 ) {
     Row(
         modifier = Modifier
@@ -106,7 +107,8 @@ fun CustomHeader(
                             imageId = rightIcon,
                             buttonTextStyle = rightButtonTextStyle,
                             imageModifier = rightIconModifier,
-                            isButtonEnabled = isRightButtonEnabled
+                            isButtonEnabled = isRightButtonEnabled,
+                            isRightButtonModifier = rightButtonModifier!!
                         )
 
                         UserAvatar(

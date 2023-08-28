@@ -117,6 +117,11 @@ fun CustomBottomSheetContainer(
                             modifier = Modifier
                                 .width(24.dp)
                                 .height(24.dp)
+                                .semantics {
+                                    contentDescription = "img_search_magnifying_glass"
+                                    testTagsAsResourceId = true
+                                    testTag = "img_search_magnifying_glass"
+                                }
 
                         )
                         TextField(
@@ -202,8 +207,13 @@ fun CustomBottomSheetContainer(
                             text = "No results found",
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
-                            textAlign = TextAlign.Center
+                                .padding(16.dp)
+                                .semantics {
+                                    contentDescription = "txt_search_no_result_found"
+                                    testTagsAsResourceId = true
+                                    testTag = "txt_search_no_result_found"
+                                },
+                            textAlign = TextAlign.Center,
                         )
                     }
                 } else {
