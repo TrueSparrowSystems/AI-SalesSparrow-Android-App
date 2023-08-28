@@ -68,7 +68,7 @@ fun NotesScreen(
     accountName: String? = null,
     accountId: String? = null,
     isAccountSelectionEnabled: Boolean = false,
-    id : String,
+    id: String,
     viewModel: GlobalStateViewModel,
 ) {
     var note by remember { mutableStateOf("") }
@@ -96,9 +96,9 @@ fun NotesScreen(
                 getCrmActionLoading = false
                 tasks = (it.data?.add_task_suggestions?.map { task ->
                     var index = 0;
-                    val id = "${task.description}${task.due_date}${index++}"
+                    val id = "${task.description}${task.due_date ?: ""}${index++}"
                     TaskSuggestions(
-                        description = task.description, due_date = task.due_date, id = id
+                        description = task.description, due_date = task.due_date ?: "", id = id
                     )
 
                 } ?: listOf<TaskSuggestions?>(null))
@@ -120,9 +120,9 @@ fun NotesScreen(
         }
     }
 
-    LaunchedEffect(true) {
-        notesViewModel.getCrmActions(note);
-    }
+//    LaunchedEffect(true) {
+//        notesViewModel.getCrmActions(note);
+//    }
 
 
     saveNoteRespose?.let { response ->
@@ -135,7 +135,10 @@ fun NotesScreen(
                     duration = Toast.LENGTH_SHORT,
                     type = ToastType.Success
                 )
-                notesViewModel.getCrmActions(note);
+
+                LaunchedEffect(true) {
+                    notesViewModel.getCrmActions(note);
+                }
             }
 
             is NetworkResponse.Error -> {
@@ -189,9 +192,14 @@ fun NotesScreen(
 
         if (getCrmActionLoading) {
             RecommendedSectionHeader(
-                heading = "Getting recommendations", onPlusClicked = {
+                heading = "Getting recommendations",
+                onPlusClicked = {
                     recommendedPopup = true
-                }, shouldShowPlusIcon = false, crmUserId = crmUserId!!, crmUserName = crmUserName!!, accountId = accountId!!
+                },
+                shouldShowPlusIcon = false,
+                crmUserId = crmUserId!!,
+                crmUserName = crmUserName!!,
+                accountId = accountId!!
             )
             Spacer(modifier = Modifier.height(30.dp))
             Column(
@@ -224,61 +232,64 @@ fun NotesScreen(
                 height = 95.dp
             )
         } else {
-            RecommendedSectionHeader(
-                heading = "We have some recommendations",
-                onPlusClicked = {
-                    recommendedPopup = true
-                },
-                shouldShowPlusIcon = true,
-                crmUserName = crmUserName!!,
-                crmUserId = crmUserId!!,
-                accountId = accountId!!
-            )
-            Spacer(modifier = Modifier.height(30.dp))
-            tasks.forEach { task ->
-                task?.let {
 
-                    val taskDesc = viewModel.getTaskDescById(it.id)?.value ?: ""
-                    val userId = viewModel.getCrmUserIdById(it.id)?.value ?: ""
-                    val userName = viewModel.getCrmUserNameById(it.id)?.value ?: ""
-                    val dDate = viewModel.getDueDateById(it.id)?.value ?: ""
+            if (tasks.isNotEmpty()) {
+                RecommendedSectionHeader(
+                    heading = "We have some recommendations",
+                    onPlusClicked = {
+                        recommendedPopup = true
+                    },
+                    shouldShowPlusIcon = true,
+                    crmUserName = crmUserName!!,
+                    crmUserId = crmUserId!!,
+                    accountId = accountId!!
+                )
 
-                    viewModel.setValuesById(
-                        id = it.id, taskDesc = if (taskDesc.isEmpty()) {
-                            it.description
-                        } else {
-                            taskDesc
-                        }, crmUserId = if (userId.isEmpty()) {
-                            crmUserId
-                        } else {
-                            userId
-                        }, crmUserName = if (userName.isEmpty()) {
-                            crmUserName
-                        } else {
-                            userName
-                        }, dueDate = if (dDate.isEmpty()) {
-                            it.due_date
-                        } else {
-                            dDate
+                Spacer(modifier = Modifier.height(30.dp))
+                tasks.forEach { task ->
+                    task?.let {
+
+                        val taskDesc = viewModel.getTaskDescById(it.id)?.value ?: ""
+                        val userId = viewModel.getCrmUserIdById(it.id)?.value ?: ""
+                        val userName = viewModel.getCrmUserNameById(it.id)?.value ?: ""
+                        val dDate = viewModel.getDueDateById(it.id)?.value ?: ""
+
+                        viewModel.setValuesById(
+                            id = it.id, taskDesc = if (taskDesc.isEmpty()) {
+                                it.description
+                            } else {
+                                taskDesc
+                            }, crmUserId = if (userId.isEmpty()) {
+                                crmUserId
+                            } else {
+                                userId
+                            }, crmUserName = if (userName.isEmpty()) {
+                                crmUserName
+                            } else {
+                                userName
+                            }, dueDate = if (dDate.isEmpty()) {
+                                it.due_date ?: ""
+                            } else {
+                                dDate
+                            }
+                        )
+
+                        Column(
+                            modifier = Modifier
+                                .dashedBorder(1.dp, 5.dp, Color(0x80545A71))
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
+                        ) {
+                            TaskSuggestionCard(id = it.id,
+                                accountId = accountId!!,
+                                accountName = accountName!!,
+                                globalStateViewModel = viewModel,
+                                onDeleteTaskClick = {})
                         }
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .dashedBorder(1.dp, 5.dp, Color(0x80545A71))
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
-                    ) {
-                        TaskSuggestionCard(
-                            id = it.id,
-                            accountId = accountId,
-                            accountName = accountName!!,
-                            globalStateViewModel = viewModel,
-                            onDeleteTaskClick = {})
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
 
+                }
             }
         }
     }
@@ -290,7 +301,7 @@ fun RecommendedSectionHeader(
     heading: String,
     crmUserName: String,
     crmUserId: String,
-    accountId : String,
+    accountId: String,
     onPlusClicked: () -> Unit,
     shouldShowPlusIcon: Boolean,
 ) {
