@@ -57,22 +57,31 @@ import coil.decode.ImageDecoderDecoder
 import com.truesparrow.sales.R
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.util.NetworkResponse
+import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 import com.truesparrow.sales.viewmodals.TasksViewModal
 import java.util.Calendar
 import java.util.Date
 
 @Composable
 fun TaskSuggestionCard(
-    taskTitle: String,
-    crmUserName: String?,
-    dueDate: String,
+    taskTitle: String = "",
+    crmUserName: String = "",
+    crmUserId: String = "",
+    dueDate: String = "",
     onDeleteTaskClick: () -> Unit,
     accountId: String,
     accountName: String,
+    globalStateViewModel: GlobalStateViewModel,
 ) {
     var expanded by remember {
         mutableStateOf(false)
     }
+
+    val taskDesc = globalStateViewModel.getTaskDesc().observeAsState(initial = "")
+    val userName = globalStateViewModel.getCrmUserName().observeAsState(initial = "")
+    val dDate = globalStateViewModel.getDueDate().observeAsState(initial = "")
+
+
     var pressOffset by remember { mutableStateOf(DpOffset.Zero) }
     var itemHeight by remember { mutableStateOf(0.dp) }
     val density = LocalDensity.current
@@ -86,7 +95,10 @@ fun TaskSuggestionCard(
 
     if (searchNameBottomSheetVisible) {
         SearchNameBottomSheet(
-            toggleSearchNameBottomSheet, accountId = accountId, accountName = accountName!!
+            toggleSearchNameBottomSheet,
+            globalStateViewModel = globalStateViewModel,
+            accountId = accountId,
+            accountName = accountName!!
         )
     }
 
@@ -108,6 +120,7 @@ fun TaskSuggestionCard(
             dueDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
         }, dueDateYear, dueDateMonth, dueDateDay
     )
+
 
     val dueDateV = if (dueDate.value.isNotEmpty()) {
         dueDate.value?.replace("/", "-")
@@ -248,13 +261,14 @@ fun TaskSuggestionCard(
                     .background(color = Color(0xFFF6F7F8), shape = RoundedCornerShape(size = 5.dp))
                     .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
                     .clickable {
-                        NavigationService.navigateTo("task_screen/${1}/${crmUserName}/${dueDateV}")
-
+                        NavigationService.navigateTo("task_screen/${crmUserId}/${crmUserName}/${dueDateV}")
                     }
 
             ) {
                 Text(
-                    text = taskTitle, style = TextStyle(
+                    text = taskDesc.value.ifEmpty {
+                        taskTitle
+                    }, style = TextStyle(
                         fontSize = 16.sp,
                         fontFamily = FontFamily(Font(R.font.nunito_regular)),
                         fontWeight = FontWeight(600),
@@ -313,7 +327,9 @@ fun TaskSuggestionCard(
                         userAvatarTestId = "user_avatar_search_user"
                     )
                     Text(
-                        text = crmUserName ?: "Select", style = TextStyle(
+                        text = userName.value.ifEmpty {
+                            crmUserName.ifEmpty { "Select" }
+                        }, style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(700),
@@ -358,10 +374,8 @@ fun TaskSuggestionCard(
                     )
 
                     Text(
-                        text = if (dueDate.value.isNotEmpty()) {
-                            dueDate.value.replace("-", "/")
-                        } else {
-                            "Select"
+                        text = dDate.value.ifEmpty {
+                            dueDate.value.replace("-", "/").ifEmpty { "Select" }
                         }, style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
@@ -381,7 +395,7 @@ fun TaskSuggestionCard(
                     createTaskApiInProgress = true
                     tasksViewModel.createTask(
                         accountId = accountId!!,
-                        crmOrganizationUserId = "00U1e000003TnVXEA1",
+                        crmOrganizationUserId = crmUserId!!,
                         description = taskTitle!!,
                         dueDate = dueDate.value,
                     )

@@ -1,5 +1,6 @@
 package com.truesparrow.sales.common_components
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -23,20 +24,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.truesparrow.sales.ui.theme.Typography
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.ui.theme.eastBay_70
 import com.truesparrow.sales.ui.theme.walkaway_gray
+import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchUserName(
     firstName: String,
     lastName: String,
+    crmUserId : String,
     searchNameTestId: String,
     onAccountRowClick: () -> Unit,
+    globalStateViewModel : GlobalStateViewModel
 ) {
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -51,11 +55,12 @@ fun SearchUserName(
                     testTagsAsResourceId = true
                     testTag = searchNameTestId
                 }
-                .clickable(
-                    onClick = onAccountRowClick,
-                    interactionSource = MutableInteractionSource(),
-                    indication = null
-                ),
+                .clickable {
+                    globalStateViewModel.setCrmUserName(firstName)
+                    globalStateViewModel.setCrmUserId(crmUserId)
+                    onAccountRowClick()
+
+                }
 
             ) {
 
@@ -80,20 +85,17 @@ fun SearchUserName(
     }
 
     Divider(
-        color = eastBay_70,
-        thickness = 0.5.dp,
-        modifier = Modifier
-            .height(1.dp)
+        color = eastBay_70, thickness = 0.5.dp, modifier = Modifier.height(1.dp)
     )
 }
 
-@Composable
-@Preview(showBackground = true)
-fun SearchUserNamePreview() {
-    SearchUserName(
-        firstName = "John",
-        lastName = "Doe",
-        searchNameTestId = "accountRow",
-        onAccountRowClick = {}
-    )
-}
+//@Composable
+//@Preview(showBackground = true)
+//fun SearchUserNamePreview() {
+//    SearchUserName(firstName = "John",
+//        lastName = "Doe",
+//        crmUserId = "1234",
+//        searchNameTestId = "accountRow",
+//
+//        onAccountRowClick = {})
+//}

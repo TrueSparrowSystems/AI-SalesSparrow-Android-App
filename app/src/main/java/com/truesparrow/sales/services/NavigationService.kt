@@ -22,6 +22,7 @@ import com.truesparrow.sales.screens.SettingsScreen
 import com.truesparrow.sales.screens.TaskScreen
 import com.truesparrow.sales.util.Screens
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
+import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 
 
 object NavigationService {
@@ -81,7 +82,7 @@ object NavigationService {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NavigationService(intent: Intent?) {
+fun NavigationService(intent: Intent?, viewModel: GlobalStateViewModel) {
     val navController = rememberNavController()
     val authenticationViewModal: AuthenticationViewModal = viewModel()
     NavigationService.initialize(navController, authenticationViewModal)
@@ -108,7 +109,7 @@ fun NavigationService(intent: Intent?) {
                 it.arguments?.getString("isAccountSelectionEnabled")?.toBoolean() ?: false
             val crmUserId = it.arguments?.getString("crmUserId") ?: ""
             val crmUserName = it.arguments?.getString("crmUserName") ?: ""
-            NotesScreen(accountName, accountId, isAccountSelectionEnabled,crmUserId, crmUserName)
+            NotesScreen(accountName, accountId, isAccountSelectionEnabled,crmUserId, crmUserName, viewModel)
         }
         composable(route = Screens.AccountDetailsScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
@@ -130,7 +131,7 @@ fun NavigationService(intent: Intent?) {
             val crmUserName = it.arguments?.getString("crmUserName") ?: ""
             val dueDate = it.arguments?.getString("dueDate") ?: ""
 
-            TaskScreen(crmUserId, crmUserName, dueDate)
+            TaskScreen(crmUserId, crmUserName, dueDate, viewModel)
         }
     }
 }

@@ -51,6 +51,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
@@ -65,16 +67,22 @@ import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
+import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 import com.truesparrow.sales.viewmodals.TasksViewModal
 import java.util.Calendar
 import java.util.Date
 
 @Composable
 fun TaskScreen(
-    crmUserId: String? = null, crmUserName: String? = null, dueDate: String? = null
+    crmUserId: String? = null,
+    crmUserName: String? = null,
+    dueDate: String? = null,
+    globalStateViewModel: GlobalStateViewModel
 ) {
 
-    var task by remember { mutableStateOf("Presentation on how we would get prepare and plan a migration from PHP to Ruby. Get number of teams members and detailed estimates for Smagic.  Rachin to lead this. |") }
+    var task by remember { mutableStateOf("") }
+
+    globalStateViewModel.setTaskDesc(task)
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
     var createTaskApiInProgress by remember { mutableStateOf(false) }
@@ -89,9 +97,7 @@ fun TaskScreen(
                 createTaskApiInProgress = false;
                 createTaskApiIsSuccess = true
                 CustomToast(
-                    message = "Task Added.",
-                    duration = Toast.LENGTH_SHORT,
-                    type = ToastType.Success
+                    message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
             }
 
@@ -123,10 +129,13 @@ fun TaskScreen(
             )
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
-            crmUserName = crmUserName, crmUserId = crmUserId, dueDate = dueDate?.replace("-", "/")
+            crmUserName = crmUserName,
+            crmUserId = crmUserId,
+            dueDate = dueDate?.replace("-", "/"),
+            globalStateViewModel = globalStateViewModel
         )
         Spacer(modifier = Modifier.height(20.dp))
-        EditableTextField(note = task ?: "", placeholderText = if (task == null) {
+        EditableTextField(note = task ?: "", placeholderText = if (task.isEmpty()) {
             "Add task"
         } else {
             ""
@@ -147,6 +156,7 @@ fun AddTaskContent(
     crmUserName: String? = null,
     crmUserId: String? = null,
     dueDate: String? = null,
+    globalStateViewModel: GlobalStateViewModel
 ) {
 
     var searchNameBottomSheetVisible by remember { mutableStateOf(false) }
@@ -157,7 +167,11 @@ fun AddTaskContent(
 
 
     if (searchNameBottomSheetVisible) {
-        SearchNameBottomSheet(toggleSearchNameBottomSheet, isNewTask = true)
+        SearchNameBottomSheet(
+            toggleSearchNameBottomSheet,
+            isNewTask = true,
+            globalStateViewModel = globalStateViewModel
+        )
     }
 
     val dueDateContext = LocalContext.current
@@ -180,6 +194,7 @@ fun AddTaskContent(
         }, dueDateYear, dueDateMonth, dueDateDay
     )
 
+    globalStateViewModel.setDueDate(selectedDueDate.value)
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
         verticalAlignment = Alignment.CenterVertically,
@@ -388,7 +403,7 @@ fun AddTaskHeader(
                 accountId = "0011e00000dWhY5AAK",
                 crmOrganizationUserId = crmUserId!!,
                 description = task!!,
-                dueDate = dueDate !!,
+                dueDate = dueDate!!,
             )
         },
             enabled = true,
@@ -457,8 +472,8 @@ fun AddTaskHeader(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun TaskScreenPreview() {
-    TaskScreen()
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun TaskScreenPreview() {
+//    TaskScreen()
+//}

@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,6 +57,7 @@ import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
+import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 import com.truesparrow.sales.viewmodals.NotesViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -68,9 +68,9 @@ fun NotesScreen(
     isAccountSelectionEnabled: Boolean = false,
     crmUserId: String? = null,
     crmUserName: String? = null,
+    viewModel: GlobalStateViewModel,
 ) {
     var note by remember { mutableStateOf("") }
-
 
     val notesViewModel: NotesViewModel = hiltViewModel()
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
@@ -240,8 +240,10 @@ fun NotesScreen(
                         TaskSuggestionCard(taskTitle = it.description,
                             dueDate = it.due_date,
                             crmUserName = crmUserName,
+                            crmUserId = crmUserId,
                             accountId = accountId,
                             accountName = accountName!!,
+                            globalStateViewModel = viewModel,
                             onDeleteTaskClick = {})
                     }
                     Spacer(modifier = Modifier.height(16.dp))

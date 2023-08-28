@@ -10,6 +10,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.truesparrow.sales.ui.theme.white
+import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -17,7 +18,8 @@ fun SearchNameBottomSheet(
     bottomSheetVisible: () -> Unit,
     accountId: String = "",
     accountName: String = "",
-    isNewTask : Boolean = false
+    isNewTask : Boolean = false,
+    globalStateViewModel: GlobalStateViewModel
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -35,7 +37,8 @@ fun SearchNameBottomSheet(
             bottomSheetVisible,
             accountId = accountId,
             accountName = accountName!!,
-            isNewTask = isNewTask
+            isNewTask = isNewTask,
+            globalStateViewModel = globalStateViewModel
         )
     }
 }
