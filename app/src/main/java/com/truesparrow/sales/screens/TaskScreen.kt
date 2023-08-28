@@ -202,7 +202,7 @@ fun AddTaskContent(
 
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            selectedDueDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
+            selectedDueDate.value = "$mYear-${mMonth + 1}-$mDayOfMonth"
         }, dueDateYear, dueDateMonth, dueDateDay
     )
 

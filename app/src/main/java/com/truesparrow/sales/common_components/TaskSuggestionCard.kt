@@ -116,7 +116,7 @@ fun TaskSuggestionCard(
     val dueDate = remember { mutableStateOf(dDate) }
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            dueDate.value = "$mDayOfMonth/${mMonth + 1}/$mYear"
+            dueDate.value = "$mYear-${mMonth + 1}-$mDayOfMonth"
         }, dueDateYear, dueDateMonth, dueDateDay
     )
 
