@@ -34,16 +34,15 @@ class SearchCrmUserNameViewModal @Inject constructor(
     }
 
     fun onAccountRowClicked(
-        crmUserId: String,
-        crmUserName: String,
         accountId: String,
         accountName: String,
-        isNewTask: Boolean = false
+        isNewTask: Boolean = false,
+        id : String
     ) {
         if (isNewTask) {
-            NavigationService.navigateTo("task_screen/${crmUserId}/${crmUserName}/{Select}")
+            NavigationService.navigateTo("task_screen/${accountId}/${id}")
         } else {
-            NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/{true}/${crmUserId}/${crmUserName}")
+            NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/true")
         }
 
     }

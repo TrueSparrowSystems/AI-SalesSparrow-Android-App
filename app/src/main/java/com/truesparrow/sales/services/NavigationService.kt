@@ -22,6 +22,7 @@ import com.truesparrow.sales.screens.SettingsScreen
 import com.truesparrow.sales.screens.TaskScreen
 import com.truesparrow.sales.util.Screens
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
+import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 
 
 object NavigationService {
@@ -81,7 +82,7 @@ object NavigationService {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NavigationService(intent: Intent?) {
+fun NavigationService(intent: Intent?, viewModel: GlobalStateViewModel) {
     val navController = rememberNavController()
     val authenticationViewModal: AuthenticationViewModal = viewModel()
     NavigationService.initialize(navController, authenticationViewModal)
@@ -90,7 +91,8 @@ fun NavigationService(intent: Intent?) {
         composable(route = Screens.SplashScreen.route) {
             SplashScreen()
         }
-        composable(route = Screens.LoginScreen.route,
+        composable(
+            route = Screens.LoginScreen.route,
             deepLinks = listOf(navDeepLink {
                 uriPattern = BuildConfig.REDIRECT_URI
                 action = Intent.ACTION_VIEW
@@ -106,9 +108,8 @@ fun NavigationService(intent: Intent?) {
             val accountName = it.arguments?.getString("accountName") ?: ""
             val isAccountSelectionEnabled =
                 it.arguments?.getString("isAccountSelectionEnabled")?.toBoolean() ?: false
-            val crmUserId = it.arguments?.getString("crmUserId") ?: ""
-            val crmUserName = it.arguments?.getString("crmUserName") ?: ""
-            NotesScreen(accountName, accountId, isAccountSelectionEnabled,crmUserId, crmUserName)
+            val id = it.arguments?.getString("id") ?: ""
+            NotesScreen(accountName, accountId, isAccountSelectionEnabled, id, viewModel)
         }
         composable(route = Screens.AccountDetailsScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
@@ -118,19 +119,17 @@ fun NavigationService(intent: Intent?) {
         composable(route = Screens.SettingsScreen.route) {
             SettingsScreen()
         }
-        composable(route = Screens.NoteDetailsScreen.route){
+        composable(route = Screens.NoteDetailsScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
             val accountName = it.arguments?.getString("accountName") ?: ""
             val noteId = it.arguments?.getString("noteId") ?: ""
-            NoteDetailScreen(accountId, accountName,noteId)
+            NoteDetailScreen(accountId, accountName, noteId)
         }
 
         composable(route = Screens.TaskScreen.route) {
-            val crmUserId = it.arguments?.getString("crmUserId") ?: ""
-            val crmUserName = it.arguments?.getString("crmUserName") ?: ""
-            val dueDate = it.arguments?.getString("dueDate") ?: ""
-
-            TaskScreen(crmUserId, crmUserName, dueDate)
+            val id = it.arguments?.getString("id") ?: ""
+            val accountId = it.arguments?.getString("accountId") ?: ""
+            TaskScreen(accountId, id, viewModel)
         }
     }
 }
