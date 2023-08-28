@@ -95,8 +95,14 @@ interface ApiService {
         @Path(value = "account_id", encoded = true) accountId: String
     ): Response<AccountTasksResponse>
 
+    @DELETE("/v1/accounts/{account_id}/tasks/{task_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: DeleteAccountTaskResponse.json")
+    suspend fun deleteTask(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "task_id") noteId: String
+    ): Response<Unit>
 
-
+    
     @POST("v1/accounts/{account_id}/tasks")
     @Headers("$MOCK_RESPONSE_HEADER: CreateAccountTaskResponse.json")
     suspend fun createAccountTasks(
