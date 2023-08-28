@@ -71,8 +71,7 @@ import java.util.Date
 
 @Composable
 fun TaskScreen(
-    id: String,
-    globalStateViewModel: GlobalStateViewModel
+    id: String, globalStateViewModel: GlobalStateViewModel
 ) {
 
     var taskDesc = ""
@@ -86,8 +85,6 @@ fun TaskScreen(
         crmUserName = globalStateViewModel.getCrmUserNameById(id)?.value ?: "Select"
         dueDate = globalStateViewModel.getDueDateById(id)?.value ?: "Select"
     }
-
-    Log.i("Daresss", "${dueDate} ${crmUserName} ${taskDesc}")
 
 
     var task by remember { mutableStateOf(taskDesc) }
@@ -195,8 +192,7 @@ fun AddTaskContent(
     dueDateDay = dueDateCalendar.get(Calendar.DAY_OF_MONTH)
 
     dueDateCalendar.time = Date()
-    val selectedDueDate = remember { mutableStateOf("") }
-
+    val selectedDueDate = remember { mutableStateOf(dueDate) }
 
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
@@ -338,7 +334,9 @@ fun AddTaskContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = globalStateViewModel.getDueDateById(id)?.value ?: "Select",
+                        text = selectedDueDate.value.ifEmpty {
+                            dueDate
+                        },
                         color = Color(0xff444A62),
                         style = TextStyle(
                             fontSize = 14.sp,

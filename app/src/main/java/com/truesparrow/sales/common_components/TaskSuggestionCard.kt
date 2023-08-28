@@ -120,6 +120,8 @@ fun TaskSuggestionCard(
         }, dueDateYear, dueDateMonth, dueDateDay
     )
 
+    globalStateViewModel.setValuesById(id, dueDate = dueDate.value)
+
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
     var createTaskApiInProgress by remember { mutableStateOf(false) }
@@ -350,8 +352,6 @@ fun TaskSuggestionCard(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable {
                         mDatePickerDialog.show()
-                        globalStateViewModel.setValuesById(id, dueDate = dueDate.value)
-
                     }) {
 
                     Text(
@@ -373,9 +373,8 @@ fun TaskSuggestionCard(
                     )
 
                     Text(
-                        text = dDate.ifEmpty {
-                            dueDate.value.replace("-", "/").ifEmpty { "Select" }
-                        }, style = TextStyle(
+                        text = dueDate.value
+                        , style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(700),
