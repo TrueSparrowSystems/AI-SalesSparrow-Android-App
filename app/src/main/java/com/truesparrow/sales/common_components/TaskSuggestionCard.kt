@@ -128,9 +128,7 @@ fun TaskSuggestionCard(
                 createTaskApiInProgress = false;
                 createTaskApiIsSuccess = true
                 CustomToast(
-                    message = "Task Added.",
-                    duration = Toast.LENGTH_SHORT,
-                    type = ToastType.Success
+                    message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
             }
 
@@ -142,6 +140,7 @@ fun TaskSuggestionCard(
                     type = ToastType.Error
                 )
             }
+
             is NetworkResponse.Loading -> {
                 createTaskApiInProgress = true;
                 Log.d("TaskScreen", "Loading")
@@ -360,7 +359,7 @@ fun TaskSuggestionCard(
 
                     Text(
                         text = if (dueDate.value.isNotEmpty()) {
-                            dueDate.value
+                            dueDate.value.replace("-", "/")
                         } else {
                             "Select"
                         }, style = TextStyle(
@@ -382,7 +381,7 @@ fun TaskSuggestionCard(
                     createTaskApiInProgress = true
                     tasksViewModel.createTask(
                         accountId = accountId!!,
-                        crmOrganizationUserId ="00U1e000003TnVXEA1",
+                        crmOrganizationUserId = "00U1e000003TnVXEA1",
                         description = taskTitle!!,
                         dueDate = dueDate.value,
                     )
