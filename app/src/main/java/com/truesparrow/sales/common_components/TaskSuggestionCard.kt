@@ -114,13 +114,17 @@ fun TaskSuggestionCard(
     dueDateCalendar.time = Date()
 
     val dueDate = remember { mutableStateOf(dDate) }
+
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            dueDate.value = "$mYear-${mMonth + 1}-$mDayOfMonth"
+            val formattedMonth = String.format("%02d", mMonth + 1)
+            val formattedDay = String.format("%02d", mDayOfMonth)
+            dueDate.value = "$mYear-$formattedMonth-$formattedDay"
         }, dueDateYear, dueDateMonth, dueDateDay
     )
 
     globalStateViewModel.setValuesById(id, dueDate = dueDate.value)
+    mDatePickerDialog.datePicker.minDate = dueDateCalendar.timeInMillis
 
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
@@ -373,8 +377,7 @@ fun TaskSuggestionCard(
                     )
 
                     Text(
-                        text = dueDate.value
-                        , style = TextStyle(
+                        text = dueDate.value, style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(700),

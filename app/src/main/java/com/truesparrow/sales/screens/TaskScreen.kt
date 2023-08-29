@@ -199,11 +199,13 @@ fun AddTaskContent(
 
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            selectedDueDate.value = "$mYear-${mMonth + 1}-$mDayOfMonth"
+            val formattedDay = String.format("%02d", mDayOfMonth)
+            val formattedMonth = String.format("%02d", mMonth + 1)
+            selectedDueDate.value = "$mYear-$formattedMonth-$formattedDay"
         }, dueDateYear, dueDateMonth, dueDateDay
     )
-
     globalStateViewModel.setValuesById(id, dueDate = selectedDueDate.value)
+    mDatePickerDialog.datePicker.minDate = dueDateCalendar.timeInMillis
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
