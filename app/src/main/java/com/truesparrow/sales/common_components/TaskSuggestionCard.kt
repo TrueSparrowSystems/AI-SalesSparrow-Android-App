@@ -71,7 +71,9 @@ fun TaskSuggestionCard(
     onDeleteTaskClick: () -> Unit,
     accountId: String,
     accountName: String,
+    shouldShowOptions: Boolean = false,
     globalStateViewModel: GlobalStateViewModel,
+    onCancelTaskClick: (id: String) -> Unit
 ) {
     var expanded by remember {
         mutableStateOf(false)
@@ -236,24 +238,26 @@ fun TaskSuggestionCard(
                         )
                     )
 
-                    Box {
-                        Image(painter = painterResource(id = R.drawable.setting_three_dots_outline),
-                            contentDescription = "menu",
-                            modifier = Modifier
-                                .width(20.dp)
-                                .height(20.dp)
-                                .pointerInput(true) {
-                                    detectTapGestures(onPress = {
-                                        pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
-                                        expanded = true
+                    if (shouldShowOptions) {
+                        Box {
+                            Image(painter = painterResource(id = R.drawable.setting_three_dots_outline),
+                                contentDescription = "menu",
+                                modifier = Modifier
+                                    .width(20.dp)
+                                    .height(20.dp)
+                                    .pointerInput(true) {
+                                        detectTapGestures(onPress = {
+                                            pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
+                                            expanded = true
+                                        })
                                     })
-                                })
 
-                        CustomDropDownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            onDeleteMenuClick = onDeleteTaskClick
-                        )
+                            CustomDropDownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                                onDeleteMenuClick = onDeleteTaskClick
+                            )
+                        }
                     }
                 }
 
@@ -419,9 +423,70 @@ fun TaskSuggestionCard(
                             .height(18.dp)
                             .width(18.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Task added",
+                },
+                    contentPadding = PaddingValues(all = 8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent, contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .background(
+                            color = Color(0xFF212653), shape = RoundedCornerShape(size = 5.dp)
+                        )
+                        .height(32.dp)
+                        .clip(shape = RoundedCornerShape(size = 5.dp))
+                        .semantics {
+                            var contentDescription = ""
+                        }
+
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(
+                            4.dp, Alignment.CenterHorizontally
+                        ), verticalAlignment = Alignment.CenterVertically
+
+                    ) {
+                        val imageLoader = ImageLoader.Builder(LocalContext.current).components {
+                            if (Build.VERSION.SDK_INT >= 28) {
+                                add(ImageDecoderDecoder.Factory())
+                            } else {
+                                add(GifDecoder.Factory())
+                            }
+                        }.build()
+
+                        if (createTaskApiInProgress) {
+                            Image(
+                                painter = rememberAsyncImagePainter(R.drawable.loader, imageLoader),
+                                contentDescription = "Loader",
+                                colorFilter = ColorFilter.tint(Color.White),
+                                modifier = Modifier
+                                    .width(width = 12.dp)
+                                    .height(height = 12.dp)
+                            )
+                        }
+
+                        Text(text = if (createTaskApiInProgress) {
+                            "Adding Task..."
+                        } else {
+                            "Add Task"
+                        }, color = Color.White, style = TextStyle(
+                            fontSize = 12.sp,
+                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                            fontWeight = FontWeight(500),
+                            color = Color(0xFFFFFFFF),
+                            letterSpacing = 0.48.sp,
+                        ), modifier = Modifier.semantics {
+                            contentDescription = ""
+                        })
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .width(60.dp)
+                        .height(32.dp)
+                        .border(1.dp, Color(0xFF5D678D), shape = RoundedCornerShape(4.dp))
+
+                ) {
+                    Text(text = "Cancel",
                         style = TextStyle(
                             fontSize = 12.sp,
                             lineHeight = 24.sp,
@@ -451,76 +516,8 @@ fun TaskSuggestionCard(
                             containerColor = Color.Transparent, contentColor = Color.White
                         ),
                         modifier = Modifier
-                            .background(
-                                color = Color(0xFF212653), shape = RoundedCornerShape(size = 5.dp)
-                            )
-                            .height(32.dp)
-                            .clip(shape = RoundedCornerShape(size = 5.dp))
-                            .semantics {
-                                var contentDescription = ""
-                            }
-
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(
-                                4.dp, Alignment.CenterHorizontally
-                            ), verticalAlignment = Alignment.CenterVertically
-
-                        ) {
-                            val imageLoader = ImageLoader.Builder(LocalContext.current).components {
-                                if (Build.VERSION.SDK_INT >= 28) {
-                                    add(ImageDecoderDecoder.Factory())
-                                } else {
-                                    add(GifDecoder.Factory())
-                                }
-                            }.build()
-
-                            if (createTaskApiInProgress) {
-                                Image(
-                                    painter = rememberAsyncImagePainter(
-                                        R.drawable.loader, imageLoader
-                                    ),
-                                    contentDescription = "Loader",
-                                    colorFilter = ColorFilter.tint(Color.White),
-                                    modifier = Modifier
-                                        .width(width = 12.dp)
-                                        .height(height = 12.dp)
-                                )
-                            }
-
-                            Text(text = if (createTaskApiInProgress) {
-                                "Adding Task..."
-                            } else {
-                                "Add Task"
-                            }, color = Color.White, style = TextStyle(
-                                fontSize = 12.sp,
-                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                                fontWeight = FontWeight(500),
-                                color = Color(0xFFFFFFFF),
-                                letterSpacing = 0.48.sp,
-                            ), modifier = Modifier.semantics {
-                                contentDescription = ""
-                            })
-                        }
-                    }
-                    Box(
-                        modifier = Modifier
-                            .width(60.dp)
-                            .height(32.dp)
-                            .border(1.dp, Color(0xFF5D678D), shape = RoundedCornerShape(4.dp))
-                    ) {
-                        Text(text = "Cancel",
-                            style = TextStyle(
-                                fontSize = 12.sp,
-                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                                fontWeight = FontWeight(500),
-                                color = Color(0xFF5D678D),
-                                letterSpacing = 0.48.sp,
-                            ),
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable { /* Handle button click */ })
-                    }
+                            .padding(8.dp)
+                            .clickable { onCancelTaskClick(id) })
                 }
             }
 
