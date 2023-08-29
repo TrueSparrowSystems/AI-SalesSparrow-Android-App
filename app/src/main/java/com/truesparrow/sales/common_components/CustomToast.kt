@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -31,8 +32,7 @@ import kotlinx.coroutines.launch
 fun CustomToast(
     message: String,
     duration: Int = Toast.LENGTH_SHORT,
-    type: ToastType,
-    testTag: String? = null
+    type: ToastType
 ) {
     var show by remember { mutableStateOf(true) }
     if (show) {
@@ -66,10 +66,7 @@ fun CustomToast(
                     bottom = 10.dp
                 )
                 .zIndex(Float.MAX_VALUE)
-                .semantics {
-                    testTagsAsResourceId = true
-                    testTag
-                }
+
 
         ) {
 
@@ -83,6 +80,11 @@ fun CustomToast(
                     modifier = Modifier
                         .height(24.dp)
                         .width(28.dp)
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = "toast_view_image"
+
+                        }
                 )
                 Text(
                     text = message,
@@ -92,7 +94,13 @@ fun CustomToast(
                         fontFamily = FontFamily(Font(R.font.nunito_regular)),
                         fontWeight = FontWeight(500),
                         color = Color(0xFFFFFFFF),
-                    )
+                    ),
+                    modifier = Modifier
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = "toast_view_text"
+
+                        }
                 )
             }
         }

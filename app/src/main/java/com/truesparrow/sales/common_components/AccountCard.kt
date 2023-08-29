@@ -14,9 +14,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import com.truesparrow.sales.ui.theme.Typography
 import com.truesparrow.sales.ui.theme.eastBay
@@ -27,13 +31,14 @@ import com.truesparrow.sales.util.NoRippleInteractionSource
 import com.truesparrow.sales.R
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun AccountCard(
     accountName: String,
     onAccountCardClick: () -> Unit = {},
     website: String,
-    contactName: String
+    contactName: String,
+    textModifier: Modifier? = null
 ) {
     val context = LocalContext.current
 
@@ -61,10 +66,11 @@ fun AccountCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             CustomText(
-                text = accountName, Typography.titleMedium, color = port_gore
+                text = accountName, Typography.titleMedium, color = port_gore,
+                modifier = textModifier
             )
 
-            if (website.isNotEmpty()){
+            if (website.isNotEmpty()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.link_icon),
@@ -86,7 +92,7 @@ fun AccountCard(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            if (contactName.isNotEmpty()){
+            if (contactName.isNotEmpty()) {
                 CustomText(
                     text = "CONTACT", Typography.titleSmall, color = eastBay.copy(alpha = 0.7f)
                 )

@@ -65,6 +65,7 @@ import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.viewmodals.AccountDetailsViewModal
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AccountDetails(
@@ -192,10 +193,12 @@ fun AccountDetails(
                 }
                 CustomToast(message = "Task Deleted", type = ToastType.Success)
             }
+
             is NetworkResponse.Error -> {
                 CustomToast(message = it.message ?: "Something went wrong", type = ToastType.Error)
                 Log.i("AccountDetails deleteAccount Error", "Failure: ${it.message}")
             }
+
             is NetworkResponse.Loading -> {
                 Log.i("AccountDetails deleteAccount Loading", "Loading")
             }
@@ -244,7 +247,15 @@ fun AccountDetails(
 
         AccountDetailsHeader()
         ContactDetailsHeader()
-        AccountCard(accountName, onAccountCardClick = {}, "", "")
+        AccountCard(
+            accountName,
+            onAccountCardClick = {},
+            "",
+            "",
+            textModifier = Modifier.semantics {
+                testTagsAsResourceId = true
+                testTag = "txt_account_detail_${accountName}"
+            })
         NotesDetailsHeader(accountId, accountName = accountName)
 
         if (isAccountNoteDetailsLoading) {
@@ -458,8 +469,8 @@ fun NotesDetailsHeader(
                 .width(20.dp)
                 .height(20.dp)
                 .semantics {
-                          testTag = "btn_account_detail_add_note"
-                         testTagsAsResourceId = true
+                    testTag = "btn_account_detail_add_note"
+                    testTagsAsResourceId = true
                 }
                 .clickable(
                     interactionSource = MutableInteractionSource(),
@@ -501,8 +512,8 @@ fun AccountDetailsHeader() {
             .width(24.dp)
             .height(24.dp)
             .semantics {
-                       testTag = "btn_account_detail_back"
-                      testTagsAsResourceId = true
+                testTag = "btn_account_detail_back"
+                testTagsAsResourceId = true
             },
         text = "Details",
         textStyle = TextStyle(
@@ -512,7 +523,7 @@ fun AccountDetailsHeader() {
             color = Color(0xFF212653),
         ),
         textModifier = Modifier.semantics {
-           testTag = "txt_account_detail_account_details_title"
+            testTag = "txt_account_detail_account_details_title"
             testTagsAsResourceId = true
         },
         onClick = {
