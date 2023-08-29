@@ -220,8 +220,6 @@ fun NotesScreen(
                 })
 
 
-        Log.i("NotesScreen re-com 0", "NotesScreen: ${getCrmActionLoading} $tasks")
-
         if (getCrmActionLoading) {
             RecommendedSectionHeader(
                 heading = "Getting recommendations",
@@ -229,7 +227,8 @@ fun NotesScreen(
                 crmUserId = crmUserId!!,
                 crmUserName = crmUserName!!,
                 accountId = accountId!!,
-                accountName = accountName!!
+                accountName = accountName!!,
+                testId = "txt_create_note_getting_recommendations"
             )
             Spacer(modifier = Modifier.height(30.dp))
             Column(
@@ -259,7 +258,8 @@ fun NotesScreen(
             EmptyScreen(
                 emptyText = "You are all set, no recommendation for now!",
                 shouldShowIcon = true,
-                height = 95.dp
+                height = 95.dp,
+                testId = ""
             )
         } else {
             Log.i("NotesScreen re com", "NotesScreen: ${tasks.size} $tasks")
@@ -271,6 +271,7 @@ fun NotesScreen(
                     crmUserId = crmUserId!!,
                     accountId = accountId!!,
                     accountName = accountName!!,
+                    testId = "txt_create_note_recommendations"
                 )
 
                 Spacer(modifier = Modifier.height(30.dp))
@@ -359,6 +360,7 @@ fun RecommendedSectionHeader(
     crmUserId: String,
     accountId: String,
     shouldShowPlusIcon: Boolean,
+    testId : String
 ) {
     var recommendedPopup by remember { mutableStateOf(false) }
 
@@ -380,7 +382,12 @@ fun RecommendedSectionHeader(
                 fontFamily = FontFamily(Font(R.font.nunito_regular)),
                 fontWeight = FontWeight(600),
                 color = Color(0xFF212653),
-            )
+            ),
+            textModifier = Modifier.semantics {
+                testTagsAsResourceId = true
+                testTag = testId
+                contentDescription = testId
+            }
         )
         if (shouldShowPlusIcon) {
             Box {

@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -192,10 +193,12 @@ fun AccountDetails(
                 }
                 CustomToast(message = "Task Deleted", type = ToastType.Success)
             }
+
             is NetworkResponse.Error -> {
                 CustomToast(message = it.message ?: "Something went wrong", type = ToastType.Error)
                 Log.i("AccountDetails deleteAccount Error", "Failure: ${it.message}")
             }
+
             is NetworkResponse.Loading -> {
                 Log.i("AccountDetails deleteAccount Loading", "Loading")
             }
@@ -250,9 +253,14 @@ fun AccountDetails(
         if (isAccountNoteDetailsLoading) {
             Loader()
         } else if (notes?.isEmpty() == true || notes == null) {
-            EmptyScreen("Add notes and sync with your salesforce account")
+            EmptyScreen(
+                "Add notes and sync with your salesforce account",
+                testId = "txt_account_detail_add_note_text"
+            )
         } else {
             notes?.forEach { note ->
+
+                var index = 0;
                 NotesCard(
                     firsName = note.creator.split(" ")[0],
                     lastName = note.creator.split(" ")[1],
@@ -260,6 +268,7 @@ fun AccountDetails(
                     notes = note.text_preview,
                     date = note.last_modified_time,
                     noteId = note.id,
+                    index = index++,
                     onClick = {
                         Log.i("AccountDetails", "NoteId: ${note.id}")
                         NavigationService.navigateTo("note_details_screen/${accountId}/${accountName}/${note.id}")
@@ -279,7 +288,7 @@ fun AccountDetails(
         if (isAccountTaskDetailsLoading) {
             Loader()
         } else if (tasks?.isEmpty() == true || tasks == null) {
-            EmptyScreen("Add tasks, set due dates and assign to your team")
+            EmptyScreen("Add tasks, set due dates and assign to your team", testId = "")
         } else {
             tasks?.forEach { task ->
                 TasksCard(
@@ -346,8 +355,14 @@ fun Modifier.dashedBorder(width: Dp, radius: Dp, color: Color) =
         }
     }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EmptyScreen(emptyText: String, shouldShowIcon: Boolean = false, height: Dp = 40.dp) {
+fun EmptyScreen(
+    emptyText: String,
+    shouldShowIcon: Boolean = false,
+    height: Dp = 40.dp,
+    testId: String
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -356,6 +371,11 @@ fun EmptyScreen(emptyText: String, shouldShowIcon: Boolean = false, height: Dp =
             .padding(0.75.dp)
             .fillMaxWidth()
             .height(height)
+            .semantics {
+                testTagsAsResourceId = true
+                testTag = testId
+                contentDescription = testId
+            }
             .padding(start = 14.dp, top = 12.dp, end = 14.dp, bottom = 12.dp)
     ) {
 
@@ -442,24 +462,36 @@ fun NotesDetailsHeader(
             imageContentDescription = "buildings",
             imageModifier = Modifier
                 .width(17.dp)
-                .height(17.dp),
+                .height(17.dp)
+                .semantics {
+                    testTag = "img_account_detail_note_icon"
+                    contentDescription = "img_account_detail_note_icon"
+                    testTagsAsResourceId = true
+                },
             text = "Notes",
             textStyle = TextStyle(
                 fontSize = 16.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_regular)),
                 fontWeight = FontWeight(600),
                 color = Color(0xFF212653),
-            )
+            ),
+            textModifier =Modifier
+                .semantics {
+                    testTag = "txt_account_detail_notes_title"
+                    contentDescription = "txt_account_detail_notes_title"
+                    testTagsAsResourceId = true
+                }
         )
         Image(
             painter = painterResource(id = R.drawable.add_icon),
-            contentDescription = "img_account_detail_add_note_icon",
+            contentDescription = "img_account_detail_note_icon",
             modifier = Modifier
                 .width(20.dp)
                 .height(20.dp)
                 .semantics {
-                          testTag = "btn_account_detail_add_note"
-                         testTagsAsResourceId = true
+                    testTag = "img_account_detail_create_note_icon"
+                    contentDescription = "img_account_detail_create_note_icon"
+                    testTagsAsResourceId = true
                 }
                 .clickable(
                     interactionSource = MutableInteractionSource(),
@@ -473,6 +505,7 @@ fun NotesDetailsHeader(
 }
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ContactDetailsHeader() {
     CustomTextWithImage(
@@ -480,15 +513,24 @@ fun ContactDetailsHeader() {
         imageContentDescription = "buildings",
         imageModifier = Modifier
             .width(17.dp)
-            .height(17.dp),
+            .height(17.dp)
+            .semantics {
+                testTagsAsResourceId = true
+                testTag = "img_account_detail_account_icon"
+                contentDescription = "img_account_detail_account_icon"
+            },
         text = "Account Details",
         textStyle = TextStyle(
             fontSize = 16.sp,
             fontFamily = FontFamily(Font(R.font.nunito_regular)),
             fontWeight = FontWeight(600),
             color = Color(0xFF212653),
-        )
-    )
+        ),
+        textModifier = Modifier.semantics {
+            testTagsAsResourceId = true
+            testTag = "txt_account_detail_account_details_title"
+            contentDescription = "txt_account_detail_account_details_title"
+        })
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -501,8 +543,8 @@ fun AccountDetailsHeader() {
             .width(24.dp)
             .height(24.dp)
             .semantics {
-                       testTag = "btn_account_detail_back"
-                      testTagsAsResourceId = true
+                testTag = "btn_account_detail_back"
+                testTagsAsResourceId = true
             },
         text = "Details",
         textStyle = TextStyle(
@@ -512,7 +554,7 @@ fun AccountDetailsHeader() {
             color = Color(0xFF212653),
         ),
         textModifier = Modifier.semantics {
-           testTag = "txt_account_detail_account_details_title"
+            testTag = "txt_account_detail_account_details_title"
             testTagsAsResourceId = true
         },
         onClick = {
