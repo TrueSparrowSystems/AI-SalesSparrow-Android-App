@@ -2,9 +2,7 @@ package com.truesparrow.sales.common_components
 
 import android.app.DatePickerDialog
 import android.os.Build
-import android.util.Log
 import android.widget.DatePicker
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -42,6 +42,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -56,12 +58,12 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.truesparrow.sales.R
 import com.truesparrow.sales.services.NavigationService
-import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.viewmodals.GlobalStateViewModel
-import com.truesparrow.sales.viewmodals.TasksViewModal
+import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 import java.util.Calendar
 import java.util.Date
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TaskSuggestionCard(
     id: String,
@@ -70,12 +72,22 @@ fun TaskSuggestionCard(
     accountName: String,
     shouldShowOptions: Boolean = false,
     globalStateViewModel: GlobalStateViewModel,
-    onCancelTaskClick: (id: String) -> Unit
+    onCancelTaskClick: (id: String) -> Unit,
+    onAddTaskClick: (
+        crmOrganizationUserId: String, description: String, dueDate: String
+    ) -> Unit,
+    createTaskApiInProgress: Boolean = false,
+    isTaskAdded: Boolean = false
 ) {
+
+
     var expanded by remember {
         mutableStateOf(false)
     }
 
+    val authenticationViewModal: AuthenticationViewModal = hiltViewModel()
+    val currentUser = authenticationViewModal.currentUserLiveData?.observeAsState()?.value
+    val currentUserName = currentUser?.data?.current_user?.name ?: "John ve"
     val taskDesc = globalStateViewModel.getTaskDescById(id)?.value ?: ""
     val userId = globalStateViewModel.getCrmUserIdById(id)?.value ?: ""
     val userName = globalStateViewModel.getCrmUserNameById(id)?.value ?: "Select"
@@ -118,47 +130,14 @@ fun TaskSuggestionCard(
     val dueDate = remember { mutableStateOf(dDate) }
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            dueDate.value = "$mYear-${mMonth + 1}-$mDayOfMonth"
+            val formattedMonth = String.format("%02d", mMonth + 1)
+            val formattedDay = String.format("%02d", mDayOfMonth)
+            dueDate.value = "$mYear-$formattedMonth-$formattedDay"
         }, dueDateYear, dueDateMonth, dueDateDay
     )
 
     globalStateViewModel.setValuesById(id, dueDate = dueDate.value)
-
-
-    val tasksViewModel: TasksViewModal = hiltViewModel()
-    var createTaskApiInProgress by remember { mutableStateOf(false) }
-    var createTaskApiIsSuccess by remember { mutableStateOf(false) }
-
-
-    val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
-
-    createTaskResponse?.let { response ->
-        when (response) {
-            is NetworkResponse.Success -> {
-                createTaskApiInProgress = false;
-                createTaskApiIsSuccess = true
-                CustomToast(
-                    message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
-                )
-            }
-
-            is NetworkResponse.Error -> {
-                createTaskApiInProgress = false;
-                CustomToast(
-                    message = response.message ?: "Failed to create the task",
-                    duration = Toast.LENGTH_SHORT,
-                    type = ToastType.Error
-                )
-            }
-
-            is NetworkResponse.Loading -> {
-                createTaskApiInProgress = true;
-                Log.d("TaskScreen", "Loading")
-            }
-        }
-    }
-
-
+    mDatePickerDialog.datePicker.minDate = dueDateCalendar.timeInMillis
 
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
@@ -191,8 +170,8 @@ fun TaskSuggestionCard(
                 ) {
                     UserAvatar(
                         id = "1",
-                        firstName = "D",
-                        lastName = "S",
+                        firstName = currentUserName!!.split(" ")[0],
+                        lastName = currentUserName!!.split(" ")[1],
                         size = 18.dp,
                         textStyle = TextStyle(
                             fontSize = 5.24.sp,
@@ -204,7 +183,7 @@ fun TaskSuggestionCard(
                         userAvatarTestId = "user_avatar_note_details"
                     )
                     Text(
-                        text = "John Doe", style = TextStyle(
+                        text = currentUserName, style = TextStyle(
                             fontSize = 14.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(500),
@@ -219,7 +198,7 @@ fun TaskSuggestionCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Tuesday, 5:49pm", style = TextStyle(
+                        text = "Just Now", style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(300),
@@ -260,9 +239,11 @@ fun TaskSuggestionCard(
                     .background(color = Color(0xFFF6F7F8), shape = RoundedCornerShape(size = 5.dp))
                     .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
                     .clickable {
-                        NavigationService.navigateTo(
-                            "task_screen/${accountId}/${id}"
-                        )
+                        if (globalStateViewModel.getIsTaskCreatedById(id)?.value != true) {
+                            NavigationService.navigateTo(
+                                "task_screen/${accountId}/${accountName}/${id}"
+                            )
+                        }
                     }
 
             ) {
@@ -291,9 +272,18 @@ fun TaskSuggestionCard(
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable {
-                        toggleSearchNameBottomSheet()
-                    }) {
+                    modifier = Modifier
+                        .clickable {
+                            if (globalStateViewModel.getIsTaskCreatedById(id)?.value != true) {
+                                toggleSearchNameBottomSheet()
+                            }
+
+                        }
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = "btn_create_note_assign_to"
+                            contentDescription = "btn_create_note_assign_to"
+                        }) {
 
                     Text(
                         text = "Assign to", style = TextStyle(
@@ -302,7 +292,12 @@ fun TaskSuggestionCard(
                             fontWeight = FontWeight(600),
                             color = Color(0xFF444A62),
                             letterSpacing = 0.48.sp,
-                        )
+                        ),
+                        modifier = Modifier.semantics {
+                            testTagsAsResourceId = true
+                            testTag = "txt_create_note_assign_to"
+                            contentDescription = "txt_create_note_assign_to"
+                        }
                     )
 
                     Image(
@@ -312,31 +307,50 @@ fun TaskSuggestionCard(
                             .width(20.dp)
                             .height(20.dp)
                     )
-
-                    UserAvatar(
-                        id = "1",
-                        firstName = "D",
-                        lastName = "S",
-                        size = 17.dp,
-                        textStyle = TextStyle(
-                            fontSize = 5.24.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(700),
-                            color = Color(0xFF000000),
-                            letterSpacing = 0.21.sp,
-                        ),
-                        userAvatarTestId = "user_avatar_search_user"
-                    )
-                    Text(
-                        text = userName.ifEmpty {
-                            "Select"
-                        }, style = TextStyle(
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(700),
-                            color = Color(0xFFDD1A77),
-                            letterSpacing = 0.48.sp,
+                    if (userId.isNotEmpty()) {
+                        UserAvatar(
+                            id = userId,
+                            firstName = userName.split(" ")[0],
+                            lastName = userName.split(" ")[0],
+                            size = 18.dp,
+                            textStyle = TextStyle(
+                                fontSize = 5.24.sp,
+                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                                fontWeight = FontWeight(700),
+                                color = Color(0xFF000000),
+                                letterSpacing = 0.21.sp,
+                            ),
+                            userAvatarTestId = "user_avatar_note_details"
                         )
+                    }
+                    Text(text = userName.ifEmpty {
+                        "Select"
+                    }, style = TextStyle(
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                        fontWeight = FontWeight(700),
+                        color = Color(0xFFDD1A77),
+                        letterSpacing = 0.48.sp,
+                    ), modifier = Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag = if (userName.isEmpty()) {
+                            "txt_create_note_select_account"
+                        } else {
+                            "txt_create_note_selected_account"
+                        }
+                        contentDescription = if (userName.isEmpty()) {
+                            "txt_create_note_select_account"
+                        } else {
+                            "txt_create_note_selected_account"
+                        }
+                    })
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.up_arrow),
+                        contentDescription = "Up arrow",
+                        modifier = Modifier
+                            .width(8.dp)
+                            .height(8.dp)
                     )
                 }
             }
@@ -354,10 +368,17 @@ fun TaskSuggestionCard(
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable {
-                        mDatePickerDialog.show()
-                    }) {
-
+                    modifier = Modifier
+                        .clickable {
+                            if (globalStateViewModel.getIsTaskCreatedById(id)?.value != true) {
+                                mDatePickerDialog.show()
+                            }
+                        }
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = "btn_create_note_due"
+                            contentDescription = "btn_create_note_due"
+                        }) {
                     Text(
                         text = "Due", style = TextStyle(
                             fontSize = 12.sp,
@@ -365,7 +386,12 @@ fun TaskSuggestionCard(
                             fontWeight = FontWeight(600),
                             color = Color(0xFF444A62),
                             letterSpacing = 0.48.sp,
-                        )
+                        ),
+                        modifier = Modifier.semantics {
+                            testTagsAsResourceId = true
+                            testTag = "txt_create_note_due"
+                            contentDescription = "txt_create_note_due"
+                        }
                     )
 
                     Image(
@@ -377,7 +403,11 @@ fun TaskSuggestionCard(
                     )
 
                     Text(
-                        text = dueDate.value, style = TextStyle(
+                        text = if (dueDate.value.isEmpty()) {
+                            "Select"
+                        } else {
+                            dueDate.value.replace("-", "/")
+                        }, style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(700),
@@ -385,95 +415,166 @@ fun TaskSuggestionCard(
                             letterSpacing = 0.48.sp,
                         )
                     )
+                    Image(
+                        painter = painterResource(id = R.drawable.calendar),
+                        contentDescription = "calendar",
+                        modifier = Modifier
+                            .width(20.dp)
+                            .height(20.dp)
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(onClick = {
-                    createTaskApiInProgress = true
-                    tasksViewModel.createTask(
-                        accountId = accountId!!,
-                        crmOrganizationUserId = userId,
-                        description = taskDesc,
-                        dueDate = dDate,
-                    )
-                },
-                    contentPadding = PaddingValues(all = 8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent, contentColor = Color.White
-                    ),
-                    modifier = Modifier
-                        .background(
-                            color = Color(0xFF212653), shape = RoundedCornerShape(size = 5.dp)
-                        )
-                        .height(32.dp)
-                        .clip(shape = RoundedCornerShape(size = 5.dp))
-                        .semantics {
-                            var contentDescription = ""
-                        }
 
-                ) {
+            if (isTaskAdded) {
+                Box(modifier = Modifier.fillMaxSize()) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(
-                            4.dp, Alignment.CenterHorizontally
-                        ), verticalAlignment = Alignment.CenterVertically
-
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(35.dp)
+                            .background(Color(0xFF4CAF50))
                     ) {
-                        val imageLoader = ImageLoader.Builder(LocalContext.current).components {
-                            if (Build.VERSION.SDK_INT >= 28) {
-                                add(ImageDecoderDecoder.Factory())
-                            } else {
-                                add(GifDecoder.Factory())
-                            }
-                        }.build()
-
-                        if (createTaskApiInProgress) {
-                            Image(
-                                painter = rememberAsyncImagePainter(R.drawable.loader, imageLoader),
-                                contentDescription = "Loader",
-                                colorFilter = ColorFilter.tint(Color.White),
-                                modifier = Modifier
-                                    .width(width = 12.dp)
-                                    .height(height = 12.dp)
+                        Image(
+                            painter = painterResource(id = R.drawable.success_toast_check),
+                            contentDescription = "Success",
+                            modifier = Modifier
+                                .height(18.dp)
+                                .width(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Task added",
+                            modifier = Modifier.semantics {
+                                testTagsAsResourceId = true
+                                testTag = "txt_create_note_task_added"
+                                contentDescription = "txt_create_note_task_added"
+                            },
+                            style = TextStyle(
+                                fontSize = 12.sp, lineHeight = 24.sp, color = Color(0xFF444A62)
                             )
-                        }
-
-                        Text(text = if (createTaskApiInProgress) {
-                            "Adding Task..."
-                        } else {
-                            "Add Task"
-                        }, color = Color.White, style = TextStyle(
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(500),
-                            color = Color(0xFFFFFFFF),
-                            letterSpacing = 0.48.sp,
-                        ), modifier = Modifier.semantics {
-                            contentDescription = ""
-                        })
+                        )
                     }
                 }
-                Box(
-                    modifier = Modifier
-                        .width(60.dp)
-                        .height(32.dp)
-                        .border(1.dp, Color(0xFF5D678D), shape = RoundedCornerShape(4.dp))
-
+            } else {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Cancel",
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(500),
-                            color = Color(0xFF5D678D),
-                            letterSpacing = 0.48.sp,
+                    Button(onClick = {
+                        onAddTaskClick(
+                            userId,
+                            taskDesc,
+                            dDate,
+                        )
+                    },
+                        contentPadding = PaddingValues(all = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent, contentColor = Color.White
                         ),
                         modifier = Modifier
-                            .padding(8.dp)
-                            .clickable { onCancelTaskClick(id) })
+                            .background(
+                                color = Color(0xFF212653), shape = RoundedCornerShape(size = 5.dp)
+                            )
+                            .height(32.dp)
+                            .clip(shape = RoundedCornerShape(size = 5.dp))
+                            .semantics {
+                            testTagsAsResourceId = true
+                            testTag = if (createTaskApiInProgress) {
+                                "txt_create_note_adding_task"
+                            } else {
+                                "btn_create_note_add_task"
+                            }
+                            contentDescription = if (createTaskApiInProgress) {
+                                "txt_create_note_adding_task"
+                            } else {
+                                "btn_create_note_add_task"
+                            }
+                        }
+
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(
+                                4.dp, Alignment.CenterHorizontally
+                            ), verticalAlignment = Alignment.CenterVertically
+
+                        ) {
+                            val imageLoader = ImageLoader.Builder(LocalContext.current).components {
+                                if (Build.VERSION.SDK_INT >= 28) {
+                                    add(ImageDecoderDecoder.Factory())
+                                } else {
+                                    add(GifDecoder.Factory())
+                                }
+                            }.build()
+
+                            if (createTaskApiInProgress) {
+                                Image(
+                                    painter = rememberAsyncImagePainter(
+                                        R.drawable.loader, imageLoader
+                                    ),
+                                    contentDescription = "Loader",
+                                    colorFilter = ColorFilter.tint(Color.White),
+                                    modifier = Modifier
+                                        .width(width = 12.dp)
+                                        .height(height = 12.dp)
+                                )
+                            }
+
+                            Text(text = if (createTaskApiInProgress) {
+                                "Adding Task..."
+                            } else {
+                                "Add Task"
+                            }, color = Color.White, style = TextStyle(
+                                fontSize = 12.sp,
+                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                                fontWeight = FontWeight(500),
+                                color = Color(0xFFFFFFFF),
+                                letterSpacing = 0.48.sp,
+                            ), modifier = Modifier.semantics {
+                                testTagsAsResourceId = true
+                                testTag = if (!createTaskApiInProgress) {
+                                    "txt_create_note_add_task"
+                                } else {
+                                    "txt_create_note_adding_task"
+                                }
+                                contentDescription = if (!createTaskApiInProgress) {
+                                    "txt_create_note_add_task"
+                                } else {
+                                    "txt_create_note_adding_task"
+                                }
+                            })
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .width(60.dp)
+                            .height(32.dp)
+                            .border(1.dp, Color(0xFF5D678D), shape = RoundedCornerShape(4.dp))
+                            .semantics {
+                                testTagsAsResourceId = true
+                                testTag = "btn_create_note_cancel"
+                                contentDescription = "btn_create_note_cancel"
+                            }
+
+                    ) {
+                        Text(text = "Cancel",
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                                fontWeight = FontWeight(500),
+                                color = Color(0xFF5D678D),
+                                letterSpacing = 0.48.sp,
+                            ),
+                            modifier = Modifier
+                                .padding(8.dp) .semantics {
+                                    testTagsAsResourceId = true
+                                    testTag = "txt_create_note_cancel"
+                                    contentDescription = "txt_create_note_cancel"
+                                }
+                                .clickable { onCancelTaskClick(id) })
+
+                    }
                 }
             }
         }

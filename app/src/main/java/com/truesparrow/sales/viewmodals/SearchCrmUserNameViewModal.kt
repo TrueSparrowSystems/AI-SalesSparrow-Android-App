@@ -40,7 +40,7 @@ class SearchCrmUserNameViewModal @Inject constructor(
         id : String
     ) {
         if (isNewTask) {
-            NavigationService.navigateTo("task_screen/${accountId}/${id}")
+            NavigationService.navigateTo("task_screen/${accountId}/${accountName}/${id}")
         } else {
             NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/true")
         }

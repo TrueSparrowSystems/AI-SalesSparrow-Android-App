@@ -72,6 +72,7 @@ import java.util.Date
 @Composable
 fun TaskScreen(
     accountId: String? = null,
+    accountName: String? = null,
     id: String = "1",
     globalStateViewModel: GlobalStateViewModel
 ) {
@@ -100,6 +101,7 @@ fun TaskScreen(
             is NetworkResponse.Success -> {
                 createTaskApiInProgress = false
                 createTaskApiIsSuccess = true
+                globalStateViewModel.setValuesById(id, isTaskCreated = true)
                 CustomToast(
                     message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
@@ -134,6 +136,7 @@ fun TaskScreen(
         AddTaskContent(
             id = id,
             accountId = accountId,
+            accountName = accountName,
             crmUserName = globalStateViewModel.getCrmUserNameById(id)?.value ?: "Select",
             crmUserId = crmUserId,
             dueDate = dueDate,
@@ -164,7 +167,9 @@ fun AddTaskContent(
     dueDate: String,
     globalStateViewModel: GlobalStateViewModel,
     id: String,
-    accountId : String? = null
+    accountId: String? = null,
+    accountName: String? = null
+
 ) {
 
     var searchNameBottomSheetVisible by remember { mutableStateOf(false) }
@@ -178,6 +183,7 @@ fun AddTaskContent(
         SearchNameBottomSheet(
             toggleSearchNameBottomSheet,
             accountId = accountId!!,
+            accountName = accountName!!,
             isNewTask = true,
             globalStateViewModel = globalStateViewModel,
             id = id
@@ -199,11 +205,13 @@ fun AddTaskContent(
 
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
-            selectedDueDate.value = "$mYear-${mMonth + 1}-$mDayOfMonth"
+            val formattedDay = String.format("%02d", mDayOfMonth)
+            val formattedMonth = String.format("%02d", mMonth + 1)
+            selectedDueDate.value = "$mYear-$formattedMonth-$formattedDay"
         }, dueDateYear, dueDateMonth, dueDateDay
     )
-
     globalStateViewModel.setValuesById(id, dueDate = selectedDueDate.value)
+    mDatePickerDialog.datePicker.minDate = dueDateCalendar.timeInMillis
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
@@ -233,6 +241,7 @@ fun AddTaskContent(
                 .border(
                     width = 1.dp, color = Color(0xFFE9E9E9), shape = RoundedCornerShape(size = 4.dp)
                 )
+                .width(180.dp)
 
         ) {
             Button(onClick = {
@@ -247,12 +256,12 @@ fun AddTaskContent(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (id != "1") {
+                    if(crmUserId.isNotEmpty()){
                         UserAvatar(
-                            id = "1",
-                            firstName = "D",
-                            lastName = "S",
-                            size = 17.dp,
+                            id = crmUserId,
+                            firstName = crmUserName.split(" ")[0],
+                            lastName =  crmUserName.split(" ")[0],
+                            size = 18.dp,
                             textStyle = TextStyle(
                                 fontSize = 5.24.sp,
                                 fontFamily = FontFamily(Font(R.font.nunito_regular)),
@@ -260,7 +269,7 @@ fun AddTaskContent(
                                 color = Color(0xFF000000),
                                 letterSpacing = 0.21.sp,
                             ),
-                            userAvatarTestId = ""
+                            userAvatarTestId = "user_avatar_note_details"
                         )
                     }
 
@@ -329,7 +338,7 @@ fun AddTaskContent(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 interactionSource = NoRippleInteractionSource(),
                 modifier = Modifier
-                    .width(160.dp)
+                    .width(180.dp)
                     .semantics {
                         contentDescription = "btn_select_account"
                     }) {
@@ -337,8 +346,10 @@ fun AddTaskContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = selectedDueDate.value.ifEmpty {
-                            dueDate
+                        text = selectedDueDate.value.replace("-","/").ifEmpty {
+                            dueDate.replace("-","/").ifEmpty {
+                                "Select"
+                            }
                         },
                         color = Color(0xff444A62),
                         style = TextStyle(
@@ -347,7 +358,7 @@ fun AddTaskContent(
                             fontFamily = customFontFamily,
                         ),
                     )
-                    Spacer(modifier = Modifier.width(40.dp))
+                    Spacer(modifier = Modifier.weight(1f))
                     Image(
                         painter = painterResource(id = R.drawable.calendar),
                         contentDescription = "calendar",
@@ -368,8 +379,8 @@ fun AddTaskContent(
 fun AddTaskHeader(
     createTaskApiInProgress: Boolean,
     createTasksApiIsSuccess: Boolean,
-    accountId : String? = null,
-    globalStateViewModel : GlobalStateViewModel,
+    accountId: String? = null,
+    globalStateViewModel: GlobalStateViewModel,
     id: String
 ) {
 
@@ -422,7 +433,7 @@ fun AddTaskHeader(
                 .background(
                     color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
                 )
-                .width(92.dp)
+                .width(112.dp)
                 .height(46.dp)
                 .clip(shape = RoundedCornerShape(size = 5.dp))
                 .semantics {
@@ -454,17 +465,17 @@ fun AddTaskHeader(
                         contentDescription = "Loader",
                         colorFilter = ColorFilter.tint(Color.White),
                         modifier = Modifier
-                            .width(width = 17.dp)
+                            .width(width = 12.dp)
                             .height(height = 12.dp)
                     )
 
                 }
                 Text(text = if (createTaskApiInProgress) {
-                    "Adding Task..."
+                    "Saving Task..."
                 } else if (createTasksApiIsSuccess) {
                     "Saved"
                 } else {
-                    "Add Task"
+                    "Save Task"
                 }, color = Color.White, style = TextStyle(
                     fontSize = 12.sp,
                     fontFamily = FontFamily(Font(R.font.nunito_regular)),
