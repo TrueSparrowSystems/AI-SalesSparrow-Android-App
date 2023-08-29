@@ -70,7 +70,8 @@ fun NotesScreen(
     id: String,
     viewModel: GlobalStateViewModel,
 ) {
-    var note by remember { mutableStateOf("") }
+    var noteDesc = viewModel.getNoteDesc().observeAsState(initial = "")
+    val note by remember { mutableStateOf(noteDesc) }
 
     val crmUserId = viewModel.getCrmUserIdById(id)?.value ?: ""
     val crmUserName = viewModel.getCrmUserNameById(id)?.value ?: "Select"
@@ -165,7 +166,7 @@ fun NotesScreen(
                 )
 
                 LaunchedEffect(true) {
-                    notesViewModel.getCrmActions(note);
+                    notesViewModel.getCrmActions(note.value);
                 }
             }
 
@@ -193,7 +194,7 @@ fun NotesScreen(
             .verticalScroll(state = scrollState, enabled = true)
     ) {
         Header(
-            note = note,
+            note = note.value,
             accountName = accountName,
             accountId = accountId!!,
             saveNoteApiInProgress = saveNoteApiInProgress,
@@ -203,9 +204,9 @@ fun NotesScreen(
             accountName = accountName, isAccountSelectionEnabled = isAccountSelectionEnabled
         )
 
-        EditableTextField(note = note,
+        EditableTextField(note = note.value,
             onValueChange = {
-                note = it
+               viewModel.setNoteDesc(it)
             },
             placeholderText = "Add A Note",
             readOnly = saveNoteApiIsSuccess,

@@ -10,6 +10,12 @@ class GlobalStateViewModel : ViewModel() {
 
     private val recommdedTasksMap = mutableMapOf<String, DataValues>()
 
+    val noteDesc = MutableLiveData<String>()
+    fun getNoteDesc(): LiveData<String> = noteDesc
+    fun setNoteDesc(desc : String){
+        noteDesc.value = desc
+    }
+
     data class DataValues(
         val taskDesc: MutableLiveData<String> = MutableLiveData(),
         val crmUserId: MutableLiveData<String> = MutableLiveData(),
