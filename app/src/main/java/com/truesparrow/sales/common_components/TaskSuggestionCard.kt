@@ -25,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
@@ -54,6 +56,7 @@ import coil.decode.ImageDecoderDecoder
 import com.truesparrow.sales.R
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.viewmodals.GlobalStateViewModel
+import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 import java.util.Calendar
 import java.util.Date
 
@@ -81,6 +84,9 @@ fun TaskSuggestionCard(
         mutableStateOf(false)
     }
 
+    val authenticationViewModal: AuthenticationViewModal = hiltViewModel()
+    val currentUser = authenticationViewModal.currentUserLiveData?.observeAsState()?.value
+    val currentUserName = currentUser?.data?.current_user?.name ?: "John ve"
     val taskDesc = globalStateViewModel.getTaskDescById(id)?.value ?: ""
     val userId = globalStateViewModel.getCrmUserIdById(id)?.value ?: ""
     val userName = globalStateViewModel.getCrmUserNameById(id)?.value ?: "Select"
@@ -163,8 +169,8 @@ fun TaskSuggestionCard(
                 ) {
                     UserAvatar(
                         id = "1",
-                        firstName = "D",
-                        lastName = "S",
+                        firstName = currentUserName!!.split(" ")[0],
+                        lastName = currentUserName!!.split(" ")[1],
                         size = 18.dp,
                         textStyle = TextStyle(
                             fontSize = 5.24.sp,
@@ -176,7 +182,7 @@ fun TaskSuggestionCard(
                         userAvatarTestId = "user_avatar_note_details"
                     )
                     Text(
-                        text = "John Doe", style = TextStyle(
+                        text = currentUserName , style = TextStyle(
                             fontSize = 14.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(500),
