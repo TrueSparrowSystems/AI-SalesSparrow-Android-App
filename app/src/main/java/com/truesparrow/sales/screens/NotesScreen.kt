@@ -73,12 +73,13 @@ fun NotesScreen(
     viewModel: GlobalStateViewModel,
 ) {
 
-    var note by remember { mutableStateOf("") }
     val crmUserId = viewModel.getCrmUserIdById(id)?.value ?: ""
     val crmUserName = viewModel.getCrmUserNameById(id)?.value ?: "Select"
 
 
     val notesViewModel: NotesViewModel = hiltViewModel()
+    val note by notesViewModel.note
+
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
     var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
 
@@ -206,7 +207,7 @@ fun NotesScreen(
 
         EditableTextField(note = note,
             onValueChange = {
-                note = it
+                notesViewModel.note.value = it
             },
             placeholderText = "Add A Note",
             readOnly = saveNoteApiIsSuccess,

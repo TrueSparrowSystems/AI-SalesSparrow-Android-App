@@ -1,6 +1,7 @@
 package com.truesparrow.sales.viewmodals
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,6 +20,8 @@ import javax.inject.Inject
 class NotesViewModel @Inject constructor(
     private val notesRepository: NotesRepository
 ) : ViewModel() {
+
+    val note = mutableStateOf("")
 
     val notesLiveData: LiveData<NetworkResponse<SaveNote>>
         get() = notesRepository.notesLiveData

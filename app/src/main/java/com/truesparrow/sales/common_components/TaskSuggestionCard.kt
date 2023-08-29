@@ -2,7 +2,6 @@ package com.truesparrow.sales.common_components
 
 import android.app.DatePickerDialog
 import android.os.Build
-import android.util.Log
 import android.widget.DatePicker
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -78,7 +77,6 @@ fun TaskSuggestionCard(
     isTaskAdded: Boolean = false
 ) {
 
-    Log.i("TaskSuggestionCard", "TaskSuggestionCard: $id ${globalStateViewModel.getIsTaskCreatedById(id)?.value} ${isTaskAdded}")
 
     var expanded by remember {
         mutableStateOf(false)
@@ -197,7 +195,7 @@ fun TaskSuggestionCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Tuesday, 5:49pm", style = TextStyle(
+                        text = "Just Now", style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(300),
