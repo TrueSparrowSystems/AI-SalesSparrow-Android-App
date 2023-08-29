@@ -226,7 +226,7 @@ fun CustomBottomSheetContainer(
                                     name = recordInfo.name,
                                     showAddNote,
                                     accountRowTestId = "btn_search_account_name_${recordInfo.name}",
-                                    addNoteButtonTestId = "btn_search_account_add_note_${recordInfo.name}",
+                                    addNoteButtonTestId = "btn_search_add_note_${recordInfo.name}",
                                     onAccountRowClick = {
                                         searchAccountViewModal.onAccountRowClicked(
                                             recordInfo.name,
