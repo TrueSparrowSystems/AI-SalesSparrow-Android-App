@@ -303,6 +303,7 @@ fun NotesScreen(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RecommendedSectionHeader(
     heading: String,

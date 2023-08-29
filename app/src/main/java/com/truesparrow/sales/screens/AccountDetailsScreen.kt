@@ -453,12 +453,12 @@ fun NotesDetailsHeader(
         )
         Image(
             painter = painterResource(id = R.drawable.add_icon),
-            contentDescription = "add_notes",
+            contentDescription = "img_account_detail_add_note_icon",
             modifier = Modifier
                 .width(20.dp)
                 .height(20.dp)
                 .semantics {
-                          testTag = "img_account_detail_add_note_icon"
+                          testTag = "btn_account_detail_add_note"
                          testTagsAsResourceId = true
                 }
                 .clickable(
