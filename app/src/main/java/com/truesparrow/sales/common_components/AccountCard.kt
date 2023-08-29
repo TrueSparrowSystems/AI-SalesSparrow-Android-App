@@ -17,6 +17,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import com.truesparrow.sales.ui.theme.Typography
 import com.truesparrow.sales.ui.theme.eastBay
@@ -25,6 +29,7 @@ import com.truesparrow.sales.ui.theme.whisper
 import com.truesparrow.sales.ui.theme.white
 import com.truesparrow.sales.util.NoRippleInteractionSource
 import com.truesparrow.sales.R
+import com.truesparrow.sales.ui.theme.walkaway_gray
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,12 +61,21 @@ fun AccountCard(
     ) {
         Column(Modifier.padding(14.dp)) {
             CustomText(
-                text = "ACCOUNT", Typography.titleSmall, color = eastBay.copy(alpha = 0.7f)
+                text = "ACCOUNT", Typography.titleSmall, color = eastBay.copy(alpha = 0.7f), modifier = Modifier
+                    .semantics {
+                        testTag = "txt_account_detail_account_text"
+                        contentDescription = "txt_account_detail_account_text"
+                    }
             )
             Spacer(modifier = Modifier.height(8.dp))
 
+
             CustomText(
-                text = accountName, Typography.titleMedium, color = port_gore
+                text = accountName, Typography.labelMedium, color = walkaway_gray , modifier = Modifier
+                    .semantics {
+                        testTag = accountName
+                        contentDescription = accountName
+                    }
             )
 
             if (website.isNotEmpty()){

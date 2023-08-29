@@ -30,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -41,6 +42,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -60,6 +63,7 @@ import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 import java.util.Calendar
 import java.util.Date
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TaskSuggestionCard(
     id: String,
@@ -268,12 +272,18 @@ fun TaskSuggestionCard(
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable {
-                        if (globalStateViewModel.getIsTaskCreatedById(id)?.value != true) {
-                            toggleSearchNameBottomSheet()
-                        }
+                    modifier = Modifier
+                        .clickable {
+                            if (globalStateViewModel.getIsTaskCreatedById(id)?.value != true) {
+                                toggleSearchNameBottomSheet()
+                            }
 
-                    }) {
+                        }
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = "btn_create_note_assign_to"
+                            contentDescription = "btn_create_note_assign_to"
+                        }) {
 
                     Text(
                         text = "Assign to", style = TextStyle(
@@ -282,7 +292,12 @@ fun TaskSuggestionCard(
                             fontWeight = FontWeight(600),
                             color = Color(0xFF444A62),
                             letterSpacing = 0.48.sp,
-                        )
+                        ),
+                        modifier = Modifier.semantics {
+                            testTagsAsResourceId = true
+                            testTag = "txt_create_note_assign_to"
+                            contentDescription = "txt_create_note_assign_to"
+                        }
                     )
 
                     Image(
@@ -308,17 +323,27 @@ fun TaskSuggestionCard(
                             userAvatarTestId = "user_avatar_note_details"
                         )
                     }
-                    Text(
-                        text = userName.ifEmpty {
-                            "Select"
-                        }, style = TextStyle(
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(700),
-                            color = Color(0xFFDD1A77),
-                            letterSpacing = 0.48.sp,
-                        )
-                    )
+                    Text(text = userName.ifEmpty {
+                        "Select"
+                    }, style = TextStyle(
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                        fontWeight = FontWeight(700),
+                        color = Color(0xFFDD1A77),
+                        letterSpacing = 0.48.sp,
+                    ), modifier = Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag = if (userName.isEmpty()) {
+                            "txt_create_note_select_account"
+                        } else {
+                            "txt_create_note_selected_account"
+                        }
+                        contentDescription = if (userName.isEmpty()) {
+                            "txt_create_note_select_account"
+                        } else {
+                            "txt_create_note_selected_account"
+                        }
+                    })
                     Spacer(modifier = Modifier.height(4.dp))
                     Image(
                         painter = painterResource(id = R.drawable.up_arrow),
@@ -343,11 +368,17 @@ fun TaskSuggestionCard(
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable {
-                        if (globalStateViewModel.getIsTaskCreatedById(id)?.value != true) {
-                            mDatePickerDialog.show()
+                    modifier = Modifier
+                        .clickable {
+                            if (globalStateViewModel.getIsTaskCreatedById(id)?.value != true) {
+                                mDatePickerDialog.show()
+                            }
                         }
-                    }) {
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = "btn_create_note_due"
+                            contentDescription = "btn_create_note_due"
+                        }) {
                     Text(
                         text = "Due", style = TextStyle(
                             fontSize = 12.sp,
@@ -355,7 +386,12 @@ fun TaskSuggestionCard(
                             fontWeight = FontWeight(600),
                             color = Color(0xFF444A62),
                             letterSpacing = 0.48.sp,
-                        )
+                        ),
+                        modifier = Modifier.semantics {
+                            testTagsAsResourceId = true
+                            testTag = "txt_create_note_due"
+                            contentDescription = "txt_create_note_due"
+                        }
                     )
 
                     Image(
@@ -390,7 +426,7 @@ fun TaskSuggestionCard(
             }
             Spacer(modifier = Modifier.height(4.dp))
 
-            if (!isTaskAdded) {
+            if (isTaskAdded) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Row(
                         horizontalArrangement = Arrangement.Center,
@@ -409,7 +445,13 @@ fun TaskSuggestionCard(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "Task added", style = TextStyle(
+                            text = "Task added",
+                            modifier = Modifier.semantics {
+                                testTagsAsResourceId = true
+                                testTag = "txt_create_note_task_added"
+                                contentDescription = "txt_create_note_task_added"
+                            },
+                            style = TextStyle(
                                 fontSize = 12.sp, lineHeight = 24.sp, color = Color(0xFF444A62)
                             )
                         )
@@ -438,8 +480,18 @@ fun TaskSuggestionCard(
                             .height(32.dp)
                             .clip(shape = RoundedCornerShape(size = 5.dp))
                             .semantics {
-                                var contentDescription = ""
+                            testTagsAsResourceId = true
+                            testTag = if (createTaskApiInProgress) {
+                                "txt_create_note_adding_task"
+                            } else {
+                                "btn_create_note_add_task"
                             }
+                            contentDescription = if (createTaskApiInProgress) {
+                                "txt_create_note_adding_task"
+                            } else {
+                                "btn_create_note_add_task"
+                            }
+                        }
 
                     ) {
                         Row(
@@ -480,7 +532,17 @@ fun TaskSuggestionCard(
                                 color = Color(0xFFFFFFFF),
                                 letterSpacing = 0.48.sp,
                             ), modifier = Modifier.semantics {
-                                contentDescription = ""
+                                testTagsAsResourceId = true
+                                testTag = if (!createTaskApiInProgress) {
+                                    "txt_create_note_add_task"
+                                } else {
+                                    "txt_create_note_adding_task"
+                                }
+                                contentDescription = if (!createTaskApiInProgress) {
+                                    "txt_create_note_add_task"
+                                } else {
+                                    "txt_create_note_adding_task"
+                                }
                             })
                         }
                     }
@@ -489,6 +551,11 @@ fun TaskSuggestionCard(
                             .width(60.dp)
                             .height(32.dp)
                             .border(1.dp, Color(0xFF5D678D), shape = RoundedCornerShape(4.dp))
+                            .semantics {
+                                testTagsAsResourceId = true
+                                testTag = "btn_create_note_cancel"
+                                contentDescription = "btn_create_note_cancel"
+                            }
 
                     ) {
                         Text(text = "Cancel",
@@ -500,8 +567,13 @@ fun TaskSuggestionCard(
                                 letterSpacing = 0.48.sp,
                             ),
                             modifier = Modifier
-                                .padding(8.dp)
+                                .padding(8.dp) .semantics {
+                                    testTagsAsResourceId = true
+                                    testTag = "txt_create_note_cancel"
+                                    contentDescription = "txt_create_note_cancel"
+                                }
                                 .clickable { onCancelTaskClick(id) })
+
                     }
                 }
             }

@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -56,7 +57,8 @@ fun NotesCard(
     notes: String,
     noteId: String = "",
     onClick: () -> Unit,
-    onDeleteMenuClick: (noteId: String) -> Unit = {}
+    onDeleteMenuClick: (noteId: String) -> Unit = {},
+    index : Number
 ) {
     var formattedTime: String = "";
     try {
@@ -120,7 +122,12 @@ fun NotesCard(
                         fontWeight = FontWeight(500),
                         color = Color(0xFF545A71),
                         letterSpacing = 0.56.sp,
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                    testTag = username
+                    contentDescription = username
+                    testTagsAsResourceId = true
+                }
                 )
             }
 
@@ -133,7 +140,12 @@ fun NotesCard(
                         fontWeight = FontWeight(300),
                         color = Color(0xFF545A71),
                         letterSpacing = 0.48.sp,
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        testTag = "txt_account_detail_note_last_modified_time"
+                        contentDescription = "txt_account_detail_note_last_modified_time"
+                        testTagsAsResourceId = true
+                    }
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Box {
@@ -143,6 +155,11 @@ fun NotesCard(
                         modifier = Modifier
                             .width(20.dp)
                             .height(20.dp)
+                            .semantics {
+                                testTag = "btn_account_detail_note_more_${index}"
+                                contentDescription = "btn_account_detail_note_more_${index}"
+                                testTagsAsResourceId = true
+                            }
                             .pointerInput(true) {
                                 detectTapGestures(onPress = {
                                     expanded = true
@@ -173,7 +190,12 @@ fun NotesCard(
                 fontWeight = FontWeight(500),
                 color = Color(0xFF545A71),
                 letterSpacing = 0.56.sp,
-            )
+            ),
+            modifier = Modifier.semantics {
+                testTag = "txt_account_detail_note_text_${index}"
+                contentDescription = "txt_account_detail_note_text_${index}"
+                testTagsAsResourceId = true
+            }
         )
 
     }
@@ -189,6 +211,7 @@ fun noteCardPreview() {
         username = "johndoe",
         date = "2021-08-10T12:00:00.000Z",
         notes = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vi",
+        index = 0,
         onClick = {}
     )
 }
