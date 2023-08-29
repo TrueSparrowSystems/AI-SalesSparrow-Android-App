@@ -32,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -43,7 +42,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -51,7 +49,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
@@ -119,7 +116,6 @@ fun TaskSuggestionCard(
     dueDateCalendar.time = Date()
 
     val dueDate = remember { mutableStateOf(dDate) }
-
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
             val formattedMonth = String.format("%02d", mMonth + 1)
@@ -142,11 +138,9 @@ fun TaskSuggestionCard(
     createTaskResponse?.let { response ->
         when (response) {
             is NetworkResponse.Success -> {
-                createTaskApiInProgress = false
+                createTaskApiInProgress = false;
                 createTaskApiIsSuccess = true
-
                 globalStateViewModel.setValuesById(id, isTaskCreated = true)
-
                 CustomToast(
                     message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
@@ -270,7 +264,7 @@ fun TaskSuggestionCard(
                     .background(color = Color(0xFFF6F7F8), shape = RoundedCornerShape(size = 5.dp))
                     .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
                     .clickable {
-                        if(globalStateViewModel.getIsTaskCreatedById(id)?.value != true){
+                        if (globalStateViewModel.getIsTaskCreatedById(id)?.value != true) {
                             NavigationService.navigateTo(
                                 "task_screen/${accountId}/${accountName}/${id}"
                             )
@@ -304,7 +298,7 @@ fun TaskSuggestionCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable {
-                        if(globalStateViewModel.getIsTaskCreatedById(id)?.value  != true){
+                        if (globalStateViewModel.getIsTaskCreatedById(id)?.value != true) {
                             toggleSearchNameBottomSheet()
                         }
 
@@ -370,7 +364,7 @@ fun TaskSuggestionCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable {
-                        if(globalStateViewModel.getIsTaskCreatedById(id)?.value != true){
+                        if (globalStateViewModel.getIsTaskCreatedById(id)?.value != true) {
                             mDatePickerDialog.show()
                         }
                     }) {
@@ -406,7 +400,8 @@ fun TaskSuggestionCard(
             }
             Spacer(modifier = Modifier.height(4.dp))
 
-            if (globalStateViewModel.getIsTaskCreatedById(id)?.value  == true) {
+            if (globalStateViewModel.getIsTaskCreatedById(id)?.value == true) {
+
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
@@ -414,7 +409,6 @@ fun TaskSuggestionCard(
                         .fillMaxWidth()
                         .height(35.dp)
                         .background(Color(0xFF4CAF50))
-
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.success_toast_check),
@@ -423,80 +417,13 @@ fun TaskSuggestionCard(
                             .height(18.dp)
                             .width(18.dp)
                     )
-                },
-                    contentPadding = PaddingValues(all = 8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent, contentColor = Color.White
-                    ),
-                    modifier = Modifier
-                        .background(
-                            color = Color(0xFF212653), shape = RoundedCornerShape(size = 5.dp)
-                        )
-                        .height(32.dp)
-                        .clip(shape = RoundedCornerShape(size = 5.dp))
-                        .semantics {
-                            var contentDescription = ""
-                        }
-
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(
-                            4.dp, Alignment.CenterHorizontally
-                        ), verticalAlignment = Alignment.CenterVertically
-
-                    ) {
-                        val imageLoader = ImageLoader.Builder(LocalContext.current).components {
-                            if (Build.VERSION.SDK_INT >= 28) {
-                                add(ImageDecoderDecoder.Factory())
-                            } else {
-                                add(GifDecoder.Factory())
-                            }
-                        }.build()
-
-                        if (createTaskApiInProgress) {
-                            Image(
-                                painter = rememberAsyncImagePainter(R.drawable.loader, imageLoader),
-                                contentDescription = "Loader",
-                                colorFilter = ColorFilter.tint(Color.White),
-                                modifier = Modifier
-                                    .width(width = 12.dp)
-                                    .height(height = 12.dp)
-                            )
-                        }
-
-                        Text(text = if (createTaskApiInProgress) {
-                            "Adding Task..."
-                        } else {
-                            "Add Task"
-                        }, color = Color.White, style = TextStyle(
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(500),
-                            color = Color(0xFFFFFFFF),
-                            letterSpacing = 0.48.sp,
-                        ), modifier = Modifier.semantics {
-                            contentDescription = ""
-                        })
-                    }
-                }
-                Box(
-                    modifier = Modifier
-                        .width(60.dp)
-                        .height(32.dp)
-                        .border(1.dp, Color(0xFF5D678D), shape = RoundedCornerShape(4.dp))
-
-                ) {
-                    Text(text = "Cancel",
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            lineHeight = 24.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(500),
-                            color = Color(0xFF444A62),
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Task added", style = TextStyle(
+                            fontSize = 12.sp, lineHeight = 24.sp, color = Color(0xFF444A62)
                         )
                     )
                 }
-
             } else {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
@@ -516,11 +443,79 @@ fun TaskSuggestionCard(
                             containerColor = Color.Transparent, contentColor = Color.White
                         ),
                         modifier = Modifier
-                            .padding(8.dp)
-                            .clickable { onCancelTaskClick(id) })
+                            .background(
+                                color = Color(0xFF212653), shape = RoundedCornerShape(size = 5.dp)
+                            )
+                            .height(32.dp)
+                            .clip(shape = RoundedCornerShape(size = 5.dp))
+                            .semantics {
+                                var contentDescription = ""
+                            }
+
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(
+                                4.dp, Alignment.CenterHorizontally
+                            ), verticalAlignment = Alignment.CenterVertically
+
+                        ) {
+                            val imageLoader = ImageLoader.Builder(LocalContext.current).components {
+                                if (Build.VERSION.SDK_INT >= 28) {
+                                    add(ImageDecoderDecoder.Factory())
+                                } else {
+                                    add(GifDecoder.Factory())
+                                }
+                            }.build()
+
+                            if (createTaskApiInProgress) {
+                                Image(
+                                    painter = rememberAsyncImagePainter(
+                                        R.drawable.loader, imageLoader
+                                    ),
+                                    contentDescription = "Loader",
+                                    colorFilter = ColorFilter.tint(Color.White),
+                                    modifier = Modifier
+                                        .width(width = 12.dp)
+                                        .height(height = 12.dp)
+                                )
+                            }
+
+                            Text(text = if (createTaskApiInProgress) {
+                                "Adding Task..."
+                            } else {
+                                "Add Task"
+                            }, color = Color.White, style = TextStyle(
+                                fontSize = 12.sp,
+                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                                fontWeight = FontWeight(500),
+                                color = Color(0xFFFFFFFF),
+                                letterSpacing = 0.48.sp,
+                            ), modifier = Modifier.semantics {
+                                contentDescription = ""
+                            })
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .width(60.dp)
+                            .height(32.dp)
+                            .border(1.dp, Color(0xFF5D678D), shape = RoundedCornerShape(4.dp))
+
+                    ) {
+                        Text(text = "Cancel",
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                                fontWeight = FontWeight(500),
+                                color = Color(0xFF5D678D),
+                                letterSpacing = 0.48.sp,
+                            ),
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .clickable { onCancelTaskClick(id) })
+                    }
                 }
             }
-
         }
     }
 }
