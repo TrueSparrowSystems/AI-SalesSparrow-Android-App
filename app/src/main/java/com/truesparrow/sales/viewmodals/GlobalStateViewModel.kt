@@ -1,5 +1,6 @@
 package com.truesparrow.sales.viewmodals
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -28,6 +29,12 @@ class GlobalStateViewModel : ViewModel() {
         crmUserName?.let { dataValues.crmUserName.value = it }
         dueDate?.let { dataValues.dueDate.value = it }
         recommdedTasksMap[id] = dataValues
+    }
+
+    fun DeleteTaskById(id: String) {
+        Log.i("GlobalStateViewModel", "DeleteTaskById: $id ${recommdedTasksMap.size}")
+        recommdedTasksMap.remove(id)
+        Log.i("GlobalStateViewModel", "DeleteTaskById: $id ${recommdedTasksMap.size}")
     }
 
     fun getTaskDescById(id: String): LiveData<String>? = recommdedTasksMap[id]?.taskDesc
