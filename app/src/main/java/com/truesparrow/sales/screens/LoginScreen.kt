@@ -127,6 +127,10 @@ fun LogInScreen(intent: Intent?) {
                     modifier = Modifier
                         .width(160.dp)
                         .height(80.dp)
+                        .semantics {
+                            testTag = "img_login_app_logo"
+                            testTagsAsResourceId = true;
+                        }
                 )
                 Text(
                     text = "Your Salesforce app with AI powered recommendations", style = TextStyle(
@@ -138,6 +142,8 @@ fun LogInScreen(intent: Intent?) {
                         textAlign = TextAlign.Center,
                     ),
                     modifier = Modifier.semantics {
+                        testTag = "txt_login_app_description"
+                        testTagsAsResourceId = true;
                         contentDescription = "txt_login_app_description"
                     }
 
@@ -161,6 +167,8 @@ fun LogInScreen(intent: Intent?) {
                         ),
                         textModifier = Modifier.semantics {
                             contentDescription = "txt_login_notes"
+                            testTagsAsResourceId = true;
+                            testTag = "txt_login_notes"
                         }
                     )
                     CustomTextWithImage(
@@ -177,6 +185,8 @@ fun LogInScreen(intent: Intent?) {
                         ),
                         textModifier = Modifier.semantics {
                             contentDescription = "txt_login_tasks"
+                            testTagsAsResourceId = true;
+                            testTag = "txt_login_tasks"
                         }
                     )
                     CustomTextWithImage(
@@ -193,6 +203,8 @@ fun LogInScreen(intent: Intent?) {
                         ),
                         textModifier = Modifier.semantics {
                             contentDescription = "txt_login_events"
+                            testTagsAsResourceId = true;
+                            testTag = "txt_login_events"
                         }
                     )
                     CustomTextWithImage(
@@ -209,6 +221,8 @@ fun LogInScreen(intent: Intent?) {
                         ),
                         textModifier = Modifier.semantics {
                             contentDescription = "txt_login_opportunities"
+                            testTagsAsResourceId = true;
+                            testTag = "txt_login_opportunities"
                         }
                     )
                 }
@@ -226,6 +240,8 @@ fun LogInScreen(intent: Intent?) {
                     ),
                     modifier = Modifier.semantics {
                         contentDescription = "txt_login_create_account"
+                        testTagsAsResourceId = true;
+                        testTag = "txt_login_create_account"
                     }
                 )
 
@@ -235,6 +251,8 @@ fun LogInScreen(intent: Intent?) {
                     buttonTextModifier = Modifier
                         .semantics {
                             contentDescription = "txt_login_continue_salesforce"
+                            testTagsAsResourceId = true;
+                            testTag = "txt_login_continue_salesforce"
                         },
                     buttonTextStyle = TextStyle(
                         fontSize = 16.sp,
@@ -274,6 +292,8 @@ fun LogInScreen(intent: Intent?) {
                     }
                     .semantics {
                         contentDescription = "txt_login_terms"
+                        testTagsAsResourceId = true;
+                        testTag = "txt_login_terms"
                     }
             )
         }

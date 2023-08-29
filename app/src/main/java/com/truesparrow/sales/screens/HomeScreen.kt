@@ -25,11 +25,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -50,6 +53,7 @@ import com.truesparrow.sales.util.Screens
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 import com.truesparrow.sales.viewmodals.HomeScreenViewModal
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun HomeScreen() {
     val authenticationViewModal: AuthenticationViewModal = hiltViewModel()
@@ -143,15 +147,25 @@ fun HomeScreen() {
                     .height(24.dp)
                     .semantics {
                         contentDescription = "img_home_screen_account_icon"
+                        testTag = "img_home_screen_account_icon"
+                        testTagsAsResourceId = true
                     },
                 leftTextModifier = Modifier
                     .semantics {
                         contentDescription = "txt_account_details_title"
+                        testTag = "txt_account_details_title"
+                        testTagsAsResourceId = true
                     },
                 isLeftButtonEnabled = false,
                 rightButtonTestId = "btn_search_account",
                 isRightButtonPresent = true,
                 rightIcon = R.drawable.search_icon,
+                rightButtonModifier = Modifier
+                    .semantics {
+                        contentDescription = "btn_search_account"
+                        testTag = "btn_search_account"
+                        testTagsAsResourceId = true
+                    },
                 rightButtonText = "",
                 rightButtonAction = toggleBottomSheet,
                 isRightTextButton = true,
@@ -161,12 +175,16 @@ fun HomeScreen() {
                     .height(24.dp)
                     .semantics {
                         contentDescription = "btn_search_account"
+                        testTag = "btn_search_account"
+                        testTagsAsResourceId = true
                     },
                 isRightButtonEnabled = true,
                 shouldShowAvatarComponent = true,
                 userAvatarModifier = Modifier
                     .semantics {
                         contentDescription = "txt_user_account_icon"
+                        testTag = "txt_user_account_icon"
+                        testTagsAsResourceId = true
                     },
                 userName = currentUser?.data?.current_user?.name ?: "John ve",
                 userId = currentUser?.data?.current_user?.name ?: "121",

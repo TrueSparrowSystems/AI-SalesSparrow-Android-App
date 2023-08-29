@@ -350,7 +350,7 @@ fun NotesScreen(
     }
 }
 
-
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RecommendedSectionHeader(
     heading: String,
@@ -389,6 +389,11 @@ fun RecommendedSectionHeader(
                     modifier = Modifier
                         .width(20.dp)
                         .height(20.dp)
+                         .semantics {
+                        contentDescription = "add_notes"
+                        testTag = "add_notes"
+                        testTagsAsResourceId = true
+                    }
                         .clickable(
                             interactionSource = MutableInteractionSource(), indication = null
                         ) {
@@ -407,6 +412,7 @@ fun RecommendedSectionHeader(
 }
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NotesHeader(accountName: String?, isAccountSelectionEnabled: Boolean) {
     var bottomSheetVisible by remember { mutableStateOf(false) }
@@ -461,6 +467,8 @@ fun NotesHeader(accountName: String?, isAccountSelectionEnabled: Boolean) {
                 interactionSource = NoRippleInteractionSource(),
                 modifier = Modifier.semantics {
                     contentDescription = "btn_select_account"
+                    testTag = "btn_select_account"
+                    testTagsAsResourceId = true
                 }) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.Start),
@@ -475,7 +483,9 @@ fun NotesHeader(accountName: String?, isAccountSelectionEnabled: Boolean) {
                         ),
                         modifier = Modifier.semantics {
                             contentDescription =
-                                if (accountName.isNullOrBlank()) "txt_create_note_selected_account" else "txt_create_note_select_account"
+                                if (accountName.isNullOrBlank()) "txt_create_note_select_account" else  "txt_create_note_selected_account"
+                            testTag =   if (accountName.isNullOrBlank()) "txt_create_note_select_account" else  "txt_create_note_selected_account"
+                            testTagsAsResourceId = true
                         })
                 }
                 Icon(
@@ -525,6 +535,8 @@ fun Header(
                     indication = null,
                     onClick = { NavigationService.navigateBack() })
                 .semantics {
+                    testTagsAsResourceId = true
+                    testTag =  if (saveNoteApiIsSuccess) "btn_done_note_screen" else "btn_cancel_create_note"
                     contentDescription =
                         if (saveNoteApiIsSuccess) "btn_done_create_note" else "btn_cancel_create_note"
                 },
@@ -555,6 +567,8 @@ fun Header(
                 .height(46.dp)
                 .clip(shape = RoundedCornerShape(size = 5.dp))
                 .semantics {
+                    testTagsAsResourceId = true
+                    testTag = "btn_save_note"
                     contentDescription = "btn_save_note"
                 }
 
@@ -586,6 +600,10 @@ fun Header(
                     modifier = Modifier
                         .width(width = 17.dp)
                         .height(height = 12.dp)
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = "cloud"
+                        }
                 )
                 Text(text = if (saveNoteApiInProgress) {
                     "Saving..."
@@ -600,6 +618,8 @@ fun Header(
                     color = Color(0xFFFFFFFF),
                     letterSpacing = 0.48.sp,
                 ), modifier = Modifier.semantics {
+                    testTagsAsResourceId = true
+                    testTag = if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
                     contentDescription =
                         if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
                 })
