@@ -388,13 +388,21 @@ fun TaskSuggestionCard(
                     )
 
                     Text(
-                        text = dueDate.value, style = TextStyle(
+                        text = dueDate.value.replace("-","/"), style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(700),
                             color = Color(0xFF444A62),
                             letterSpacing = 0.48.sp,
                         )
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Image(
+                        painter = painterResource(id = R.drawable.calendar),
+                        contentDescription = "calendar",
+                        modifier = Modifier
+                            .width(20.dp)
+                            .height(20.dp)
                     )
                 }
             }

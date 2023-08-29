@@ -348,8 +348,8 @@ fun AddTaskContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = selectedDueDate.value.ifEmpty {
-                            dueDate
+                        text = selectedDueDate.value.replace("-","/").ifEmpty {
+                            dueDate.replace("-","/")
                         },
                         color = Color(0xff444A62),
                         style = TextStyle(
@@ -358,7 +358,7 @@ fun AddTaskContent(
                             fontFamily = customFontFamily,
                         ),
                     )
-                    Spacer(modifier = Modifier.width(40.dp))
+                    Spacer(modifier = Modifier.weight(1f))
                     Image(
                         painter = painterResource(id = R.drawable.calendar),
                         contentDescription = "calendar",
