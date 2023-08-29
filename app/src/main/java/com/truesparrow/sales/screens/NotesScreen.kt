@@ -286,7 +286,8 @@ fun NotesScreen(
                                 onCancelTaskClick = {taskId ->
                                     Log.i("NotesScreen", "NotesScreen: $taskId")
                                     Log.i("NotesScreen", "NotesScreen: ${tasks.size} $tasks")
-                                    tasks = tasks.filter { it?.id != taskId }
+                                    val updatedTasks = tasks.filter { it?.id != taskId }
+                                    tasks = updatedTasks
                                     Log.i("NotesScreen", "NotesScreen: ${tasks.size} $tasks")
                                     viewModel.DeleteTaskById(taskId)
                                 },
