@@ -253,24 +253,33 @@ fun NotesScreen(
                         val userId = viewModel.getCrmUserIdById(it.id)?.value ?: ""
                         val userName = viewModel.getCrmUserNameById(it.id)?.value ?: ""
                         val dDate = viewModel.getDueDateById(it.id)?.value ?: ""
+                        val isTaskCreated = viewModel.getIsTaskCreatedById(it.id)?.value ?: false
 
                         viewModel.setValuesById(
                             id = it.id, taskDesc = if (taskDesc.isEmpty()) {
                                 it.description
                             } else {
                                 taskDesc
-                            }, crmUserId = if (userId.isEmpty()) {
+                            },
+                            crmUserId = if (userId.isEmpty()) {
                                 crmUserId
                             } else {
                                 userId
-                            }, crmUserName = if (userName.isEmpty()) {
+                            },
+                            crmUserName = if (userName.isEmpty()) {
                                 crmUserName
                             } else {
                                 userName
-                            }, dueDate = if (dDate.isEmpty()) {
+                            },
+                            dueDate = if (dDate.isEmpty()) {
                                 it.due_date ?: ""
                             } else {
                                 dDate
+                            },
+                            isTaskCreated = if(isTaskCreated){
+                                isTaskCreated
+                            }else {
+                                false
                             }
                         )
 
