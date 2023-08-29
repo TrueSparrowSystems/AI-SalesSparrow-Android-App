@@ -41,4 +41,3 @@ data class AccountCardData(
     val website: String,
     val contactName: String,
 )
-

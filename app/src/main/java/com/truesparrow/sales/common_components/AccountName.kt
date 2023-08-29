@@ -51,14 +51,12 @@ fun AccountName(
                 }
                 .clickable(
                     onClick = onAccountRowClick,
-                    interactionSource =  MutableInteractionSource(),
+                    interactionSource = MutableInteractionSource(),
                     indication = null
                 ),
 
             ) {
-            CustomText(
-                text = name, Typography.labelMedium, color = walkaway_gray
-            )
+
             Spacer(Modifier.weight(1f))
             if (showAddNote) {
                 CustomText(
@@ -73,7 +71,7 @@ fun AccountName(
                         }
                         .clickable(
                             onClick = onAddNoteClick,
-                            interactionSource =  MutableInteractionSource(),
+                            interactionSource = MutableInteractionSource(),
                             indication = null
                         )
                 )

@@ -1,5 +1,6 @@
 package com.truesparrow.sales.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.truesparrow.sales.api.ApiService
@@ -15,10 +16,16 @@ class HomeRepository @Inject constructor(private val apiService: ApiService) {
         get() = _accountFeedLiveData
 
 
-    suspend fun getAccountFeed() {
+    suspend fun getAccountFeed(paginationIdentifier: String ? = "") {
         try {
+            Log.i("HomeRepository", "getAccountFeed $paginationIdentifier")
             _accountFeedLiveData.postValue(NetworkResponse.Loading())
-            val response = apiService.getAccountFeed()
+            val response = if (paginationIdentifier?.isNotBlank() == true) {
+                apiService.getAccountFeedWithPagination(paginationIdentifier!!)
+            } else {
+                apiService.getAccountFeed()
+            }
+            Log.i("HomeRepository", "getAccountFeed $response")
             if (response.isSuccessful && response.body() != null) {
                 _accountFeedLiveData.postValue(NetworkResponse.Success(response.body()!!))
             } else if (response.errorBody() != null) {
@@ -28,6 +35,7 @@ class HomeRepository @Inject constructor(private val apiService: ApiService) {
                 _accountFeedLiveData.postValue(NetworkResponse.Error("Something went wrong"))
             }
         } catch (e: Exception) {
+            Log.i("HomeRepository", "getAccountFeed $e")
             _accountFeedLiveData.postValue(NetworkResponse.Error("Something went wrong"))
         }
     }
