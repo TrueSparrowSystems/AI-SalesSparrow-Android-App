@@ -9,19 +9,13 @@ import androidx.lifecycle.ViewModel
 class GlobalStateViewModel : ViewModel() {
 
     private val recommdedTasksMap = mutableMapOf<String, DataValues>()
-
-    val noteDesc = MutableLiveData<String>()
-    fun getNoteDesc(): LiveData<String> = noteDesc
-    fun setNoteDesc(desc : String){
-        noteDesc.value = desc
-    }
-
     data class DataValues(
         val taskDesc: MutableLiveData<String> = MutableLiveData(),
         val crmUserId: MutableLiveData<String> = MutableLiveData(),
         val crmUserName: MutableLiveData<String> = MutableLiveData(),
         val dueDate: MutableLiveData<String> = MutableLiveData(),
-        val isTaskCreated: MutableLiveData<Boolean> = MutableLiveData()
+        val isTaskCreated: MutableLiveData<Boolean> = MutableLiveData(),
+        val noteDesc : MutableLiveData<Boolean> = MutableLiveData(),
     )
 
     fun setValuesById(
@@ -30,7 +24,8 @@ class GlobalStateViewModel : ViewModel() {
         crmUserId: String? = null,
         crmUserName: String? = null,
         dueDate: String? = null,
-        isTaskCreated: Boolean = false
+        isTaskCreated: Boolean = false,
+        
     ) {
         val dataValues = recommdedTasksMap[id] ?: DataValues()
         taskDesc?.let { dataValues.taskDesc.value = it }
