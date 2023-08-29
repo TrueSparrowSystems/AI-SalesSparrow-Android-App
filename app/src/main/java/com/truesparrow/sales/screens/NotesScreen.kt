@@ -59,8 +59,7 @@ import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
 import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 import com.truesparrow.sales.viewmodals.NotesViewModel
-import java.security.MessageDigest
-import java.util.UUID
+import com.truesparrow.sales.viewmodals.TasksViewModal
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -89,6 +88,40 @@ fun NotesScreen(
     val scrollState = rememberScrollState()
 
     val saveNoteRespose by notesViewModel.notesLiveData.observeAsState()
+
+    val tasksViewModel: TasksViewModal = hiltViewModel()
+    var createTaskApiInProgress by remember { mutableStateOf(false) }
+    var createTaskApiIsSuccess by remember { mutableStateOf(false) }
+
+
+    val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
+
+    createTaskResponse?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                createTaskApiInProgress = false;
+                createTaskApiIsSuccess = true
+                viewModel.setValuesById(id, isTaskCreated = true)
+                CustomToast(
+                    message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
+                )
+            }
+
+            is NetworkResponse.Error -> {
+                createTaskApiInProgress = false;
+                CustomToast(
+                    message = response.message ?: "Failed to create the task",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Error
+                )
+            }
+
+            is NetworkResponse.Loading -> {
+                createTaskApiInProgress = true;
+                Log.d("TaskScreen", "Loading")
+            }
+        }
+    }
 
     getCrmActionsResponse?.let {
         when (it) {
@@ -231,7 +264,7 @@ fun NotesScreen(
             )
         } else {
             Log.i("NotesScreen re com", "NotesScreen: ${tasks.size} $tasks")
-            if ( tasks[0] !== null) {
+            if (tasks[0] !== null) {
                 RecommendedSectionHeader(
                     heading = "We have some recommendations ",
                     onPlusClicked = {
@@ -275,9 +308,9 @@ fun NotesScreen(
                             } else {
                                 dDate
                             },
-                            isTaskCreated = if(isTaskCreated){
+                            isTaskCreated = if (isTaskCreated) {
                                 isTaskCreated
-                            }else {
+                            } else {
                                 false
                             }
                         )
@@ -294,7 +327,7 @@ fun NotesScreen(
                                 globalStateViewModel = viewModel,
                                 shouldShowOptions = false,
                                 onDeleteTaskClick = {},
-                                onCancelTaskClick = {taskId ->
+                                onCancelTaskClick = { taskId ->
                                     Log.i("NotesScreen", "NotesScreen: $taskId")
                                     Log.i("NotesScreen", "NotesScreen: ${tasks.size} $tasks")
                                     val updatedTasks = tasks.filter { it?.id != taskId }
@@ -302,6 +335,19 @@ fun NotesScreen(
                                     Log.i("NotesScreen", "NotesScreen: ${tasks.size} $tasks")
                                     viewModel.DeleteTaskById(taskId)
                                 },
+                                createTaskApiInProgress = createTaskApiInProgress,
+                                onAddTaskClick = { crmOrganizationUserId: String,
+                                                   description: String,
+                                                   dueDate: String ->
+                                    createTaskApiInProgress = true
+                                    tasksViewModel.createTask(
+                                        accountId = accountId!!,
+                                        crmOrganizationUserId = crmOrganizationUserId,
+                                        description = description,
+                                        dueDate = dueDate,
+                                    )
+                                },
+                                isTaskAdded = viewModel.getIsTaskCreatedById(id)?.value?: false,
 
                             )
                         }
@@ -318,7 +364,7 @@ fun NotesScreen(
 @Composable
 fun RecommendedSectionHeader(
     heading: String,
-    accountName : String,
+    accountName: String,
     crmUserName: String,
     crmUserId: String,
     accountId: String,

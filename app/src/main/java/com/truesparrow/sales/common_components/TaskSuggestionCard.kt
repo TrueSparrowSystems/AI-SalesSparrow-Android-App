@@ -4,7 +4,6 @@ import android.app.DatePickerDialog
 import android.os.Build
 import android.util.Log
 import android.widget.DatePicker
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,7 +25,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,16 +47,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.truesparrow.sales.R
 import com.truesparrow.sales.services.NavigationService
-import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.viewmodals.GlobalStateViewModel
-import com.truesparrow.sales.viewmodals.TasksViewModal
 import java.util.Calendar
 import java.util.Date
 
@@ -70,8 +65,18 @@ fun TaskSuggestionCard(
     accountName: String,
     shouldShowOptions: Boolean = false,
     globalStateViewModel: GlobalStateViewModel,
-    onCancelTaskClick: (id: String) -> Unit
+    onCancelTaskClick: (id: String) -> Unit,
+    onAddTaskClick: (
+        crmOrganizationUserId: String,
+        description: String,
+        dueDate: String
+    ) -> Unit,
+    createTaskApiInProgress: Boolean = false,
+    isTaskAdded: Boolean = false
 ) {
+
+    Log.i("TaskSuggestionCard", "TaskSuggestionCard: $id ${globalStateViewModel.getIsTaskCreatedById(id)?.value} ${isTaskAdded}")
+
     var expanded by remember {
         mutableStateOf(false)
     }
@@ -126,43 +131,6 @@ fun TaskSuggestionCard(
 
     globalStateViewModel.setValuesById(id, dueDate = dueDate.value)
     mDatePickerDialog.datePicker.minDate = dueDateCalendar.timeInMillis
-
-
-    val tasksViewModel: TasksViewModal = hiltViewModel()
-    var createTaskApiInProgress by remember { mutableStateOf(false) }
-    var createTaskApiIsSuccess by remember { mutableStateOf(false) }
-
-
-    val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
-
-    createTaskResponse?.let { response ->
-        when (response) {
-            is NetworkResponse.Success -> {
-                createTaskApiInProgress = false;
-                createTaskApiIsSuccess = true
-                globalStateViewModel.setValuesById(id, isTaskCreated = true)
-                CustomToast(
-                    message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
-                )
-            }
-
-            is NetworkResponse.Error -> {
-                createTaskApiInProgress = false;
-                CustomToast(
-                    message = response.message ?: "Failed to create the task",
-                    duration = Toast.LENGTH_SHORT,
-                    type = ToastType.Error
-                )
-            }
-
-            is NetworkResponse.Loading -> {
-                createTaskApiInProgress = true;
-                Log.d("TaskScreen", "Loading")
-            }
-        }
-    }
-
-
 
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
@@ -388,7 +356,7 @@ fun TaskSuggestionCard(
                     )
 
                     Text(
-                        text = dueDate.value.replace("-","/"), style = TextStyle(
+                        text = dueDate.value.replace("-", "/"), style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(700),
@@ -408,8 +376,7 @@ fun TaskSuggestionCard(
             }
             Spacer(modifier = Modifier.height(4.dp))
 
-            if (globalStateViewModel.getIsTaskCreatedById(id)?.value == true) {
-
+            if (isTaskAdded) {
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
@@ -438,12 +405,10 @@ fun TaskSuggestionCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Button(onClick = {
-                        createTaskApiInProgress = true
-                        tasksViewModel.createTask(
-                            accountId = accountId!!,
-                            crmOrganizationUserId = userId,
-                            description = taskDesc,
-                            dueDate = dDate,
+                        onAddTaskClick(
+                            userId,
+                            taskDesc,
+                            dDate,
                         )
                     },
                         contentPadding = PaddingValues(all = 8.dp),
