@@ -289,21 +289,23 @@ fun TaskSuggestionCard(
                             .width(20.dp)
                             .height(20.dp)
                     )
+                    if(userId.isNotEmpty()){
+                        UserAvatar(
+                            id = userId,
+                            firstName = userName.split(" ")[0],
+                            lastName =  userName.split(" ")[0],
+                            size = 18.dp,
+                            textStyle = TextStyle(
+                                fontSize = 5.24.sp,
+                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                                fontWeight = FontWeight(700),
+                                color = Color(0xFF000000),
+                                letterSpacing = 0.21.sp,
+                            ),
+                            userAvatarTestId = "user_avatar_note_details"
+                        )
+                    }
 
-                    UserAvatar(
-                        id = "1",
-                        firstName = "D",
-                        lastName = "S",
-                        size = 17.dp,
-                        textStyle = TextStyle(
-                            fontSize = 5.24.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(700),
-                            color = Color(0xFF000000),
-                            letterSpacing = 0.21.sp,
-                        ),
-                        userAvatarTestId = "user_avatar_search_user"
-                    )
                     Text(
                         text = userName.ifEmpty {
                             "Select"

@@ -258,12 +258,12 @@ fun AddTaskContent(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (id != "1") {
+                    if(crmUserId.isNotEmpty()){
                         UserAvatar(
-                            id = "1",
-                            firstName = "D",
-                            lastName = "S",
-                            size = 17.dp,
+                            id = crmUserId,
+                            firstName = crmUserName.split(" ")[0],
+                            lastName =  crmUserName.split(" ")[0],
+                            size = 18.dp,
                             textStyle = TextStyle(
                                 fontSize = 5.24.sp,
                                 fontFamily = FontFamily(Font(R.font.nunito_regular)),
@@ -271,7 +271,7 @@ fun AddTaskContent(
                                 color = Color(0xFF000000),
                                 letterSpacing = 0.21.sp,
                             ),
-                            userAvatarTestId = ""
+                            userAvatarTestId = "user_avatar_note_details"
                         )
                     }
 
