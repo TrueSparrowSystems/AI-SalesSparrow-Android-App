@@ -54,8 +54,10 @@ import com.truesparrow.sales.R
 import com.truesparrow.sales.common_components.AccountCard
 import com.truesparrow.sales.common_components.CustomAlertDialog
 import com.truesparrow.sales.common_components.CustomTextWithImage
+import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.NotesCard
 import com.truesparrow.sales.common_components.TasksCard
+import com.truesparrow.sales.common_components.ToastType
 import com.truesparrow.sales.models.Note
 import com.truesparrow.sales.models.Task
 import com.truesparrow.sales.services.NavigationService
@@ -73,10 +75,11 @@ fun AccountDetails(
     val accountDetailsViewModal: AccountDetailsViewModal = hiltViewModel()
     var isAccountNoteDetailsLoading by remember { mutableStateOf(false) };
     var isAccountTaskDetailsLoading by remember { mutableStateOf(false) };
-    val openDialog = remember { mutableStateOf(false) }
+    val openDialogForNote = remember { mutableStateOf(false) }
+    val openDialogForTask = remember { mutableStateOf(false) }
 
-    var notes by remember { mutableStateOf<List<Note>?>(null) }
-    var tasks by remember { mutableStateOf<List<Task>?>(null) }
+    var notes = accountDetailsViewModal.notes.observeAsState()?.value
+    var tasks = accountDetailsViewModal.tasks.observeAsState()?.value
 
     val accountNotesResponse by accountDetailsViewModal.accountDetailsLiveData.observeAsState()
 
@@ -84,19 +87,21 @@ fun AccountDetails(
 
     val deleteAccountNoteResponse by accountDetailsViewModal.deleteAccountNoteLiveData.observeAsState()
 
+    val deleteAccountTaskResponse by accountDetailsViewModal.deleteAccountTaskLiveData.observeAsState()
+
     val noteId = remember { mutableStateOf("") }
+    val taskId = remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = accountId) {
         accountDetailsViewModal.getAccountNotes(accountId = accountId)
         accountDetailsViewModal.getAccountTasks(accountId = accountId)
     }
 
-
     accountNotesResponse?.let {
         when (it) {
             is NetworkResponse.Success -> {
                 isAccountNoteDetailsLoading = false
-                notes = it.data?.note_ids?.map { noteId ->
+                val newNotes = it.data?.note_ids?.map { noteId ->
                     val noteDetails = it.data?.note_map_by_id?.get(noteId)
                     Note(
                         creator = noteDetails?.creator ?: "",
@@ -105,6 +110,8 @@ fun AccountDetails(
                         text_preview = noteDetails?.text_preview ?: ""
                     )
                 }
+
+                accountDetailsViewModal.setNotes(newNotes ?: emptyList())
                 Log.i("AccountDetails", "Success: ${it.data}")
             }
 
@@ -126,7 +133,7 @@ fun AccountDetails(
         when (it) {
             is NetworkResponse.Success -> {
                 isAccountTaskDetailsLoading = false
-                tasks = it.data?.task_ids?.map { taskId ->
+                val newTasks = it.data?.task_ids?.map { taskId ->
                     val taskDetails = it.data?.task_map_by_id?.get(taskId)
                     Task(
                         creator_name = taskDetails?.creator_name ?: "",
@@ -137,6 +144,7 @@ fun AccountDetails(
                         last_modified_time = taskDetails?.last_modified_time ?: ""
                     )
                 }
+                accountDetailsViewModal.setTasks(newTasks ?: emptyList())
                 Log.i("AccountDetails", "Success: ${it.data}")
             }
 
@@ -155,16 +163,41 @@ fun AccountDetails(
     deleteAccountNoteResponse?.let {
         when (it) {
             is NetworkResponse.Success -> {
-                Log.i("AccountDetails", "Success: ${it.data}")
-                accountDetailsViewModal.getAccountNotes(accountId = accountId)
+                Log.i("AccountDetails deleteAccount Success", "Success: ${it.data}")
+                LaunchedEffect(key1 = accountId) {
+                    accountDetailsViewModal.getAccountNotes(accountId = accountId)
+                }
+                CustomToast(message = "Note Deleted", type = ToastType.Success)
+//                val updatedNotes = notes?.filter { note -> note.id != noteId.value }
+//                accountDetailsViewModal.setNotes(updatedNotes ?: emptyList())
             }
 
             is NetworkResponse.Error -> {
-                Log.i("AccountDetails", "Failure: ${it.message}")
+                CustomToast(message = it.message ?: "Something went wrong", type = ToastType.Error)
+                Log.i("AccountDetails deleteAccount Error", "Failure: ${it.message}")
             }
 
             is NetworkResponse.Loading -> {
-                Log.i("AccountDetails", "Loading")
+                Log.i("AccountDetails deleteAccount Loading", "Loading")
+            }
+        }
+    }
+
+    deleteAccountTaskResponse?.let {
+        when (it) {
+            is NetworkResponse.Success -> {
+                Log.i("AccountDetails deleteAccount Success", "Success: ${it.data}")
+                LaunchedEffect(key1 = accountId) {
+                    accountDetailsViewModal.getAccountTasks(accountId = accountId)
+                }
+                CustomToast(message = "Task Deleted", type = ToastType.Success)
+            }
+            is NetworkResponse.Error -> {
+                CustomToast(message = it.message ?: "Something went wrong", type = ToastType.Error)
+                Log.i("AccountDetails deleteAccount Error", "Failure: ${it.message}")
+            }
+            is NetworkResponse.Loading -> {
+                Log.i("AccountDetails deleteAccount Loading", "Loading")
             }
         }
     }
@@ -185,13 +218,28 @@ fun AccountDetails(
                     accountId = accountId,
                     noteId = noteId.value
                 )
-                openDialog.value = false
+                openDialogForNote.value = false
             },
             onDismissRequest = {
-                openDialog.value = false
+                openDialogForNote.value = false
             },
-            showConfirmationDialog = openDialog.value
+            showConfirmationDialog = openDialogForNote.value
+        )
 
+        CustomAlertDialog(
+            title = "Delete Task",
+            message = "Are you sure you want to delete this task?",
+            onConfirmButtonClick = {
+                accountDetailsViewModal.deleteAccountTask(
+                    accountId = accountId,
+                    taskId = taskId.value
+                )
+                openDialogForTask.value = false
+            },
+            onDismissRequest = {
+                openDialogForTask.value = false
+            },
+            showConfirmationDialog = openDialogForTask.value
         )
 
         AccountDetailsHeader()
@@ -219,7 +267,7 @@ fun AccountDetails(
                     onDeleteMenuClick = { noteID ->
                         Log.i("AccountDetails onDeleteMenuClick", "NoteId: ${note.id}")
                         noteId.value = noteID
-                        openDialog.value = true
+                        openDialogForNote.value = true
                     }
 
                 )
@@ -245,6 +293,12 @@ fun AccountDetails(
                     onClick = {
                         Log.i("AccountDetails", "TaskId: ${task.id}")
                         NavigationService.navigateTo("task_details_screen/${accountId}/${accountName}/${task.id}")
+                    },
+                    taskId = task.id,
+                    onDeleteMenuClick = { task ->
+                        Log.i("AccountDetails onDeleteMenuClick", "TaskId: $task")
+                        taskId.value = task
+                        openDialogForTask.value = true
                     }
                 )
             }
@@ -365,7 +419,7 @@ fun TaskDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}/{1}/${"Select"}")
+                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
                 }
         )
     }
@@ -411,7 +465,7 @@ fun NotesDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}/{1}/${"Select"}")
+                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
                 }
         )
     }

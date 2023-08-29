@@ -41,7 +41,7 @@ class SearchAccountViewModel @Inject constructor(
     ) {
         Log.d("SearchAccountViewModel", "onAccountRowClicked: $accountName")
         if (isAccountSelectionEnabled) {
-            NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}/{1}/${"Select"}")
+            NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
 
         } else {
             NavigationService.navigateTo("account_details_screen/${accountId}/${accountName}")
@@ -54,6 +54,6 @@ class SearchAccountViewModel @Inject constructor(
         accountId: String,
         isAccountSelectionEnabled: Boolean
     ) {
-        NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}/{1}/${"Select"}")
+        NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
     }
 }

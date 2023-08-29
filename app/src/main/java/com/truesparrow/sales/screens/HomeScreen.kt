@@ -222,7 +222,7 @@ fun HomeScreen() {
                                     accountName = item?.name ?: "",
                                     website = item?.website ?: "",
                                     onAccountCardClick = {
-                                        NavigationService.navigateTo(Screens.AccountDetailsScreen.route)
+                                        NavigationService.navigateTo("account_details_screen/${item?.id}/${item?.name}")
                                     },
                                     contactName = item?.contactName ?: ""
                                 )

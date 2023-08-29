@@ -7,7 +7,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,10 +21,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -50,7 +57,9 @@ fun TasksCard(
     notes: String,
     dueDate: String,
     assignedTaskUserName: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    taskId: String = "",
+    onDeleteMenuClick: (taskId: String) -> Unit = {}
 ) {
     Log.i("NotesCard", "NotesCard: $notes @date: $date @username: $username")
     var formattedTime: String = "";
@@ -62,7 +71,9 @@ fun TasksCard(
     }
 
     var formattedDueDate = convertDateFormat(dueDate);
-
+    var expanded by remember {
+        mutableStateOf(false)
+    }
 
 
 
@@ -120,16 +131,41 @@ fun TasksCard(
                 )
             }
 
-            Text(
-                text = formattedTime,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                    fontWeight = FontWeight(300),
-                    color = Color(0xFF545A71),
-                    letterSpacing = 0.48.sp,
+            Row {
+                Text(
+                    text = formattedTime,
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                        fontWeight = FontWeight(300),
+                        color = Color(0xFF545A71),
+                        letterSpacing = 0.48.sp,
+                    )
                 )
-            )
+                Spacer(modifier = Modifier.width(10.dp))
+                Box {
+                    Image(
+                        painter = painterResource(id = R.drawable.setting_three_dots_outline),
+                        contentDescription = "menu",
+                        modifier = Modifier
+                            .width(20.dp)
+                            .height(20.dp)
+                            .pointerInput(true) {
+                                detectTapGestures(onPress = {
+                                    expanded = true
+                                })
+                            })
+                    CustomDropDownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        onDeleteMenuClick = {
+                            Log.i("NotesCard", "NotesCard: $taskId")
+                            onDeleteMenuClick(taskId)
+                        }
+                    )
+                }
+            }
+
         }
 
         Text(

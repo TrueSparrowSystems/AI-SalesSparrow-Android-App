@@ -8,6 +8,8 @@ import com.truesparrow.sales.models.CurrentUserResponse
 import com.truesparrow.sales.models.AccountListResponse
 import com.truesparrow.sales.models.AccountNotesResponse
 import com.truesparrow.sales.models.AccountTasksResponse
+import com.truesparrow.sales.models.CreateAccountTaskRequest
+import com.truesparrow.sales.models.CreateAccountTaskResponse
 import com.truesparrow.sales.models.CrmOrganisationUsersResponse
 import com.truesparrow.sales.models.GetCrmActionRequest
 import com.truesparrow.sales.models.GetCrmActionsResponse
@@ -92,6 +94,21 @@ interface ApiService {
     suspend fun getAccountTasks(
         @Path(value = "account_id", encoded = true) accountId: String
     ): Response<AccountTasksResponse>
+
+    @DELETE("v1/accounts/{account_id}/tasks/{task_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: DeleteAccountTaskResponse.json")
+    suspend fun deleteTask(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "task_id") noteId: String
+    ): Response<Unit>
+
+    
+    @POST("v1/accounts/{account_id}/tasks")
+    @Headers("$MOCK_RESPONSE_HEADER: CreateAccountTaskResponse.json")
+    suspend fun createAccountTasks(
+    @Path(value = "account_id", encoded = true) accountId: String,
+    @Body request: CreateAccountTaskRequest
+    ): Response<CreateAccountTaskResponse>
 
     @GET("./v1/accounts/feed")
     @Headers("$MOCK_RESPONSE_HEADER: AccountFeedResponse.json")
