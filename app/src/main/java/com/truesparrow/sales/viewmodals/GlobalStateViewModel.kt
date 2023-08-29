@@ -13,7 +13,9 @@ class GlobalStateViewModel : ViewModel() {
         val taskDesc: MutableLiveData<String> = MutableLiveData(),
         val crmUserId: MutableLiveData<String> = MutableLiveData(),
         val crmUserName: MutableLiveData<String> = MutableLiveData(),
-        val dueDate: MutableLiveData<String> = MutableLiveData()
+        val dueDate: MutableLiveData<String> = MutableLiveData(),
+        val isTaskCreated: MutableLiveData<Boolean> = MutableLiveData(),
+        val noteDesc : MutableLiveData<Boolean> = MutableLiveData(),
     )
 
     fun setValuesById(
@@ -21,13 +23,16 @@ class GlobalStateViewModel : ViewModel() {
         taskDesc: String? = null,
         crmUserId: String? = null,
         crmUserName: String? = null,
-        dueDate: String? = null
+        dueDate: String? = null,
+        isTaskCreated: Boolean = false,
+        
     ) {
         val dataValues = recommdedTasksMap[id] ?: DataValues()
         taskDesc?.let { dataValues.taskDesc.value = it }
         crmUserId?.let { dataValues.crmUserId.value = it }
         crmUserName?.let { dataValues.crmUserName.value = it }
         dueDate?.let { dataValues.dueDate.value = it }
+        isTaskCreated?.let { dataValues.isTaskCreated.value = it }
         recommdedTasksMap[id] = dataValues
     }
 
@@ -41,4 +46,5 @@ class GlobalStateViewModel : ViewModel() {
     fun getCrmUserIdById(id: String): LiveData<String>? = recommdedTasksMap[id]?.crmUserId
     fun getCrmUserNameById(id: String): LiveData<String>? = recommdedTasksMap[id]?.crmUserName
     fun getDueDateById(id: String): LiveData<String>? = recommdedTasksMap[id]?.dueDate
+    fun getIsTaskCreatedById(id: String): LiveData<Boolean>? = recommdedTasksMap[id]?.isTaskCreated
 }
