@@ -102,9 +102,6 @@ fun TaskScreen(
                 createTaskApiInProgress = false
                 createTaskApiIsSuccess = true
                 globalStateViewModel.setValuesById(id, isTaskCreated = true)
-                if (id == "1") {
-                    NavigationService.navigateTo("account_details_screen/${accountId}/${accountName}")
-                }
                 CustomToast(
                     message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
@@ -433,7 +430,7 @@ fun AddTaskHeader(
                 .background(
                     color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
                 )
-                .width(92.dp)
+                .width(112.dp)
                 .height(46.dp)
                 .clip(shape = RoundedCornerShape(size = 5.dp))
                 .semantics {
@@ -465,17 +462,17 @@ fun AddTaskHeader(
                         contentDescription = "Loader",
                         colorFilter = ColorFilter.tint(Color.White),
                         modifier = Modifier
-                            .width(width = 17.dp)
+                            .width(width = 12.dp)
                             .height(height = 12.dp)
                     )
 
                 }
                 Text(text = if (createTaskApiInProgress) {
-                    "Adding Task..."
+                    "Saving Task..."
                 } else if (createTasksApiIsSuccess) {
                     "Saved"
                 } else {
-                    "Add Task"
+                    "Save Task"
                 }, color = Color.White, style = TextStyle(
                     fontSize = 12.sp,
                     fontFamily = FontFamily(Font(R.font.nunito_regular)),

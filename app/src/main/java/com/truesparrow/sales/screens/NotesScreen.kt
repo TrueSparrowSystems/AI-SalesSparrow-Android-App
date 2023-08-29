@@ -47,11 +47,13 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.truesparrow.sales.R
 import com.truesparrow.sales.common_components.AccountListBottomSheet
+import com.truesparrow.sales.common_components.CustomDropDownMenu
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
 import com.truesparrow.sales.common_components.TaskSuggestionCard
 import com.truesparrow.sales.common_components.ToastType
+import com.truesparrow.sales.common_components.UpdateTaskDropDownMenu
 import com.truesparrow.sales.models.TaskSuggestions
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
@@ -79,7 +81,6 @@ fun NotesScreen(
     val notesViewModel: NotesViewModel = hiltViewModel()
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
     var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
-    var recommendedPopup by remember { mutableStateOf(false) }
 
 
     val getCrmActionsResponse by notesViewModel.getCrmActionsLiveData.observeAsState()
@@ -223,9 +224,6 @@ fun NotesScreen(
         if (getCrmActionLoading) {
             RecommendedSectionHeader(
                 heading = "Getting recommendations",
-                onPlusClicked = {
-                    recommendedPopup = true
-                },
                 shouldShowPlusIcon = false,
                 crmUserId = crmUserId!!,
                 crmUserName = crmUserName!!,
@@ -267,9 +265,6 @@ fun NotesScreen(
             if (tasks[0] !== null) {
                 RecommendedSectionHeader(
                     heading = "We have some recommendations ",
-                    onPlusClicked = {
-                        recommendedPopup = true
-                    },
                     shouldShowPlusIcon = true,
                     crmUserName = crmUserName!!,
                     crmUserId = crmUserId!!,
@@ -362,9 +357,11 @@ fun RecommendedSectionHeader(
     crmUserName: String,
     crmUserId: String,
     accountId: String,
-    onPlusClicked: () -> Unit,
     shouldShowPlusIcon: Boolean,
 ) {
+    var recommendedPopup by remember { mutableStateOf(false) }
+
+
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -385,19 +382,25 @@ fun RecommendedSectionHeader(
             )
         )
         if (shouldShowPlusIcon) {
-            Image(painter = painterResource(id = R.drawable.add_icon),
-                contentDescription = "add_notes",
-                modifier = Modifier
-                    .width(20.dp)
-                    .height(20.dp)
-                    .clickable(
-                        interactionSource = MutableInteractionSource(), indication = null
-                    ) {
-                        onPlusClicked()
+            Box {
+                Image(painter = painterResource(id = R.drawable.add_icon),
+                    contentDescription = "add_notes",
+                    modifier = Modifier
+                        .width(20.dp)
+                        .height(20.dp)
+                        .clickable(
+                            interactionSource = MutableInteractionSource(), indication = null
+                        ) {
+                            recommendedPopup = true
+                        })
+                Spacer(modifier = Modifier.height(5.dp))
+                UpdateTaskDropDownMenu(expanded = recommendedPopup,
+                    onDismissRequest = { recommendedPopup = false },
+                    onAddTaskMenuClick = {
                         NavigationService.navigateTo("task_screen/${accountId}/${accountName}/1")
                     })
+            }
         }
-
     }
 
 }
