@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -69,9 +70,7 @@ fun TaskSuggestionCard(
     globalStateViewModel: GlobalStateViewModel,
     onCancelTaskClick: (id: String) -> Unit,
     onAddTaskClick: (
-        crmOrganizationUserId: String,
-        description: String,
-        dueDate: String
+        crmOrganizationUserId: String, description: String, dueDate: String
     ) -> Unit,
     createTaskApiInProgress: Boolean = false,
     isTaskAdded: Boolean = false
@@ -180,7 +179,7 @@ fun TaskSuggestionCard(
                         userAvatarTestId = "user_avatar_note_details"
                     )
                     Text(
-                        text = currentUserName , style = TextStyle(
+                        text = currentUserName, style = TextStyle(
                             fontSize = 14.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(500),
@@ -293,11 +292,11 @@ fun TaskSuggestionCard(
                             .width(20.dp)
                             .height(20.dp)
                     )
-                    if(userId.isNotEmpty()){
+                    if (userId.isNotEmpty()) {
                         UserAvatar(
                             id = userId,
                             firstName = userName.split(" ")[0],
-                            lastName =  userName.split(" ")[0],
+                            lastName = userName.split(" ")[0],
                             size = 18.dp,
                             textStyle = TextStyle(
                                 fontSize = 5.24.sp,
@@ -309,7 +308,6 @@ fun TaskSuggestionCard(
                             userAvatarTestId = "user_avatar_note_details"
                         )
                     }
-
                     Text(
                         text = userName.ifEmpty {
                             "Select"
@@ -320,6 +318,14 @@ fun TaskSuggestionCard(
                             color = Color(0xFFDD1A77),
                             letterSpacing = 0.48.sp,
                         )
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.up_arrow),
+                        contentDescription = "Up arrow",
+                        modifier = Modifier
+                            .width(8.dp)
+                            .height(8.dp)
                     )
                 }
             }
@@ -342,7 +348,6 @@ fun TaskSuggestionCard(
                             mDatePickerDialog.show()
                         }
                     }) {
-
                     Text(
                         text = "Due", style = TextStyle(
                             fontSize = 12.sp,
@@ -362,7 +367,11 @@ fun TaskSuggestionCard(
                     )
 
                     Text(
-                        text = dueDate.value.replace("-", "/"), style = TextStyle(
+                        text = if (dueDate.value.isEmpty()) {
+                            "Select"
+                        } else {
+                            dueDate.value.replace("-", "/")
+                        }, style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(700),
@@ -370,7 +379,6 @@ fun TaskSuggestionCard(
                             letterSpacing = 0.48.sp,
                         )
                     )
-                    Spacer(modifier = Modifier.weight(1f))
                     Image(
                         painter = painterResource(id = R.drawable.calendar),
                         contentDescription = "calendar",
@@ -382,28 +390,30 @@ fun TaskSuggestionCard(
             }
             Spacer(modifier = Modifier.height(4.dp))
 
-            if (isTaskAdded) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(35.dp)
-                        .background(Color(0xFF4CAF50))
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.success_toast_check),
-                        contentDescription = "Success",
+            if (!isTaskAdded) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .height(18.dp)
-                            .width(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Task added", style = TextStyle(
-                            fontSize = 12.sp, lineHeight = 24.sp, color = Color(0xFF444A62)
+                            .fillMaxWidth()
+                            .height(35.dp)
+                            .background(Color(0xFF4CAF50))
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.success_toast_check),
+                            contentDescription = "Success",
+                            modifier = Modifier
+                                .height(18.dp)
+                                .width(18.dp)
                         )
-                    )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Task added", style = TextStyle(
+                                fontSize = 12.sp, lineHeight = 24.sp, color = Color(0xFF444A62)
+                            )
+                        )
+                    }
                 }
             } else {
                 Row(

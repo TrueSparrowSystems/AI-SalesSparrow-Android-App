@@ -241,6 +241,7 @@ fun AddTaskContent(
                 .border(
                     width = 1.dp, color = Color(0xFFE9E9E9), shape = RoundedCornerShape(size = 4.dp)
                 )
+                .width(180.dp)
 
         ) {
             Button(onClick = {
@@ -337,7 +338,7 @@ fun AddTaskContent(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 interactionSource = NoRippleInteractionSource(),
                 modifier = Modifier
-                    .width(160.dp)
+                    .width(180.dp)
                     .semantics {
                         contentDescription = "btn_select_account"
                     }) {
@@ -346,7 +347,9 @@ fun AddTaskContent(
                 ) {
                     Text(
                         text = selectedDueDate.value.replace("-","/").ifEmpty {
-                            dueDate.replace("-","/")
+                            dueDate.replace("-","/").ifEmpty {
+                                "Select"
+                            }
                         },
                         color = Color(0xff444A62),
                         style = TextStyle(
