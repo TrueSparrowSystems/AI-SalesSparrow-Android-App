@@ -28,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
@@ -36,6 +37,9 @@ import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -421,6 +425,7 @@ fun TaskDetailsHeader(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NotesDetailsHeader(
     accountId: String,
@@ -452,6 +457,10 @@ fun NotesDetailsHeader(
             modifier = Modifier
                 .width(20.dp)
                 .height(20.dp)
+                .semantics {
+                          testTag = "img_account_detail_add_note_icon"
+                         testTagsAsResourceId = true
+                }
                 .clickable(
                     interactionSource = MutableInteractionSource(),
                     indication = null
@@ -482,6 +491,7 @@ fun ContactDetailsHeader() {
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AccountDetailsHeader() {
     CustomTextWithImage(
@@ -489,7 +499,11 @@ fun AccountDetailsHeader() {
         imageContentDescription = "arrow-left",
         imageModifier = Modifier
             .width(24.dp)
-            .height(24.dp),
+            .height(24.dp)
+            .semantics {
+                       testTag = "btn_account_detail_back"
+                      testTagsAsResourceId = true
+            },
         text = "Details",
         textStyle = TextStyle(
             fontSize = 16.sp,
@@ -497,6 +511,10 @@ fun AccountDetailsHeader() {
             fontWeight = FontWeight(600),
             color = Color(0xFF212653),
         ),
+        textModifier = Modifier.semantics {
+           testTag = "txt_account_detail_account_details_title"
+            testTagsAsResourceId = true
+        },
         onClick = {
             NavigationService.navigateBack();
         }

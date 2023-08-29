@@ -26,10 +26,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -49,6 +54,7 @@ import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SettingsScreen() {
     var switchCheckedState by remember { mutableStateOf(false) }
@@ -169,6 +175,11 @@ fun SettingsScreen() {
                 .height(40.dp)
                 .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp))
                 .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
+                .semantics {
+                    testTagsAsResourceId = true
+                     testTag = "btn_user_account_detail_logout"
+                    contentDescription = "btn_user_account_detail_logout"
+                    }
                 .clickable(
                     interactionSource =  MutableInteractionSource(),
                     indication = null,
