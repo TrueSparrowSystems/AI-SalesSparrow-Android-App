@@ -68,7 +68,9 @@ fun TaskSuggestionCard(
     onDeleteTaskClick: () -> Unit,
     accountId: String,
     accountName: String,
+    shouldShowOptions: Boolean = false,
     globalStateViewModel: GlobalStateViewModel,
+    onCancelTaskClick: (id: String) -> Unit
 ) {
     var expanded by remember {
         mutableStateOf(false)
@@ -226,24 +228,26 @@ fun TaskSuggestionCard(
                         )
                     )
 
-                    Box {
-                        Image(painter = painterResource(id = R.drawable.setting_three_dots_outline),
-                            contentDescription = "menu",
-                            modifier = Modifier
-                                .width(20.dp)
-                                .height(20.dp)
-                                .pointerInput(true) {
-                                    detectTapGestures(onPress = {
-                                        pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
-                                        expanded = true
+                    if (shouldShowOptions) {
+                        Box {
+                            Image(painter = painterResource(id = R.drawable.setting_three_dots_outline),
+                                contentDescription = "menu",
+                                modifier = Modifier
+                                    .width(20.dp)
+                                    .height(20.dp)
+                                    .pointerInput(true) {
+                                        detectTapGestures(onPress = {
+                                            pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
+                                            expanded = true
+                                        })
                                     })
-                                })
 
-                        CustomDropDownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            onDeleteMenuClick = onDeleteTaskClick
-                        )
+                            CustomDropDownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                                onDeleteMenuClick = onDeleteTaskClick
+                            )
+                        }
                     }
                 }
 
@@ -373,8 +377,7 @@ fun TaskSuggestionCard(
                     )
 
                     Text(
-                        text = dueDate.value
-                        , style = TextStyle(
+                        text = dueDate.value, style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(700),
@@ -458,6 +461,7 @@ fun TaskSuggestionCard(
                         .width(60.dp)
                         .height(32.dp)
                         .border(1.dp, Color(0xFF5D678D), shape = RoundedCornerShape(4.dp))
+
                 ) {
                     Text(text = "Cancel",
                         style = TextStyle(
@@ -469,7 +473,7 @@ fun TaskSuggestionCard(
                         ),
                         modifier = Modifier
                             .padding(8.dp)
-                            .clickable { /* Handle button click */ })
+                            .clickable { onCancelTaskClick(id) })
                 }
             }
         }

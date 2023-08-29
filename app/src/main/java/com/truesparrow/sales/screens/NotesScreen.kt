@@ -120,11 +120,6 @@ fun NotesScreen(
         }
     }
 
-//    LaunchedEffect(true) {
-//        notesViewModel.getCrmActions(note);
-//    }
-
-
     saveNoteRespose?.let { response ->
         when (response) {
             is NetworkResponse.Success -> {
@@ -190,6 +185,8 @@ fun NotesScreen(
                 })
 
 
+        Log.i("NotesScreen re-com 0", "NotesScreen: ${getCrmActionLoading} $tasks")
+
         if (getCrmActionLoading) {
             RecommendedSectionHeader(
                 heading = "Getting recommendations",
@@ -232,10 +229,10 @@ fun NotesScreen(
                 height = 95.dp
             )
         } else {
-
-            if (tasks.isNotEmpty()) {
+            Log.i("NotesScreen re com", "NotesScreen: ${tasks.size} $tasks")
+            if ( tasks[0] !== null) {
                 RecommendedSectionHeader(
-                    heading = "We have some recommendations",
+                    heading = "We have some recommendations ",
                     onPlusClicked = {
                         recommendedPopup = true
                     },
@@ -247,7 +244,7 @@ fun NotesScreen(
 
                 Spacer(modifier = Modifier.height(30.dp))
                 tasks.forEach { task ->
-                    task?.let {
+                    task?.let { it ->
 
                         val taskDesc = viewModel.getTaskDescById(it.id)?.value ?: ""
                         val userId = viewModel.getCrmUserIdById(it.id)?.value ?: ""
@@ -284,7 +281,17 @@ fun NotesScreen(
                                 accountId = accountId!!,
                                 accountName = accountName!!,
                                 globalStateViewModel = viewModel,
-                                onDeleteTaskClick = {})
+                                shouldShowOptions = false,
+                                onDeleteTaskClick = {},
+                                onCancelTaskClick = {taskId ->
+                                    Log.i("NotesScreen", "NotesScreen: $taskId")
+                                    Log.i("NotesScreen", "NotesScreen: ${tasks.size} $tasks")
+                                    tasks = tasks.filter { it?.id != taskId }
+                                    Log.i("NotesScreen", "NotesScreen: ${tasks.size} $tasks")
+                                    viewModel.DeleteTaskById(taskId)
+                                },
+
+                            )
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -462,7 +469,7 @@ fun Header(
                     onClick = { NavigationService.navigateBack() })
                 .semantics {
                     contentDescription =
-                        if (saveNoteApiIsSuccess) "btn_done_note_screen" else "btn_cancel_create_note"
+                        if (saveNoteApiIsSuccess) "btn_done_create_note" else "btn_cancel_create_note"
                 },
         )
 

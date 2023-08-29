@@ -46,10 +46,7 @@ fun EditableTextField(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
         ),
-        modifier = Modifier.semantics {
-            testTagsAsResourceId = true
-            testTag = "editableTextFieldTestId"
-        },
+        modifier = modifier!!,
         placeholder = {
             Text(
                 text = placeholderText,
