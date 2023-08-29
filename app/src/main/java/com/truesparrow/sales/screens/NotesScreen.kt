@@ -199,7 +199,8 @@ fun NotesScreen(
                 shouldShowPlusIcon = false,
                 crmUserId = crmUserId!!,
                 crmUserName = crmUserName!!,
-                accountId = accountId!!
+                accountId = accountId!!,
+                accountName = accountName!!
             )
             Spacer(modifier = Modifier.height(30.dp))
             Column(
@@ -242,7 +243,8 @@ fun NotesScreen(
                     shouldShowPlusIcon = true,
                     crmUserName = crmUserName!!,
                     crmUserId = crmUserId!!,
-                    accountId = accountId!!
+                    accountId = accountId!!,
+                    accountName = accountName!!,
                 )
 
                 Spacer(modifier = Modifier.height(30.dp))
@@ -308,6 +310,7 @@ fun NotesScreen(
 @Composable
 fun RecommendedSectionHeader(
     heading: String,
+    accountName : String,
     crmUserName: String,
     crmUserId: String,
     accountId: String,
@@ -343,7 +346,7 @@ fun RecommendedSectionHeader(
                         interactionSource = MutableInteractionSource(), indication = null
                     ) {
                         onPlusClicked()
-                        NavigationService.navigateTo("task_screen/${accountId}/1")
+                        NavigationService.navigateTo("task_screen/${accountId}/${accountName}/1")
                     })
         }
 

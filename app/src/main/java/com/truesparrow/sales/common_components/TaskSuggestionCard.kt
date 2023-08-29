@@ -268,7 +268,7 @@ fun TaskSuggestionCard(
                     .clickable {
                         if(globalStateViewModel.getIsTaskCreatedById(id)?.value != true){
                             NavigationService.navigateTo(
-                                "task_screen/${accountId}/${id}"
+                                "task_screen/${accountId}/${accountName}/${id}"
                             )
                         }
                     }

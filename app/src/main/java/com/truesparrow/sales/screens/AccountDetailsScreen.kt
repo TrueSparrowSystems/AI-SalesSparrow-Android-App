@@ -415,7 +415,7 @@ fun TaskDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
+                    NavigationService.navigateTo("task_screen/${accountId}/${accountName}/1")
                 }
         )
     }

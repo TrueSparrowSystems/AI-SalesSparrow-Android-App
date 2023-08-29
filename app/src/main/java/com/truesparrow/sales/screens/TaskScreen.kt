@@ -72,6 +72,7 @@ import java.util.Date
 @Composable
 fun TaskScreen(
     accountId: String? = null,
+    accountName: String? = null,
     id: String = "1",
     globalStateViewModel: GlobalStateViewModel
 ) {
@@ -100,6 +101,10 @@ fun TaskScreen(
             is NetworkResponse.Success -> {
                 createTaskApiInProgress = false
                 createTaskApiIsSuccess = true
+                globalStateViewModel.setValuesById(id, isTaskCreated = true)
+                if (id == "1") {
+                    NavigationService.navigateTo("account_details_screen/${accountId}/${accountName}")
+                }
                 CustomToast(
                     message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
@@ -134,6 +139,7 @@ fun TaskScreen(
         AddTaskContent(
             id = id,
             accountId = accountId,
+            accountName = accountName,
             crmUserName = globalStateViewModel.getCrmUserNameById(id)?.value ?: "Select",
             crmUserId = crmUserId,
             dueDate = dueDate,
@@ -164,7 +170,9 @@ fun AddTaskContent(
     dueDate: String,
     globalStateViewModel: GlobalStateViewModel,
     id: String,
-    accountId : String? = null
+    accountId: String? = null,
+    accountName: String? = null
+
 ) {
 
     var searchNameBottomSheetVisible by remember { mutableStateOf(false) }
@@ -178,6 +186,7 @@ fun AddTaskContent(
         SearchNameBottomSheet(
             toggleSearchNameBottomSheet,
             accountId = accountId!!,
+            accountName = accountName!!,
             isNewTask = true,
             globalStateViewModel = globalStateViewModel,
             id = id
@@ -370,8 +379,8 @@ fun AddTaskContent(
 fun AddTaskHeader(
     createTaskApiInProgress: Boolean,
     createTasksApiIsSuccess: Boolean,
-    accountId : String? = null,
-    globalStateViewModel : GlobalStateViewModel,
+    accountId: String? = null,
+    globalStateViewModel: GlobalStateViewModel,
     id: String
 ) {
 
