@@ -543,7 +543,7 @@ fun Header(
                     onClick = { NavigationService.navigateBack() })
                 .semantics {
                     testTagsAsResourceId = true
-                    testTag =  if (saveNoteApiIsSuccess) "btn_done_note_screen" else "btn_cancel_create_note"
+                    testTag =  if (saveNoteApiIsSuccess) "btn_done_create_note" else "btn_cancel_create_note"
                     contentDescription =
                         if (saveNoteApiIsSuccess) "btn_done_create_note" else "btn_cancel_create_note"
                 },

@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -32,13 +33,14 @@ import com.truesparrow.sales.R
 import com.truesparrow.sales.ui.theme.walkaway_gray
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun AccountCard(
     accountName: String,
     onAccountCardClick: () -> Unit = {},
     website: String,
-    contactName: String
+    contactName: String,
+    textModifier: Modifier? = null
 ) {
     val context = LocalContext.current
 
@@ -71,14 +73,11 @@ fun AccountCard(
 
 
             CustomText(
-                text = accountName, Typography.labelMedium, color = walkaway_gray , modifier = Modifier
-                    .semantics {
-                        testTag = accountName
-                        contentDescription = accountName
-                    }
+                text = accountName, Typography.titleMedium, color = walkaway_gray,
+                modifier = textModifier
             )
 
-            if (website.isNotEmpty()){
+            if (website.isNotEmpty()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.link_icon),
@@ -100,7 +99,7 @@ fun AccountCard(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            if (contactName.isNotEmpty()){
+            if (contactName.isNotEmpty()) {
                 CustomText(
                     text = "CONTACT", Typography.titleSmall, color = eastBay.copy(alpha = 0.7f)
                 )
