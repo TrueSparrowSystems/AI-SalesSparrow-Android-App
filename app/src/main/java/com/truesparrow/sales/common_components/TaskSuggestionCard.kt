@@ -426,7 +426,7 @@ fun TaskSuggestionCard(
             }
             Spacer(modifier = Modifier.height(4.dp))
 
-            if (!isTaskAdded) {
+            if (isTaskAdded) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Row(
                         horizontalArrangement = Arrangement.Center,
