@@ -211,6 +211,7 @@ fun noteCardPreview() {
         username = "johndoe",
         date = "2021-08-10T12:00:00.000Z",
         notes = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vi",
+        index = 0,
         onClick = {}
     )
 }
