@@ -1,5 +1,6 @@
 package com.truesparrow.sales.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.truesparrow.sales.api.ApiService
@@ -15,10 +16,14 @@ class HomeRepository @Inject constructor(private val apiService: ApiService) {
         get() = _accountFeedLiveData
 
 
-    suspend fun getAccountFeed() {
+    suspend fun getAccountFeed(paginationIdentifier: String ? = "") {
         try {
             _accountFeedLiveData.postValue(NetworkResponse.Loading())
-            val response = apiService.getAccountFeed()
+            val response = if (paginationIdentifier?.isNotBlank() == true) {
+                apiService.getAccountFeedWithPagination(paginationIdentifier!!)
+            } else {
+                apiService.getAccountFeed()
+            }
             if (response.isSuccessful && response.body() != null) {
                 _accountFeedLiveData.postValue(NetworkResponse.Success(response.body()!!))
             } else if (response.errorBody() != null) {

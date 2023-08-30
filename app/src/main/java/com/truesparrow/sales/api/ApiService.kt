@@ -102,16 +102,23 @@ interface ApiService {
         @Path(value = "task_id") noteId: String
     ): Response<Unit>
 
-    
+
     @POST("v1/accounts/{account_id}/tasks")
     @Headers("$MOCK_RESPONSE_HEADER: CreateAccountTaskResponse.json")
     suspend fun createAccountTasks(
-    @Path(value = "account_id", encoded = true) accountId: String,
-    @Body request: CreateAccountTaskRequest
+        @Path(value = "account_id", encoded = true) accountId: String,
+        @Body request: CreateAccountTaskRequest
     ): Response<CreateAccountTaskResponse>
 
     @GET("./v1/accounts/feed")
     @Headers("$MOCK_RESPONSE_HEADER: AccountFeedResponse.json")
-    suspend fun getAccountFeed(): Response<AccountFeedResponse>
+    suspend fun getAccountFeed(
+    ): Response<AccountFeedResponse>
+
+    @GET("./v1/accounts/feed")
+    @Headers("$MOCK_RESPONSE_HEADER: AccountFeedResponse.json")
+    suspend fun getAccountFeedWithPagination(
+        @Query("pagination_identifier") paginationIdentifier: String
+    ): Response<AccountFeedResponse>
 
 }
