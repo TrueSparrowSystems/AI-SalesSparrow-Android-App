@@ -74,18 +74,11 @@ fun TaskScreen(
     accountId: String? = null,
     accountName: String? = null,
     id: String = "1",
-    globalStateViewModel: GlobalStateViewModel
 ) {
 
     var taskDesc = ""
     var crmUserId = ""
     var dueDate = "Select"
-
-    if (id != "1") {
-        taskDesc = globalStateViewModel.getTaskDescById(id)?.value ?: ""
-        crmUserId = globalStateViewModel.getCrmUserIdById(id)?.value ?: ""
-        dueDate = globalStateViewModel.getDueDateById(id)?.value ?: "Select"
-    }
 
 
     var task by remember { mutableStateOf(taskDesc) }
@@ -93,7 +86,6 @@ fun TaskScreen(
     var createTaskApiInProgress by remember { mutableStateOf(false) }
     var createTaskApiIsSuccess by remember { mutableStateOf(false) }
 
-    globalStateViewModel.setValuesById(id, taskDesc = task)
     val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
 
     createTaskResponse?.let { response ->
@@ -101,7 +93,6 @@ fun TaskScreen(
             is NetworkResponse.Success -> {
                 createTaskApiInProgress = false
                 createTaskApiIsSuccess = true
-                globalStateViewModel.setValuesById(id, isTaskCreated = true)
                 CustomToast(
                     message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
@@ -129,18 +120,14 @@ fun TaskScreen(
             createTaskApiInProgress = createTaskApiInProgress,
             createTasksApiIsSuccess = createTaskApiIsSuccess,
             accountId = accountId,
-            globalStateViewModel = globalStateViewModel,
-            id = id
         )
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
-            id = id,
             accountId = accountId,
             accountName = accountName,
-            crmUserName = globalStateViewModel.getCrmUserNameById(id)?.value ?: "Select",
+            crmUserName = "Select",
             crmUserId = crmUserId,
             dueDate = dueDate,
-            globalStateViewModel = globalStateViewModel
         )
         Spacer(modifier = Modifier.height(20.dp))
         EditableTextField(note = task, placeholderText = if (id == "1") {
@@ -148,7 +135,6 @@ fun TaskScreen(
         } else {
             ""
         }, onValueChange = {
-            globalStateViewModel.setValuesById(id, taskDesc = it)
             task = it
         }, modifier = Modifier
             .fillMaxWidth()
@@ -165,8 +151,6 @@ fun AddTaskContent(
     crmUserName: String,
     crmUserId: String,
     dueDate: String,
-    globalStateViewModel: GlobalStateViewModel,
-    id: String,
     accountId: String? = null,
     accountName: String? = null
 
@@ -184,9 +168,6 @@ fun AddTaskContent(
             toggleSearchNameBottomSheet,
             accountId = accountId!!,
             accountName = accountName!!,
-            isNewTask = true,
-            globalStateViewModel = globalStateViewModel,
-            id = id
         )
     }
 
@@ -210,7 +191,6 @@ fun AddTaskContent(
             selectedDueDate.value = "$mYear-$formattedMonth-$formattedDay"
         }, dueDateYear, dueDateMonth, dueDateDay
     )
-    globalStateViewModel.setValuesById(id, dueDate = selectedDueDate.value)
     mDatePickerDialog.datePicker.minDate = dueDateCalendar.timeInMillis
 
     Row(
@@ -380,8 +360,6 @@ fun AddTaskHeader(
     createTaskApiInProgress: Boolean,
     createTasksApiIsSuccess: Boolean,
     accountId: String? = null,
-    globalStateViewModel: GlobalStateViewModel,
-    id: String
 ) {
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
@@ -419,9 +397,9 @@ fun AddTaskHeader(
         Button(onClick = {
             tasksViewModel.createTask(
                 accountId = accountId!!,
-                crmOrganizationUserId = globalStateViewModel.getCrmUserIdById(id)?.value ?: "",
-                description = globalStateViewModel.getTaskDescById(id)?.value ?: "",
-                dueDate = globalStateViewModel.getDueDateById(id)?.value ?: "",
+                crmOrganizationUserId =  "",
+                description = "",
+                dueDate =  "",
             )
         },
             enabled = true,

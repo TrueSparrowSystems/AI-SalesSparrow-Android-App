@@ -15,14 +15,12 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     val intentState = mutableStateOf<Intent?>(null)
-
-    private val viewModel: GlobalStateViewModel by viewModels()
-
+    
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NavigationService(intentState.value, viewModel)
+            NavigationService(intentState.value)
 
         }
     }

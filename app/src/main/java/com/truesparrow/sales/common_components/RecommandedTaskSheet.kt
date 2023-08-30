@@ -26,7 +26,6 @@ fun RecommandedTaskSheet(
     accountName : String?,
     accountId : String?,
     id : String?,
-    globalStateViewModel : GlobalStateViewModel
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     Log.i("Tag===", "Task: $taskDesc, Due Date: $dueDate, User ID: $crmUserId, User Name: $crmUserName")
@@ -48,7 +47,6 @@ fun RecommandedTaskSheet(
             accountId = accountId,
             accountName = accountName,
             id = id!!,
-            globalStateViewModel = globalStateViewModel,
             crmUserId = crmUserId,
             crmUserName = crmUserName,
             taskDesc = taskDesc,

@@ -34,7 +34,7 @@ class NotesViewModel @Inject constructor(
     val tasks: MutableLiveData<List<Tasks>> = _tasks
 
     fun setTasks(newTasks: List<Tasks>) {
-        _tasks.value = newTasks
+        _tasks.postValue(newTasks)
         Log.i(" _tasks.value","${ _tasks.value}")
     }
     fun updateTaskById(taskId: String, updatedTask: Tasks) {
@@ -42,15 +42,19 @@ class NotesViewModel @Inject constructor(
         Log.i("UpdateById=","${updatedTask} ${taskId}")
 
         val currentTasks = _tasks.value.orEmpty()
+        Log.i("currentTasks=","${currentTasks}")
         val updatedTasks = currentTasks.map { task ->
             if (task.id == taskId) {
                 Log.i("Checking","Log")
                 updatedTask
             } else {
+                Log.i("Existing task","${task.id}")
                 task
+
             }
         }
         Log.i("Checking","${updatedTasks}")
+//        setTasks(updatedTasks)
         _tasks.postValue(updatedTasks)
 
         Log.i("UpdateById","${_tasks.value}")

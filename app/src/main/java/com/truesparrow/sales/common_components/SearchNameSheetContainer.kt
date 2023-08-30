@@ -63,8 +63,6 @@ fun SearchNameSheetContainer(
     bottomSheetVisible: () -> Unit,
     accountId: String,
     accountName: String,
-    isNewTask : Boolean,
-    globalStateViewModel : GlobalStateViewModel,
     id : String
 ) {
     val searchCrmUserNameViewModal: SearchCrmUserNameViewModal = hiltViewModel()
@@ -230,18 +228,13 @@ fun SearchNameSheetContainer(
                                     firstName = recordInfo.name,
                                     lastName = recordInfo.name,
                                     crmUserId = recordInfo.id,
-                                    searchNameTestId = "btn_search_user_user_name_${recordInfo.name}",
-                                    globalStateViewModel = globalStateViewModel,
                                     id = id,
+                                    searchNameTestId = "btn_search_user_user_name_${recordInfo.name}",
                                     onAccountRowClick = {
-                                        if(isNewTask){
                                             searchCrmUserNameViewModal.onAccountRowClicked(
                                                 accountId = accountId,
                                                 accountName = accountName!!,
-                                                isNewTask = isNewTask,
-                                                id = id,
                                             )
-                                        }
                                         bottomSheetVisible()
                                     },
                                 )

@@ -18,9 +18,8 @@ fun SearchNameBottomSheet(
     bottomSheetVisible: () -> Unit,
     accountId: String = "",
     accountName: String = "",
-    isNewTask : Boolean = false,
-    globalStateViewModel: GlobalStateViewModel,
-    id : String,
+    id : String = ""
+
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -36,11 +35,9 @@ fun SearchNameBottomSheet(
     ) {
         SearchNameSheetContainer(
             bottomSheetVisible,
+            id = id,
             accountId = accountId,
             accountName = accountName!!,
-            isNewTask = isNewTask,
-            globalStateViewModel = globalStateViewModel,
-            id = id
         )
     }
 }

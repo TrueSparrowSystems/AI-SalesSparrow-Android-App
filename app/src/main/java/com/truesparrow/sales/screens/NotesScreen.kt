@@ -47,7 +47,6 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.truesparrow.sales.R
 import com.truesparrow.sales.common_components.AccountListBottomSheet
-import com.truesparrow.sales.common_components.CustomDropDownMenu
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
@@ -56,13 +55,11 @@ import com.truesparrow.sales.common_components.SearchNameBottomSheet
 import com.truesparrow.sales.common_components.TaskSuggestionCard
 import com.truesparrow.sales.common_components.ToastType
 import com.truesparrow.sales.common_components.UpdateTaskDropDownMenu
-import com.truesparrow.sales.models.TaskSuggestions
 import com.truesparrow.sales.models.Tasks
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
-import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 import com.truesparrow.sales.viewmodals.NotesViewModel
 import com.truesparrow.sales.viewmodals.TasksViewModal
 
@@ -72,23 +69,13 @@ fun NotesScreen(
     accountName: String? = null,
     accountId: String? = null,
     isAccountSelectionEnabled: Boolean = false,
-    id: String,
-    viewModel: GlobalStateViewModel,
 ) {
 
-    val crmUserId = viewModel.getCrmUserIdById(id)?.value ?: ""
-    val crmUserName = viewModel.getCrmUserNameById(id)?.value ?: "Select"
-
-
     val notesViewModel: NotesViewModel = hiltViewModel()
-    var currTaskId by remember { mutableStateOf("") }
-
-
-    val note by notesViewModel.note
+    var selectedTaskId by remember { mutableStateOf("") }
 
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
     var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
-
 
     val getCrmActionsResponse by notesViewModel.getCrmActionsLiveData.observeAsState()
     var getCrmActionLoading by remember { mutableStateOf(false) }
@@ -100,7 +87,10 @@ fun NotesScreen(
     var createTaskApiInProgress by remember { mutableStateOf(false) }
     var createTaskApiIsSuccess by remember { mutableStateOf(false) }
 
+    var noteDesc by remember { mutableStateOf("") }
+
     var tasks = notesViewModel.tasks.observeAsState()?.value
+
 
     val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
 
@@ -109,7 +99,6 @@ fun NotesScreen(
             is NetworkResponse.Success -> {
                 createTaskApiInProgress = false;
                 createTaskApiIsSuccess = true
-                viewModel.setValuesById(id, isTaskCreated = true)
                 CustomToast(
                     message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
@@ -137,10 +126,10 @@ fun NotesScreen(
                 getCrmActionLoading = false
                 val newTasks = (it.data?.add_task_suggestions?.map { task ->
                     var index = 0;
-                    val id = "${task.description}${task!!.due_date ?: ""}${index++}"
+                    val id = "temp_task_${index}_${System.currentTimeMillis()}"
                     Tasks(
-                        crm_user_id = crmUserId,
-                        crm_user_name = crmUserName,
+                        crm_user_id = "",
+                        crm_user_name = "",
                         due_date = task?.due_date ?: "",
                         task_desc = task?.description ?: "",
                         id = id
@@ -174,7 +163,7 @@ fun NotesScreen(
                 )
 
                 LaunchedEffect(true) {
-                    notesViewModel.getCrmActions(note);
+                    notesViewModel.getCrmActions(noteDesc);
                 }
             }
 
@@ -213,20 +202,15 @@ fun NotesScreen(
         SearchNameBottomSheet(
             toggleSearchNameBottomSheet,
             accountId = accountId!!,
-            accountName = accountName!!,
-            isNewTask = false,
-            globalStateViewModel = viewModel,
-            id = id,
-
+            accountName = accountName!!
         )
     }
 
     if (RecommTaksBottomSheetVisible) {
-
-        Log.i("Updated tasks","$tasks")
-        val task = tasks?.find { it.id == currTaskId }
+        Log.i("Updated tasks", "$tasks")
+        val task = tasks?.find { it.id == selectedTaskId }
         Log.i("task==", "${task}")
-        Log.i("Ids test", "${currTaskId}")
+        Log.i("Ids test", "${selectedTaskId}")
 
         RecommandedTaskSheet(
             toggleSheet,
@@ -234,13 +218,12 @@ fun NotesScreen(
             accountName = accountName!!,
             crmUserId = task?.crm_user_id ?: "",
             crmUserName = task?.crm_user_name ?: "",
-            taskDesc =  task?.task_desc ?: "",
+            taskDesc = task?.task_desc ?: "",
             dueDate = task?.due_date ?: "",
-            id = currTaskId,
+            id = selectedTaskId,
             onSelectUSerClick = { id ->
                 toggleSearchNameBottomSheet()
             },
-            globalStateViewModel = viewModel
         )
     }
 
@@ -250,7 +233,7 @@ fun NotesScreen(
             .verticalScroll(state = scrollState, enabled = true)
     ) {
         Header(
-            note = note,
+            note = noteDesc,
             accountName = accountName,
             accountId = accountId!!,
             saveNoteApiInProgress = saveNoteApiInProgress,
@@ -260,9 +243,9 @@ fun NotesScreen(
             accountName = accountName, isAccountSelectionEnabled = isAccountSelectionEnabled
         )
 
-        EditableTextField(note = note,
+        EditableTextField(note = noteDesc,
             onValueChange = {
-                notesViewModel.note.value = it
+                noteDesc = it
             },
             placeholderText = "Add A Note",
             readOnly = saveNoteApiIsSuccess,
@@ -274,13 +257,13 @@ fun NotesScreen(
                     testTagsAsResourceId = true
                 })
 
-
+        Log.i("After posting values", "values")
         if (getCrmActionLoading) {
             RecommendedSectionHeader(
                 heading = "Getting recommendations",
                 shouldShowPlusIcon = false,
-                crmUserId = crmUserId!!,
-                crmUserName = crmUserName!!,
+                crmUserId = "",
+                crmUserName = "",
                 accountId = accountId!!,
                 accountName = accountName!!,
                 testId = "txt_create_note_getting_recommendations"
@@ -322,8 +305,8 @@ fun NotesScreen(
                 RecommendedSectionHeader(
                     heading = "We have some recommendations ",
                     shouldShowPlusIcon = true,
-                    crmUserName = crmUserName!!,
-                    crmUserId = crmUserId!!,
+                    crmUserName = "",
+                    crmUserId = "",
                     accountId = accountId!!,
                     accountName = accountName!!,
                     testId = "txt_create_note_recommendations"
@@ -331,37 +314,6 @@ fun NotesScreen(
 
                 Spacer(modifier = Modifier.height(30.dp))
                 tasks?.forEach { task ->
-//                    task?.let { it ->
-//                        val taskDesc = viewModel.getTaskDescById(it.id)?.value ?: ""
-//                        val userId = viewModel.getCrmUserIdById(it.id)?.value ?: ""
-//                        val userName = viewModel.getCrmUserNameById(it.id)?.value ?: ""
-//                        val dDate = viewModel.getDueDateById(it.id)?.value ?: ""
-//                        val isTaskCreated = viewModel.getIsTaskCreatedById(it.id)?.value ?: false
-//
-//                        viewModel.setValuesById(
-//                            id = it.id, taskDesc = if (taskDesc.isEmpty()) {
-//                                it.description
-//                            } else {
-//                                taskDesc
-//                            }, crmUserId = if (userId.isEmpty()) {
-//                                crmUserId
-//                            } else {
-//                                userId
-//                            }, crmUserName = if (userName.isEmpty()) {
-//                                crmUserName
-//                            } else {
-//                                userName
-//                            }, dueDate = if (dDate.isEmpty()) {
-//                                it.due_date
-//                            } else {
-//                                dDate
-//                            }, isTaskCreated = if (isTaskCreated) {
-//                                isTaskCreated
-//                            } else {
-//                                false
-//                            }
-//                        )
-
                     Column(
                         modifier = Modifier
                             .dashedBorder(1.dp, 5.dp, Color(0x80545A71))
@@ -372,7 +324,6 @@ fun NotesScreen(
                             id = task?.id!!,
                             accountId = accountId!!,
                             accountName = accountName!!,
-                            globalStateViewModel = viewModel,
                             crmUserId = task.crm_user_id!!,
                             crmUserName = task.crm_user_name!!,
                             taskDesc = task.task_desc!!,
@@ -380,11 +331,11 @@ fun NotesScreen(
                             shouldShowOptions = false,
                             onDeleteTaskClick = {},
                             onSelectUSerClick = { id ->
-                                currTaskId = id
+                                selectedTaskId = id
                                 toggleSearchNameBottomSheet()
                             },
                             onEditTaskClick = { id ->
-                                currTaskId = id
+                                selectedTaskId = id
                                 toggleSheet()
                             },
                             onCancelTaskClick = { taskId ->
@@ -393,7 +344,6 @@ fun NotesScreen(
                                 val updatedTasks = tasks!!.filter { it?.id != taskId }
                                 tasks = updatedTasks
                                 Log.i("NotesScreen", "NotesScreen: ${tasks!!.size} $tasks")
-                                viewModel.DeleteTaskById(taskId)
                             },
                             createTaskApiInProgress = createTaskApiInProgress,
                             onAddTaskClick = { crmOrganizationUserId: String, description: String, dueDate: String ->
@@ -405,9 +355,8 @@ fun NotesScreen(
                                     dueDate = dueDate,
                                 )
                             },
-                            isTaskAdded = viewModel.getIsTaskCreatedById(id)?.value ?: false,
                             noteViewModal = notesViewModel
-                            )
+                        )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                 }

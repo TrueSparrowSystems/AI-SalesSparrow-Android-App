@@ -42,9 +42,8 @@ fun SearchUserName(
     lastName: String,
     crmUserId: String,
     searchNameTestId: String,
+    id : String,
     onAccountRowClick: () -> Unit,
-    globalStateViewModel: GlobalStateViewModel,
-    id: String
 ) {
     val noteViewModal: NotesViewModel = hiltViewModel()
     val currTask = noteViewModal.getTaskById(id)
@@ -71,8 +70,6 @@ fun SearchUserName(
                         id = id
                     )
                 )
-                globalStateViewModel.setValuesById(id, crmUserName = firstName)
-                globalStateViewModel.setValuesById(id, crmUserId = crmUserId)
                 onAccountRowClick()
             }
 

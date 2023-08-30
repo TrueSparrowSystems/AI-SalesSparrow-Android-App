@@ -80,7 +80,6 @@ fun RecommandedTaskContainer(
     crmUserName  : String?,
     taskDesc : String?,
     dueDate  : String?,
-    globalStateViewModel: GlobalStateViewModel
 ) {
 
 
@@ -93,7 +92,6 @@ fun RecommandedTaskContainer(
     var createTaskApiInProgress by remember { mutableStateOf(false) }
     var createTaskApiIsSuccess by remember { mutableStateOf(false) }
 
-    globalStateViewModel.setValuesById(id, taskDesc = taskV)
     val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
 
     createTaskResponse?.let { response ->
@@ -101,7 +99,6 @@ fun RecommandedTaskContainer(
             is NetworkResponse.Success -> {
                 createTaskApiInProgress = false
                 createTaskApiIsSuccess = true
-                globalStateViewModel.setValuesById(id, isTaskCreated = true)
                 CustomToast(
                     message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
@@ -134,7 +131,6 @@ fun RecommandedTaskContainer(
             createTaskApiInProgress = createTaskApiInProgress,
             createTasksApiIsSuccess = createTaskApiIsSuccess,
             accountId = accountId,
-            globalStateViewModel = globalStateViewModel,
             id = id,
             bottomSheetVisible = bottomSheetVisible,
             crmUserName = crmUserName!!,
@@ -151,7 +147,6 @@ fun RecommandedTaskContainer(
             crmUserId = crmUserId!!,
             dueDate = dDate!!,
             taskDesc = taskV!!,
-            globalStateViewModel = globalStateViewModel,
             onSelectUSerClick = onSelectUSerClick
 
         )
@@ -161,7 +156,6 @@ fun RecommandedTaskContainer(
         } else {
             ""
         }, onValueChange = {
-            globalStateViewModel.setValuesById(id, taskDesc = it)
             taskV = it
         }, modifier = Modifier
             .fillMaxWidth()
@@ -179,7 +173,6 @@ fun AddTaskContent(
     crmUserId: String,
     dueDate: String,
     taskDesc : String,
-    globalStateViewModel: GlobalStateViewModel,
     id: String,
     onSelectUSerClick:(id: String) -> Unit,
     accountId: String? = null,
@@ -213,7 +206,6 @@ fun AddTaskContent(
         }, dueDateYear, dueDateMonth, dueDateDay
     )
 
-    globalStateViewModel.setValuesById(id, dueDate = selectedDueDate.value)
     mDatePickerDialog.datePicker.minDate = dueDateCalendar.timeInMillis
 
     Row(
@@ -381,7 +373,6 @@ fun AddTaskHeader(
     createTaskApiInProgress: Boolean,
     createTasksApiIsSuccess: Boolean,
     accountId: String? = null,
-    globalStateViewModel: GlobalStateViewModel,
     id: String,
     bottomSheetVisible: () -> Unit,
     crmUserName: String,
