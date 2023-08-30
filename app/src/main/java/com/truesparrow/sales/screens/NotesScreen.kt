@@ -224,6 +224,18 @@ fun NotesScreen(
             onSelectUSerClick = { id ->
                 toggleSearchNameBottomSheet()
             },
+            onCancelClick = { crmOrganizationUserId: String, crmOrganizationUserName: String, description: String, dueDate: String, id: String ->
+                Log.i("onCancelClick", " crmOrganizationUserId ${crmOrganizationUserId} crmOrganizationUserName ${crmOrganizationUserName} description ${description} dueDate ${dueDate} id ${id}")
+                notesViewModel.updateTaskById(
+                    id, Tasks(
+                        crm_user_id = crmOrganizationUserId,
+                        crm_user_name = crmOrganizationUserName,
+                        task_desc = description,
+                        due_date = dueDate,
+                        id = id
+                    )
+                )
+            },
         )
     }
 
