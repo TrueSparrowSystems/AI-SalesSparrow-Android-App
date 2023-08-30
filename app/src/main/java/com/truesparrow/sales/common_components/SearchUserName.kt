@@ -24,24 +24,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.truesparrow.sales.models.Tasks
 import com.truesparrow.sales.ui.theme.Typography
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.ui.theme.eastBay_70
 import com.truesparrow.sales.ui.theme.walkaway_gray
 import com.truesparrow.sales.viewmodals.GlobalStateViewModel
+import com.truesparrow.sales.viewmodals.NotesViewModel
+import com.truesparrow.sales.viewmodals.TasksViewModal
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchUserName(
     firstName: String,
     lastName: String,
-    crmUserId : String,
+    crmUserId: String,
     searchNameTestId: String,
     onAccountRowClick: () -> Unit,
-    globalStateViewModel : GlobalStateViewModel,
-    id : String
+    globalStateViewModel: GlobalStateViewModel,
+    id: String
 ) {
+    val noteViewModal: NotesViewModel = hiltViewModel()
+    val currTask = noteViewModal.getTaskById(id)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -49,20 +56,27 @@ fun SearchUserName(
             .padding(start = 20.dp, top = 11.dp, end = 10.dp, bottom = 11.dp)
     ) {
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .semantics {
-                    testTagsAsResourceId = true
-                    testTag = searchNameTestId
-                }
-                .clickable {
-                    globalStateViewModel.setValuesById(id, crmUserName = firstName)
-                    globalStateViewModel.setValuesById(id, crmUserId = crmUserId)
-                    onAccountRowClick()
-                }
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+            .semantics {
+                testTagsAsResourceId = true
+                testTag = searchNameTestId
+            }
+            .clickable {
+                noteViewModal.updateTaskById(
+                    id, Tasks(
+                        crm_user_id = crmUserId,
+                        crm_user_name = firstName,
+                        task_desc = currTask?.task_desc ?: "",
+                        due_date = currTask?.due_date ?: "",
+                        id = id
+                    )
+                )
+                globalStateViewModel.setValuesById(id, crmUserName = firstName)
+                globalStateViewModel.setValuesById(id, crmUserId = crmUserId)
+                onAccountRowClick()
+            }
 
-            ) {
+        ) {
 
             UserAvatar(
                 id = "crm_user_$firstName",

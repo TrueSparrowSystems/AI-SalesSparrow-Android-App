@@ -3,16 +3,20 @@ package com.truesparrow.sales.viewmodals
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.truesparrow.sales.models.GetCrmActionsResponse
+import com.truesparrow.sales.models.Note
 import com.truesparrow.sales.models.NotesDetailResponse
 import com.truesparrow.sales.models.SaveNote
+import com.truesparrow.sales.models.Tasks
 import com.truesparrow.sales.repository.NotesRepository
 import com.truesparrow.sales.util.NetworkResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.log
 
 
 @HiltViewModel
@@ -26,12 +30,42 @@ class NotesViewModel @Inject constructor(
     val notesLiveData: LiveData<NetworkResponse<SaveNote>>
         get() = notesRepository.notesLiveData
 
+    private val _tasks = MutableLiveData<List<Tasks>>()
+    val tasks: MutableLiveData<List<Tasks>> = _tasks
+
+    fun setTasks(newTasks: List<Tasks>) {
+        _tasks.value = newTasks
+        Log.i(" _tasks.value","${ _tasks.value}")
+    }
+    fun updateTaskById(taskId: String, updatedTask: Tasks) {
+
+        Log.i("UpdateById=","${updatedTask}")
+
+
+        val currentTasks = tasks.value.orEmpty()
+
+        val updatedTasks = currentTasks.map { task ->
+            if (task.id == taskId) {
+                updatedTask
+            } else {
+                task
+            }
+        }
+        _tasks.value = updatedTasks
+
+        Log.i("UpdateById","${updatedTasks}")
+    }
+    fun getTaskById(taskId: String): Tasks? {
+        val currentTasks = tasks.value.orEmpty()
+        return currentTasks.find { it.id == taskId }
+    }
 
     val noteDetailsLiveData: LiveData<NetworkResponse<NotesDetailResponse>>
         get() = notesRepository.noteDetails
 
     val getCrmActionsLiveData: LiveData<NetworkResponse<GetCrmActionsResponse>>
         get() = notesRepository.getCrmActions
+
 
     fun getNoteDetails(accountId: String, noteId: String) {
         Log.i("NotesDetails", "Account Id: $accountId Note Id: $noteId");

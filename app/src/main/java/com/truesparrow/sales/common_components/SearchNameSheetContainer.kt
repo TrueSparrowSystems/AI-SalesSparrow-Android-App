@@ -234,12 +234,14 @@ fun SearchNameSheetContainer(
                                     globalStateViewModel = globalStateViewModel,
                                     id = id,
                                     onAccountRowClick = {
-                                        searchCrmUserNameViewModal.onAccountRowClicked(
-                                            accountId = accountId,
-                                            accountName = accountName!!,
-                                            isNewTask = isNewTask,
-                                            id = id,
-                                        )
+                                        if(isNewTask){
+                                            searchCrmUserNameViewModal.onAccountRowClicked(
+                                                accountId = accountId,
+                                                accountName = accountName!!,
+                                                isNewTask = isNewTask,
+                                                id = id,
+                                            )
+                                        }
                                         bottomSheetVisible()
                                     },
                                 )

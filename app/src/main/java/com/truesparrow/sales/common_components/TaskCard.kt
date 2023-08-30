@@ -157,12 +157,11 @@ fun TasksCard(
                             })
                     CustomDropDownMenu(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        onDeleteMenuClick = {
-                            Log.i("NotesCard", "NotesCard: $taskId")
-                            onDeleteMenuClick(taskId)
-                        }
-                    )
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        Log.i("NotesCard", "NotesCard: $taskId")
+                        onDeleteMenuClick(taskId)
+                    }
                 }
             }
 
