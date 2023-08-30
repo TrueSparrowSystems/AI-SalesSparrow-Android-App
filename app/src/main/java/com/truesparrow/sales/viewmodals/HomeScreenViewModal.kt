@@ -32,14 +32,12 @@ class HomeScreenViewModal @Inject constructor(private val homeRepository: HomeRe
 
     init {
         viewModelScope.launch {
-            Log.i("HomeScreenViewModal", "init viewModelScope")
             homeRepository.getAccountFeed(currentPaginationIdentifier)
         }
     }
 
     fun getAccountFeed(paginationIdentifier: String) {
         viewModelScope.launch {
-            Log.i("HomeScreenViewModal", "getAccountFeed $paginationIdentifier")
             homeRepository.getAccountFeed(paginationIdentifier)
         }
     }
