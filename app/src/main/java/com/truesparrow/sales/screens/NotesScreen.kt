@@ -222,7 +222,9 @@ fun NotesScreen(
     }
 
     if (RecommTaksBottomSheetVisible) {
-        val task =  notesViewModel.getTaskById(currTaskId)
+
+        Log.i("Updated tasks","$tasks")
+        val task = tasks?.find { it.id == currTaskId }
         Log.i("task==", "${task}")
         Log.i("Ids test", "${currTaskId}")
 
@@ -404,7 +406,7 @@ fun NotesScreen(
                                 )
                             },
                             isTaskAdded = viewModel.getIsTaskCreatedById(id)?.value ?: false,
-
+                            noteViewModal = notesViewModel
                             )
                     }
                     Spacer(modifier = Modifier.height(16.dp))

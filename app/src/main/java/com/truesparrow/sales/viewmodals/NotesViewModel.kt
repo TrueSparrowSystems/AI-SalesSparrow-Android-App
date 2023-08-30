@@ -39,25 +39,25 @@ class NotesViewModel @Inject constructor(
     }
     fun updateTaskById(taskId: String, updatedTask: Tasks) {
 
-        Log.i("UpdateById=","${updatedTask}")
+        Log.i("UpdateById=","${updatedTask} ${taskId}")
 
-
-        val currentTasks = tasks.value.orEmpty()
-
+        val currentTasks = _tasks.value.orEmpty()
         val updatedTasks = currentTasks.map { task ->
             if (task.id == taskId) {
+                Log.i("Checking","Log")
                 updatedTask
             } else {
                 task
             }
         }
-        _tasks.value = updatedTasks
+        Log.i("Checking","${updatedTasks}")
+        _tasks.postValue(updatedTasks)
 
-        Log.i("UpdateById","${updatedTasks}")
+        Log.i("UpdateById","${_tasks.value}")
     }
     fun getTaskById(taskId: String): Tasks? {
-        val currentTasks = tasks.value.orEmpty()
-        return currentTasks.find { it.id == taskId }
+        Log.i("taskId","${taskId}")
+        return _tasks.value?.find { it.id == taskId }
     }
 
     val noteDetailsLiveData: LiveData<NetworkResponse<NotesDetailResponse>>
