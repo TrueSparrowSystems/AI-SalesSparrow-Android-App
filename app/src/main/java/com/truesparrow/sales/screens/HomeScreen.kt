@@ -95,7 +95,6 @@ fun HomeScreen() {
 
 
     if (isScrollToEnd && !paginationLoading && homeScreenViewModal.currentPaginationIdentifier?.isNotBlank() == true) {
-        Log.i("HomeScreen 12", "Loading More :${homeScreenViewModal.currentPaginationIdentifier}}")
         paginationLoading = true
         LaunchedEffect(key1 = true) {
             homeScreenViewModal.currentPaginationIdentifier?.let {
@@ -116,7 +115,6 @@ fun HomeScreen() {
                     it.data?.next_page_payload?.pagination_identifier ?: ""
                 currentPageIdentifier = it.data?.next_page_payload?.pagination_identifier ?: ""
 
-                // Filter and map the account_ids that are not already added
                 val newData = it.data?.account_ids?.filter { accountId ->
                     accountId !in addedAccountIds
                 }?.mapNotNull { accountId ->
@@ -125,7 +123,6 @@ fun HomeScreen() {
                     val accountMapById = it.data.account_map_by_id
                     val contactMapById = it.data.contact_map_by_id
 
-                    // Create an AccountCardData instance if necessary data is available
                     accountMapById?.get(accountId)?.let { account ->
                         val contactId = account_contact_associations_map_by_id?.contact_ids?.get(0)
                         val contactName = contactMapById?.get(contactId)?.name
@@ -134,35 +131,29 @@ fun HomeScreen() {
                             name = account.name ?: "",
                             website = account.additional_fields?.website ?: "",
                             contactName = contactName
-                                ?: "" // Set an empty string if contactName is null
+                                ?: ""
                         )
                     }
                 }
 
-                // Update the addedAccountIds set and the accountCardList
                 if (newData != null) {
                     addedAccountIds.addAll(newData.map { accountData -> accountData.id })
                     accountCardList = (accountCardList ?: emptyList()) + newData
                 }
 
-                Log.i("HomeScreen", "Loading")
             }
 
             is NetworkResponse.Error -> {
                 paginationLoading = false
                 initialLoading = false
-                Log.i("HomeScreen", "Success")
             }
 
             is NetworkResponse.Loading -> {
-                paginationLoading = false
-                Log.i("HomeScreen", "Error")
+                paginationLoading = true
             }
         }
     }
 
-
-    Log.i("HomeScreen", "Current User: $currentUser")
 
 
     Scaffold(
@@ -282,7 +273,10 @@ fun HomeScreen() {
                         item {
                             Box(
                                 modifier = Modifier
-                                    .background(color = Color(0xFFF1F1F2)),
+                                    .background(color = Color(0xFFF1F1F2))
+                                    .fillMaxWidth()
+                                    .height(60.dp)
+                                    .padding(bottom = 40.dp),
                             ) {
                                 CircularProgressIndicator(
                                     color = Color(0xFF212653),
@@ -298,33 +292,33 @@ fun HomeScreen() {
                 }
             }
         },
-            bottomBar = {
-                Box {
-                    BottomAppBar(
-                        containerColor = Color(0xFFF1F1F2),
-                        modifier = Modifier
-                            .shadow(
-                                elevation = 7.dp,
-                                spotColor = Color(0x0F000000),
-                                ambientColor = Color(0x0F000000)
+        bottomBar = {
+            Box {
+                BottomAppBar(
+                    containerColor = Color(0xFFF1F1F2),
+                    modifier = Modifier
+                        .shadow(
+                            elevation = 7.dp,
+                            spotColor = Color(0x0F000000),
+                            ambientColor = Color(0x0F000000)
+                        )
+                        .border(
+                            BorderStroke(
+                                width = 0.dp,
+                                color = Color(0x33000000),
                             )
-                            .border(
-                                BorderStroke(
-                                    width = 0.dp,
-                                    color = Color(0x33000000),
-                                )
-                            )
-                            .fillMaxWidth()
-                            .height(60.dp),
-                        content = {},
-                        contentColor = Color(0xFFF1F1F2),
-                    )
-                }
-
+                        )
+                        .fillMaxWidth()
+                        .height(60.dp),
+                    content = {},
+                    contentColor = Color(0xFFF1F1F2),
+                )
             }
 
-            )
         }
+
+    )
+}
 
 
 
