@@ -29,6 +29,8 @@ class AuthenticationViewModal @Inject constructor(
     val getSalesForcceConnectUrl: LiveData<NetworkResponse<RedirectUrl>>
         get() = authenticationRepository.getSalesForcceConnectUrl
 
+    val salesForceDisconnect: LiveData<NetworkResponse<Unit>>
+        get() = authenticationRepository.salesForceDisconnect
 
     init {
         viewModelScope.launch {
@@ -77,7 +79,7 @@ class AuthenticationViewModal @Inject constructor(
     fun disconnectSalesForce() {
         viewModelScope.launch {
             authenticationRepository.disconnectSalesForce()
-            NavigationService.navigateTo(Screens.LoginScreen.route);
+            NavigationService.navigateWithPopUpClearingAllStack(Screens.LoginScreen.route)
         }
     }
 }
