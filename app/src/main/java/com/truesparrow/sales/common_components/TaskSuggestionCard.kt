@@ -80,7 +80,7 @@ fun TaskSuggestionCard(
     shouldShowOptions: Boolean = false,
     onCancelTaskClick: (id: String) -> Unit,
     onAddTaskClick: (
-        crmOrganizationUserId: String, description: String, dueDate: String
+        crmOrganizationUserId: String, description: String, dueDate: String, id : String
     ) -> Unit,
     createTaskApiInProgress: Boolean = false,
     isTaskAdded: Boolean = false,
@@ -96,7 +96,7 @@ fun TaskSuggestionCard(
 
     Log.i(
         "Task Sugg===",
-        "Task: $taskDesc, Due Date: $dDate, User ID: $crmUserId, User Name: $crmUserName dDate : $dDate"
+        "Task: $taskDesc, isTaskAdded: $isTaskAdded, User ID: $crmUserId, User Name: $crmUserName id : $id dDate : $dDate"
     )
 
 
@@ -123,6 +123,18 @@ fun TaskSuggestionCard(
             val formattedMonth = String.format("%02d", mMonth + 1)
             val formattedDay = String.format("%02d", mDayOfMonth)
             dueDate.value = "$mYear-$formattedMonth-$formattedDay"
+
+            Log.i("log2--------------","${id}")
+            noteViewModal.updateTaskById(
+                id, Tasks(
+                    crm_user_id = crmUserId,
+                    crm_user_name = crmUserName,
+                    task_desc = taskDesc,
+                    due_date =  dueDate.value ,
+                    id = id,
+                    is_task_created = false
+                )
+            )
         }, dueDateYear, dueDateMonth, dueDateDay
     )
 
@@ -229,12 +241,13 @@ fun TaskSuggestionCard(
                     .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
                     .clickable {
                         if (!isTaskAdded) {
+                            Log.i("log3--------------","${id}")
                             noteViewModal.updateTaskById(
                                 id, Tasks(
                                     crm_user_id = crmUserId,
                                     crm_user_name = crmUserName,
                                     task_desc = taskDesc,
-                                    due_date = dueDate.value,
+                                    due_date = dDate,
                                     id = id,
                                     is_task_created = false
                                 )
@@ -271,7 +284,7 @@ fun TaskSuggestionCard(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clickable {
-
+                            Log.i("isTaskAdded=== ", "${isTaskAdded} ${id}")
                             if (!isTaskAdded) {
                                 onSelectUSerClick(id)
                             }
@@ -394,10 +407,10 @@ fun TaskSuggestionCard(
                     )
 
                     Text(
-                        text = if (dueDate.value.isEmpty()) {
+                        text = if (dDate.isEmpty()) {
                             "Select"
                         } else {
-                            dueDate.value.replace("-", "/")
+                            dDate.replace("-", "/")
                         }, style = TextStyle(
                             fontSize = 12.sp,
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
@@ -456,6 +469,7 @@ fun TaskSuggestionCard(
                             crmUserId,
                             taskDesc,
                             dDate,
+                            id
                         )
                     },
                         contentPadding = PaddingValues(all = 8.dp),

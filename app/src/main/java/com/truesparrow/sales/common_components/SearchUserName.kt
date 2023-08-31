@@ -1,5 +1,6 @@
 package com.truesparrow.sales.common_components
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -61,7 +62,7 @@ fun SearchUserName(
                         task_desc = currTask?.task_desc ?: "",
                         due_date = currTask?.due_date ?: "",
                         id = id,
-                        is_task_created = false
+                        is_task_created = currTask?.is_task_created ?: false
                     )
                 )
                 onAccountRowClick()

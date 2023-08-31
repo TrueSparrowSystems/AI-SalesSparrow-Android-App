@@ -73,6 +73,8 @@ fun NotesScreen(
 
     val notesViewModel: NotesViewModel = hiltViewModel()
     var selectedTaskId by remember { mutableStateOf("") }
+    var addTaskId by remember { mutableStateOf("") }
+
 
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
     var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
@@ -95,6 +97,7 @@ fun NotesScreen(
     val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
 
     createTaskResponse?.let { response ->
+        Log.i("response====","${createTaskResponse}")
         when (response) {
             is NetworkResponse.Success -> {
                 createTaskApiInProgress = false;
@@ -102,14 +105,16 @@ fun NotesScreen(
                 CustomToast(
                     message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
-                val currTask = notesViewModel.getTaskById(selectedTaskId)
+                val currTask = notesViewModel.getTaskById(addTaskId)
+                Log.i("log4--------------","${currTask}")
+
                 notesViewModel.updateTaskById(
-                    selectedTaskId, Tasks(
+                    addTaskId, Tasks(
                         crm_user_id = currTask?.crm_user_id ?: "",
                         crm_user_name = currTask?.crm_user_name ?: "",
                         task_desc = currTask?.task_desc ?: "",
                         due_date = currTask?.due_date ?: "",
-                        id = selectedTaskId,
+                        id = addTaskId,
                         is_task_created = true
                     )
                 )
@@ -248,6 +253,7 @@ fun NotesScreen(
                     "onCancelClick",
                     " crmOrganizationUserId ${crmOrganizationUserId} crmOrganizationUserName ${crmOrganizationUserName} description ${description} dueDate ${dueDate} id ${id}"
                 )
+
                 notesViewModel.updateTaskById(
                     id, Tasks(
                         crm_user_id = crmOrganizationUserId,
@@ -367,6 +373,7 @@ fun NotesScreen(
                             shouldShowOptions = false,
                             onDeleteTaskClick = {},
                             onSelectUSerClick = { id ->
+                                Log.i("onSelectUSerClick:" , "${id}")
                                 selectedTaskId = id
                                 toggleSearchNameBottomSheet()
                             },
@@ -382,7 +389,8 @@ fun NotesScreen(
                                 Log.i("NotesScreen oncancel", "NotesScreen: ${updatedTasks!!.size} $updatedTasks")
                             },
                             createTaskApiInProgress = createTaskApiInProgress,
-                            onAddTaskClick = { crmOrganizationUserId: String, description: String, dueDate: String ->
+                            onAddTaskClick = { crmOrganizationUserId: String, description: String, dueDate: String, id: String ->
+                                addTaskId = id
                                 createTaskApiInProgress = true
                                 tasksViewModel.createTask(
                                     accountId = accountId!!,
