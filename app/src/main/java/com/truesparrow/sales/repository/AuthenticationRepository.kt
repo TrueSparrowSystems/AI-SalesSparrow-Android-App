@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.truesparrow.sales.api.ApiService
+import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.models.SalesForceConnectRequest
 import com.truesparrow.sales.models.RedirectUrl
 import com.truesparrow.sales.models.CurrentUserResponse
@@ -28,6 +29,11 @@ class AuthenticationRepository @Inject constructor(
     private val _getSalesForcceConnectUrl = MutableLiveData<NetworkResponse<RedirectUrl>>()
     val getSalesForcceConnectUrl: LiveData<NetworkResponse<RedirectUrl>>
         get() = _getSalesForcceConnectUrl
+
+    private val _salesForceDisconnect = MutableLiveData<NetworkResponse<Unit>>()
+    val salesForceDisconnect: LiveData<NetworkResponse<Unit>>
+        get() = _salesForceDisconnect
+
 
     suspend fun getConnectWithSalesForceUrl(
         redirectUri: String
@@ -112,12 +118,25 @@ class AuthenticationRepository @Inject constructor(
         }
     }
 
-    suspend fun disconnectSalesForce(): Boolean {
-        return try {
+    suspend fun disconnectSalesForce() {
+         try {
+
             val response = apiService.disconnectSalesForce();
+
+             if (response.isSuccessful) {
+                 NavigationService.navigateWithPopUpClearingAllStack(Screens.LoginScreen.route)
+                 cookieManager.clearCookie();
+
+             } else if (response.errorBody() != null) {
+                 val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
+
+             } else {
+
+             }
+            cookieManager.clearCookie();
             response.isSuccessful
         } catch (e: Exception) {
-            false
+
         }
     }
 

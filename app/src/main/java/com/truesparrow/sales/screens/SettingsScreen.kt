@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.truesparrow.sales.BuildConfig
 import com.truesparrow.sales.R
+import com.truesparrow.sales.common_components.CustomAlertDialog
 import com.truesparrow.sales.common_components.UserAvatar
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
@@ -57,10 +58,11 @@ import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SettingsScreen() {
-    var switchCheckedState by remember { mutableStateOf(false) }
+    var switchCheckedState by remember { mutableStateOf(true) }
     val authenticationViewModal: AuthenticationViewModal = hiltViewModel();
     val currentUser =
         authenticationViewModal.currentUserLiveData?.observeAsState()?.value?.data?.current_user
+    val openDialogForSalesForceDisconnect = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -69,6 +71,20 @@ fun SettingsScreen() {
     ) {
         SettingHeader()
         Spacer(modifier = Modifier.padding(top = 20.dp))
+
+        CustomAlertDialog(
+            title = "Disconnect Salesforce",
+            message = "This will delete your account and all details associated with it. This is an irreversible process, are you sure you want to do this?",
+            onConfirmButtonClick = {
+                authenticationViewModal.disconnectSalesForce()
+                openDialogForSalesForceDisconnect.value = false
+            },
+            onDismissRequest = {
+                openDialogForSalesForceDisconnect.value = false
+            },
+            showConfirmationDialog = openDialogForSalesForceDisconnect.value
+        )
+
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
@@ -135,10 +151,13 @@ fun SettingsScreen() {
                             shape = RoundedCornerShape(size = 4.dp)
                         )
                         .padding(start = 4.dp, top = 2.dp, end = 8.dp, bottom = 2.dp)
+                        .clickable {
+                            openDialogForSalesForceDisconnect.value = true
+                        }
                 ) {
                     Switch(
                         checked = switchCheckedState,
-                        onCheckedChange = { switchCheckedState = it }
+                        onCheckedChange = { switchCheckedState = true }
                     )
                     Text(
                         text = "Disconnect Salesforce",

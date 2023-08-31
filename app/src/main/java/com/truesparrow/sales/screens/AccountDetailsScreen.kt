@@ -66,6 +66,7 @@ import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.viewmodals.AccountDetailsViewModal
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AccountDetails(
@@ -247,7 +248,15 @@ fun AccountDetails(
 
         AccountDetailsHeader()
         ContactDetailsHeader()
-        AccountCard(accountName, onAccountCardClick = {}, "", "")
+        AccountCard(
+            accountName,
+            onAccountCardClick = {},
+            "",
+            "",
+            textModifier = Modifier.semantics {
+                testTagsAsResourceId = true
+                testTag = "txt_account_detail_${accountName}"
+            })
         NotesDetailsHeader(accountId, accountName = accountName)
 
         if (isAccountNoteDetailsLoading) {
@@ -258,9 +267,8 @@ fun AccountDetails(
                 testId = "txt_account_detail_add_note_text"
             )
         } else {
+            var index = 0;
             notes?.forEach { note ->
-
-                var index = 0;
                 NotesCard(
                     firsName = note.creator.split(" ")[0],
                     lastName = note.creator.split(" ")[1],
@@ -484,13 +492,12 @@ fun NotesDetailsHeader(
         )
         Image(
             painter = painterResource(id = R.drawable.add_icon),
-            contentDescription = "img_account_detail_note_icon",
+            contentDescription = "img_account_detail_create_note_icon",
             modifier = Modifier
                 .width(20.dp)
                 .height(20.dp)
                 .semantics {
-                    testTag = "img_account_detail_create_note_icon"
-                    contentDescription = "img_account_detail_create_note_icon"
+                    testTag = "btn_account_detail_add_note"
                     testTagsAsResourceId = true
                 }
                 .clickable(

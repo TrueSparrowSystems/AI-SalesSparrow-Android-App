@@ -206,7 +206,7 @@ fun SearchNameSheetContainer(
                 } else if (records?.isEmpty() == true) {
                     item {
                         Text(
-                            text = "No results found",
+                            text = "No Result Found",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp)

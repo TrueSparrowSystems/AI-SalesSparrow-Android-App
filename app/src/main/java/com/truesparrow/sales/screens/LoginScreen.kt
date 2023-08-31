@@ -19,6 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -46,8 +48,10 @@ import com.truesparrow.sales.R
 import com.truesparrow.sales.common_components.CustomButton
 import com.truesparrow.sales.common_components.CustomText
 import com.truesparrow.sales.common_components.CustomTextWithImage
+import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.HorizontalBar
 import com.truesparrow.sales.common_components.TermsAndConditionComponent
+import com.truesparrow.sales.common_components.ToastType
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 
@@ -60,6 +64,25 @@ fun LogInScreen(intent: Intent?) {
 
 
     var isLogInProgress = remember { mutableStateOf(false) }
+
+    val discconnectSalesForceResponse by authenticationViewModal.salesForceDisconnect.observeAsState()
+    
+    discconnectSalesForceResponse?.let {
+        when (it) {
+            is NetworkResponse.Success -> {
+                CustomToast(message = "Your account has been disconnected and detailed deleted  ", type = ToastType.Success)
+                Log.i("SalesSparow", " LogInScreen: ${it.data}")
+            }
+
+            is NetworkResponse.Loading -> {
+           
+            }
+
+            is NetworkResponse.Error -> {
+               
+            }
+        }
+    };
 
     authenticationViewModal.getSalesForcceConnectUrl.observe(
         LocalLifecycleOwner.current

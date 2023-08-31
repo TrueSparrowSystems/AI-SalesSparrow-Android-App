@@ -19,6 +19,8 @@ import androidx.compose.material.FabPosition
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -49,7 +51,6 @@ import com.truesparrow.sales.models.AccountCardData
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.lucky_point
 import com.truesparrow.sales.util.NetworkResponse
-import com.truesparrow.sales.util.Screens
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 import com.truesparrow.sales.viewmodals.HomeScreenViewModal
 
@@ -78,43 +79,81 @@ fun HomeScreen() {
         )
     }
 
-    var accountFeedLoading by remember {
-        mutableStateOf(false)
+    var currentPageIdentifier by remember {
+        mutableStateOf("")
     }
 
-    homeScreenViewModal.accountFeedLiveData?.observeAsState()?.value?.let {
-        when (it) {
-            is NetworkResponse.Success -> {
-                accountFeedLoading = false
-                accountCardList = it.data?.account_ids?.map { accountId ->
-                    var account_contact_associations_map_by_id = it.data.account_contact_associations_map_by_id?.get(accountId)
-                    AccountCardData(
-                        id = accountId,
-                        name = it.data.account_map_by_id?.get(accountId)?.name ?: "",
-                        website = it.data.account_map_by_id?.get(accountId)?.additional_fields?.website
-                            ?: "",
-                        contactName = it.data.contact_map_by_id?.get(account_contact_associations_map_by_id?.contact_ids?.get(0))?.name ?: ""
-                    )
+    var initialLoading by remember { mutableStateOf(true) }
+    var paginationLoading by remember { mutableStateOf(false) }
 
-                }!!
+    val isScrollToEnd by remember {
+        derivedStateOf {
+            listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == listState.layoutInfo.totalItemsCount - 1
+        }
+    }
+    val addedAccountIds = remember { mutableSetOf<String>() }
 
-                Log.i("HomeScreen", "Loading")
-            }
 
-            is NetworkResponse.Error -> {
-                accountFeedLoading = false
-                Log.i("HomeScreen", "Success")
-            }
-
-            is NetworkResponse.Loading -> {
-                accountFeedLoading = true
-                Log.i("HomeScreen", "Error")
+    if (isScrollToEnd && !paginationLoading && homeScreenViewModal.currentPaginationIdentifier?.isNotBlank() == true) {
+        paginationLoading = true
+        LaunchedEffect(key1 = true) {
+            homeScreenViewModal.currentPaginationIdentifier?.let {
+                homeScreenViewModal.getAccountFeed(
+                    it
+                )
             }
         }
     }
 
 
-    Log.i("HomeScreen", "Current User: $currentUser")
+    homeScreenViewModal.accountFeedLiveData?.observeAsState()?.value?.let {
+        when (it) {
+            is NetworkResponse.Success -> {
+                initialLoading = false
+                paginationLoading = false
+                homeScreenViewModal.currentPaginationIdentifier =
+                    it.data?.next_page_payload?.pagination_identifier ?: ""
+                currentPageIdentifier = it.data?.next_page_payload?.pagination_identifier ?: ""
+
+                val newData = it.data?.account_ids?.filter { accountId ->
+                    accountId !in addedAccountIds
+                }?.mapNotNull { accountId ->
+                    val account_contact_associations_map_by_id =
+                        it.data.account_contact_associations_map_by_id?.get(accountId)
+                    val accountMapById = it.data.account_map_by_id
+                    val contactMapById = it.data.contact_map_by_id
+
+                    accountMapById?.get(accountId)?.let { account ->
+                        val contactId = account_contact_associations_map_by_id?.contact_ids?.get(0)
+                        val contactName = contactMapById?.get(contactId)?.name
+                        AccountCardData(
+                            id = accountId,
+                            name = account.name ?: "",
+                            website = account.additional_fields?.website ?: "",
+                            contactName = contactName
+                                ?: ""
+                        )
+                    }
+                }
+
+                if (newData != null) {
+                    addedAccountIds.addAll(newData.map { accountData -> accountData.id })
+                    accountCardList = (accountCardList ?: emptyList()) + newData
+                }
+
+            }
+
+            is NetworkResponse.Error -> {
+                paginationLoading = false
+                initialLoading = false
+            }
+
+            is NetworkResponse.Loading -> {
+                paginationLoading = true
+            }
+        }
+    }
+
 
 
     Scaffold(
@@ -191,7 +230,7 @@ fun HomeScreen() {
             )
         },
         content = { innerPadding ->
-            if (accountFeedLoading) {
+            if (initialLoading) {
 
                 Box(
                     modifier = Modifier
@@ -214,6 +253,7 @@ fun HomeScreen() {
                         .padding(innerPadding)
                         .background(color = Color(0xFFF1F1F2)),
                 ) {
+
                     if (accountCardList != null) {
                         for (index in 0 until accountCardList?.size!!) {
                             val item = accountCardList?.get(index)
@@ -229,12 +269,29 @@ fun HomeScreen() {
                             }
                         }
                     }
+                    if (paginationLoading) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .background(color = Color(0xFFF1F1F2))
+                                    .fillMaxWidth()
+                                    .height(60.dp)
+                                    .padding(bottom = 40.dp),
+                            ) {
+                                CircularProgressIndicator(
+                                    color = Color(0xFF212653),
+                                    strokeWidth = 2.dp,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .align(Alignment.Center)
+                                )
+                            }
+                        }
+
+                    }
                 }
             }
-
-
         },
-
         bottomBar = {
             Box {
                 BottomAppBar(
