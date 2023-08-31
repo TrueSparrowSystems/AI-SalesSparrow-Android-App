@@ -54,6 +54,7 @@ fun SearchUserName(
             modifier = Modifier
                 .semantics {
                     testTagsAsResourceId = true
+                    contentDescription = searchNameTestId
                     testTag = searchNameTestId
                 }
                 .clickable {

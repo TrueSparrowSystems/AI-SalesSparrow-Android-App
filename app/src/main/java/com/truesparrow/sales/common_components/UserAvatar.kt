@@ -41,7 +41,7 @@ fun UserAvatar(
             .semantics {
                 contentDescription = userAvatarTestId
                 testTagsAsResourceId = true
-                testTag = "userAvatarTestId"
+                testTag = userAvatarTestId
             }
             .size(size)
             .clickable(interactionSource =  MutableInteractionSource(),

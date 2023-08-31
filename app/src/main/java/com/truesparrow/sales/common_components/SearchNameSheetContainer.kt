@@ -208,7 +208,7 @@ fun SearchNameSheetContainer(
                 } else if (records?.isEmpty() == true) {
                     item {
                         Text(
-                            text = "No results found",
+                            text = "No Result Found",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp)
@@ -231,6 +231,7 @@ fun SearchNameSheetContainer(
                                     lastName = recordInfo.name,
                                     crmUserId = recordInfo.id,
                                     searchNameTestId = "btn_search_user_user_name_${recordInfo.name}",
+
                                     globalStateViewModel = globalStateViewModel,
                                     id = id,
                                     onAccountRowClick = {

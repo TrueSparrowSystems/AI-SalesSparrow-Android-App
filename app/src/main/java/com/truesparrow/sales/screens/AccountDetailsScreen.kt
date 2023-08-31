@@ -267,9 +267,8 @@ fun AccountDetails(
                 testId = "txt_account_detail_add_note_text"
             )
         } else {
+            var index = 0;
             notes?.forEach { note ->
-
-                var index = 0;
                 NotesCard(
                     firsName = note.creator.split(" ")[0],
                     lastName = note.creator.split(" ")[1],
