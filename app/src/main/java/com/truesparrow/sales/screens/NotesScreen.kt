@@ -135,8 +135,8 @@ fun NotesScreen(
         when (it) {
             is NetworkResponse.Success -> {
                 getCrmActionLoading = false
+                var index = 0;
                 val newTasks = (it.data?.add_task_suggestions?.map { task ->
-                    var index = 0;
                     val id = "temp_task_${index++}_${System.currentTimeMillis()}"
                     Tasks(
                         crm_user_id = "",
@@ -147,6 +147,8 @@ fun NotesScreen(
                         is_task_created = false
                     )
                 })
+
+                Log.i("newTasks","$newTasks")
                 if (!isTasksListUpdated) {
                     isTasksListUpdated = true
                     Log.i("Heelo","Hello")
@@ -373,11 +375,11 @@ fun NotesScreen(
                                 toggleSheet()
                             },
                             onCancelTaskClick = { taskId ->
-                                Log.i("NotesScreen", "NotesScreen: $taskId")
-                                Log.i("NotesScreen", "NotesScreen: ${tasks!!.size} $tasks")
+                                Log.i("NotesScreen oncancel", "NotesScreen: $taskId")
+                                Log.i("NotesScreen oncancel", "NotesScreen: ${tasks!!.size} $tasks")
                                 val updatedTasks = tasks!!.filter { it?.id != taskId }
-                                tasks = updatedTasks
-                                Log.i("NotesScreen", "NotesScreen: ${tasks!!.size} $tasks")
+                                notesViewModel.setTasks(updatedTasks)
+                                Log.i("NotesScreen oncancel", "NotesScreen: ${updatedTasks!!.size} $updatedTasks")
                             },
                             createTaskApiInProgress = createTaskApiInProgress,
                             onAddTaskClick = { crmOrganizationUserId: String, description: String, dueDate: String ->
