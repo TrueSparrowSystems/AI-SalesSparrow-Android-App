@@ -6,8 +6,9 @@ data class SaveNote(
 
 data class Tasks(
     val crm_user_id: String,
-    val crm_user_name : String,
-    val task_desc : String,
-    val due_date : String,
-    val id : String,
+    val crm_user_name: String,
+    val task_desc: String,
+    val due_date: String,
+    val id: String,
+    val is_task_created: Boolean,
 )

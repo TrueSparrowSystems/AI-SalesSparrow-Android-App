@@ -90,7 +90,7 @@ fun NotesScreen(
     var noteDesc by remember { mutableStateOf("") }
 
     var tasks = notesViewModel.tasks.observeAsState()?.value
-
+    var isTasksListUpdated by remember { mutableStateOf(false) }
 
     val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
 
@@ -101,6 +101,17 @@ fun NotesScreen(
                 createTaskApiIsSuccess = true
                 CustomToast(
                     message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
+                )
+                val currTask = notesViewModel.getTaskById(selectedTaskId)
+                notesViewModel.updateTaskById(
+                    selectedTaskId, Tasks(
+                        crm_user_id = currTask?.crm_user_id ?: "",
+                        crm_user_name = currTask?.crm_user_name ?: "",
+                        task_desc = currTask?.task_desc ?: "",
+                        due_date = currTask?.due_date ?: "",
+                        id = selectedTaskId,
+                        is_task_created = true
+                    )
                 )
             }
 
@@ -126,16 +137,22 @@ fun NotesScreen(
                 getCrmActionLoading = false
                 val newTasks = (it.data?.add_task_suggestions?.map { task ->
                     var index = 0;
-                    val id = "temp_task_${index}_${System.currentTimeMillis()}"
+                    val id = "temp_task_${index++}_${System.currentTimeMillis()}"
                     Tasks(
                         crm_user_id = "",
                         crm_user_name = "",
                         due_date = task?.due_date ?: "",
                         task_desc = task?.description ?: "",
-                        id = id
+                        id = id,
+                        is_task_created = false
                     )
                 })
-                notesViewModel.setTasks(newTasks ?: emptyList())
+                if (!isTasksListUpdated) {
+                    isTasksListUpdated = true
+                    Log.i("Heelo","Hello")
+                    notesViewModel.setTasks(newTasks ?: emptyList())
+                } else {
+                }
             }
 
             is NetworkResponse.Error -> {
@@ -161,7 +178,6 @@ fun NotesScreen(
                     duration = Toast.LENGTH_SHORT,
                     type = ToastType.Success
                 )
-
                 LaunchedEffect(true) {
                     notesViewModel.getCrmActions(noteDesc);
                 }
@@ -202,7 +218,8 @@ fun NotesScreen(
         SearchNameBottomSheet(
             toggleSearchNameBottomSheet,
             accountId = accountId!!,
-            accountName = accountName!!
+            accountName = accountName!!,
+            id = selectedTaskId
         )
     }
 
@@ -225,14 +242,18 @@ fun NotesScreen(
                 toggleSearchNameBottomSheet()
             },
             onCancelClick = { crmOrganizationUserId: String, crmOrganizationUserName: String, description: String, dueDate: String, id: String ->
-                Log.i("onCancelClick", " crmOrganizationUserId ${crmOrganizationUserId} crmOrganizationUserName ${crmOrganizationUserName} description ${description} dueDate ${dueDate} id ${id}")
+                Log.i(
+                    "onCancelClick",
+                    " crmOrganizationUserId ${crmOrganizationUserId} crmOrganizationUserName ${crmOrganizationUserName} description ${description} dueDate ${dueDate} id ${id}"
+                )
                 notesViewModel.updateTaskById(
                     id, Tasks(
                         crm_user_id = crmOrganizationUserId,
                         crm_user_name = crmOrganizationUserName,
                         task_desc = description,
                         due_date = dueDate,
-                        id = id
+                        id = id,
+                        is_task_created = false
                     )
                 )
             },
@@ -340,6 +361,7 @@ fun NotesScreen(
                             crmUserName = task.crm_user_name!!,
                             taskDesc = task.task_desc!!,
                             dDate = task.due_date ?: "",
+                            isTaskAdded = task.is_task_created,
                             shouldShowOptions = false,
                             onDeleteTaskClick = {},
                             onSelectUSerClick = { id ->
@@ -398,8 +420,7 @@ fun RecommendedSectionHeader(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        CustomTextWithImage(
-            imageId = R.drawable.sparkle,
+        CustomTextWithImage(imageId = R.drawable.sparkle,
             imageContentDescription = "buildings",
             text = heading,
             imageModifier = Modifier
@@ -415,8 +436,7 @@ fun RecommendedSectionHeader(
                 testTagsAsResourceId = true
                 testTag = testId
                 contentDescription = testId
-            }
-        )
+            })
         if (shouldShowPlusIcon) {
             Box {
                 Image(painter = painterResource(id = R.drawable.add_icon),
@@ -624,14 +644,13 @@ fun Header(
                     }
                 }.build()
 
-                Image(
-                    painter = if (saveNoteApiInProgress) {
-                        rememberAsyncImagePainter(R.drawable.loader, imageLoader)
-                    } else if (saveNoteApiIsSuccess) {
-                        painterResource(id = R.drawable.check)
-                    } else {
-                        painterResource(id = R.drawable.cloud)
-                    },
+                Image(painter = if (saveNoteApiInProgress) {
+                    rememberAsyncImagePainter(R.drawable.loader, imageLoader)
+                } else if (saveNoteApiIsSuccess) {
+                    painterResource(id = R.drawable.check)
+                } else {
+                    painterResource(id = R.drawable.cloud)
+                },
                     contentDescription = "cloud",
                     colorFilter = ColorFilter.tint(Color.White),
                     modifier = Modifier
@@ -640,8 +659,7 @@ fun Header(
                         .semantics {
                             testTagsAsResourceId = true
                             testTag = "cloud"
-                        }
-                )
+                        })
                 Text(text = if (saveNoteApiInProgress) {
                     "Saving..."
                 } else if (saveNoteApiIsSuccess) {

@@ -60,7 +60,7 @@ class NotesViewModel @Inject constructor(
         Log.i("UpdateById","${_tasks.value}")
     }
     fun getTaskById(taskId: String): Tasks? {
-        Log.i("taskId","${taskId}")
+        Log.i("taskId get task","${taskId}")
         return _tasks.value?.find { it.id == taskId }
     }
 

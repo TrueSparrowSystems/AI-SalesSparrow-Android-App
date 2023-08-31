@@ -18,7 +18,7 @@ fun SearchNameBottomSheet(
     bottomSheetVisible: () -> Unit,
     accountId: String = "",
     accountName: String = "",
-    id : String = ""
+    id : String
 
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
