@@ -112,7 +112,7 @@ fun NotesCard(
                         color = Color(0xFF000000),
                         letterSpacing = 0.21.sp,
                     ),
-                    userAvatarTestId = "user_avatar_note_details"
+                    userAvatarTestId = "user_avatar_note_details_${index}"
                 )
                 Text(
                     text = username,
@@ -124,8 +124,8 @@ fun NotesCard(
                         letterSpacing = 0.56.sp,
                     ),
                     modifier = Modifier.semantics {
-                    testTag = username
-                    contentDescription = username
+                    testTag = "${username}_${index}"
+                    contentDescription = "${username}_${index}"
                     testTagsAsResourceId = true
                 }
                 )
@@ -142,8 +142,8 @@ fun NotesCard(
                         letterSpacing = 0.48.sp,
                     ),
                     modifier = Modifier.semantics {
-                        testTag = "txt_account_detail_note_last_modified_time"
-                        contentDescription = "txt_account_detail_note_last_modified_time"
+                        testTag = "txt_account_detail_note_last_modified_time_${index}"
+                        contentDescription = "txt_account_detail_note_last_modified_time_${index}"
                         testTagsAsResourceId = true
                     }
                 )
