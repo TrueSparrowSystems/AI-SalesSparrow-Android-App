@@ -76,6 +76,7 @@ class NotesRepository @Inject constructor(
             _getCrmActions.postValue(NetworkResponse.Loading())
             val response = apiService.getCrmActions(GetCrmActionRequest(text = text))
             if (response.isSuccessful && response.body() != null) {
+                Log.i("response", "${response.body()}")
                 _getCrmActions.postValue(NetworkResponse.Success(response.body()!!))
             } else if (response.errorBody() != null) {
                 val errorObj = JSONObject(response.errorBody()!!.charStream().readText())

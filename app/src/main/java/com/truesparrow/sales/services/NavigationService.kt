@@ -82,7 +82,7 @@ object NavigationService {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NavigationService(intent: Intent?, viewModel: GlobalStateViewModel) {
+fun NavigationService(intent: Intent?) {
     val navController = rememberNavController()
     val authenticationViewModal: AuthenticationViewModal = viewModel()
     NavigationService.initialize(navController, authenticationViewModal)
@@ -108,8 +108,7 @@ fun NavigationService(intent: Intent?, viewModel: GlobalStateViewModel) {
             val accountName = it.arguments?.getString("accountName") ?: ""
             val isAccountSelectionEnabled =
                 it.arguments?.getString("isAccountSelectionEnabled")?.toBoolean() ?: false
-            val id = it.arguments?.getString("id") ?: ""
-            NotesScreen(accountName, accountId, isAccountSelectionEnabled, id, viewModel)
+            NotesScreen(accountName, accountId, isAccountSelectionEnabled)
         }
         composable(route = Screens.AccountDetailsScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
@@ -127,10 +126,9 @@ fun NavigationService(intent: Intent?, viewModel: GlobalStateViewModel) {
         }
 
         composable(route = Screens.TaskScreen.route) {
-            val id = it.arguments?.getString("id") ?: ""
             val accountId = it.arguments?.getString("accountId") ?: ""
             val accountName = it.arguments?.getString("accountName") ?: ""
-            TaskScreen(accountId,accountName, id, viewModel)
+            TaskScreen(accountId,accountName)
         }
     }
 }

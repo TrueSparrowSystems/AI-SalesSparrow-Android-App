@@ -63,9 +63,8 @@ fun SearchNameSheetContainer(
     bottomSheetVisible: () -> Unit,
     accountId: String,
     accountName: String,
-    isNewTask : Boolean,
-    globalStateViewModel : GlobalStateViewModel,
-    id : String
+    id : String,
+    onUpdateUserName : (userId : String, userName: String) -> Unit
 ) {
     val searchCrmUserNameViewModal: SearchCrmUserNameViewModal = hiltViewModel()
     var searchQuery by remember { mutableStateOf("") }
@@ -230,17 +229,15 @@ fun SearchNameSheetContainer(
                                     firstName = recordInfo.name,
                                     lastName = recordInfo.name,
                                     crmUserId = recordInfo.id,
-                                    searchNameTestId = "btn_search_user_user_name_${recordInfo.name}",
-
-                                    globalStateViewModel = globalStateViewModel,
                                     id = id,
-                                    onAccountRowClick = {
-                                        searchCrmUserNameViewModal.onAccountRowClicked(
-                                            accountId = accountId,
-                                            accountName = accountName!!,
-                                            isNewTask = isNewTask,
-                                            id = id,
-                                        )
+                                    searchNameTestId = "btn_search_user_user_name_${recordInfo.name}",
+                                    onAccountRowClick = { crmUserId: String, crmUserName : String ->
+
+//                                            searchCrmUserNameViewModal.onAccountRowClicked(
+//                                                accountId = accountId,
+//                                                accountName = accountName!!,
+//                                            )
+                                        onUpdateUserName(crmUserId, crmUserName)
                                         bottomSheetVisible()
                                     },
                                 )
