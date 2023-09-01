@@ -37,7 +37,7 @@ fun SearchUserName(
     crmUserId: String,
     searchNameTestId: String,
     id : String,
-    onAccountRowClick: () -> Unit,
+    onAccountRowClick: (crmUserId: String, crmUserName : String) -> Unit,
 ) {
     val noteViewModal: NotesViewModel = hiltViewModel()
     val currTask = noteViewModal.getTaskById(id)
@@ -65,7 +65,7 @@ fun SearchUserName(
                         is_task_created = currTask?.is_task_created ?: false
                     )
                 )
-                onAccountRowClick()
+                onAccountRowClick(crmUserId, firstName)
             }
 
         ) {

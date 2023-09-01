@@ -56,6 +56,12 @@ fun AccountName(
                 ),
 
             ) {
+            CustomText(
+                text = name, Typography.labelMedium, color = walkaway_gray, modifier = Modifier.semantics {
+                    testTagsAsResourceId  = true
+                    testTag = accountRowTestId
+                }
+            )
 
             Spacer(Modifier.weight(1f))
             if (showAddNote) {

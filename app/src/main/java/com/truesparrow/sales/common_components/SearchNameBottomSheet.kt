@@ -18,8 +18,8 @@ fun SearchNameBottomSheet(
     bottomSheetVisible: () -> Unit,
     accountId: String = "",
     accountName: String = "",
-    id : String
-
+    id: String,
+    onUpdateUserName: (userId: String, userName: String) -> Unit
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -38,6 +38,7 @@ fun SearchNameBottomSheet(
             id = id,
             accountId = accountId,
             accountName = accountName!!,
+            onUpdateUserName = onUpdateUserName
         )
     }
 }

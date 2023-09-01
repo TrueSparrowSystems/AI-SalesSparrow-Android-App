@@ -68,7 +68,7 @@ import java.util.Date
 @Composable
 fun TaskSuggestionCard(
     id: String,
-    onDeleteTaskClick: () -> Unit,
+    onDeleteTaskClick: (id: String) -> Unit,
     onSelectUSerClick: (id: String) -> Unit,
     onEditTaskClick: (id: String) -> Unit,
     accountId: String,
@@ -225,7 +225,9 @@ fun TaskSuggestionCard(
                             CustomDropDownMenu(
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false },
-                                onDeleteMenuClick = onDeleteTaskClick
+                                onDeleteMenuClick = {
+                                    onDeleteTaskClick(id)
+                                }
                             )
                         }
                     }
@@ -241,7 +243,7 @@ fun TaskSuggestionCard(
                     .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp)
                     .clickable {
                         if (!isTaskAdded) {
-                            Log.i("log3--------------","${id}")
+                            Log.i("log3--------------", "${id}")
                             noteViewModal.updateTaskById(
                                 id, Tasks(
                                     crm_user_id = crmUserId,
@@ -430,36 +432,7 @@ fun TaskSuggestionCard(
             }
             Spacer(modifier = Modifier.height(4.dp))
 
-            if (isTaskAdded) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(35.dp)
-                            .background(Color(0xFF4CAF50))
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.success_toast_check),
-                            contentDescription = "Success",
-                            modifier = Modifier
-                                .height(18.dp)
-                                .width(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Task added", modifier = Modifier.semantics {
-                                testTagsAsResourceId = true
-                                testTag = "txt_create_note_task_added"
-                                contentDescription = "txt_create_note_task_added"
-                            }, style = TextStyle(
-                                fontSize = 12.sp, lineHeight = 24.sp, color = Color(0xFF444A62)
-                            )
-                        )
-                    }
-                }
-            } else {
+            if (!isTaskAdded) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically
@@ -579,6 +552,37 @@ fun TaskSuggestionCard(
 
                     }
                 }
+            }
+        }
+    }
+    if (isTaskAdded){
+        Box(modifier = Modifier.fillMaxSize()) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(30.dp)
+                    .background(Color(0x3362E17D))
+                    .border(width = 1.dp, color = Color(0xFFE9E9E9), shape = RoundedCornerShape(size = 0.dp))
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.success_toast_check),
+                    contentDescription = "Success",
+                    modifier = Modifier
+                        .height(18.dp)
+                        .width(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "Task added", modifier = Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag = "txt_create_note_task_added"
+                        contentDescription = "txt_create_note_task_added"
+                    }, style = TextStyle(
+                        fontSize = 12.sp, lineHeight = 24.sp, color = Color(0xFF444A62)
+                    )
+                )
             }
         }
     }
