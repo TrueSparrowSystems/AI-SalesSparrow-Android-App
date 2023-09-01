@@ -49,7 +49,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,7 +68,7 @@ import java.util.Date
 @Composable
 fun TaskSuggestionCard(
     id: String,
-    onDeleteTaskClick: () -> Unit,
+    onDeleteTaskClick: (id: String) -> Unit,
     onSelectUSerClick: (id: String) -> Unit,
     onEditTaskClick: (id: String) -> Unit,
     accountId: String,
@@ -226,7 +225,9 @@ fun TaskSuggestionCard(
                             CustomDropDownMenu(
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false },
-                                onDeleteMenuClick = onDeleteTaskClick
+                                onDeleteMenuClick = {
+                                    onDeleteTaskClick(id)
+                                }
                             )
                         }
                     }

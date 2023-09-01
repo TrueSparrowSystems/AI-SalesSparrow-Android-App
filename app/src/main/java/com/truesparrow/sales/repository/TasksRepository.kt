@@ -28,7 +28,6 @@ class TasksRepository @Inject constructor(
                     crm_organization_user_id = crmOrganizationUserId,
                     description = description,
                     due_date = dueDate
-
                 )
             );
             if (result.isSuccessful && result.body() != null) {

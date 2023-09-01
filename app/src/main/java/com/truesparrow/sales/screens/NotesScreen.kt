@@ -60,6 +60,7 @@ import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
+import com.truesparrow.sales.viewmodals.AccountDetailsViewModal
 import com.truesparrow.sales.viewmodals.NotesViewModel
 import com.truesparrow.sales.viewmodals.TasksViewModal
 
@@ -96,6 +97,24 @@ fun NotesScreen(
 
     val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
 
+    val accountDetailsViewModal: AccountDetailsViewModal = hiltViewModel()
+
+    val deleteTaskResponse by accountDetailsViewModal.deleteAccountTaskLiveData.observeAsState();
+
+    deleteTaskResponse?.let {deleteTaskResponse
+        when(deleteTaskResponse){
+            is NetworkResponse.Success -> {
+                CustomToast(message = "Task Deleted", type = ToastType.Success)
+            }
+            is NetworkResponse.Error ->{
+                CustomToast(message =  "Something went wrong", type = ToastType.Error)
+            }
+            is NetworkResponse.Loading -> {
+            }
+            else -> {}
+        }
+    }
+
     createTaskResponse?.let { response ->
         Log.i("response====","${createTaskResponse}")
         when (response) {
@@ -115,7 +134,8 @@ fun NotesScreen(
                         task_desc = currTask?.task_desc ?: "",
                         due_date = currTask?.due_date ?: "",
                         id = addTaskId,
-                        is_task_created = true
+                        is_task_created = true,
+                        task_id = response.data?.task_id
                     )
                 )
             }
@@ -149,7 +169,8 @@ fun NotesScreen(
                         due_date = task?.due_date ?: "",
                         task_desc = task?.description ?: "",
                         id = id,
-                        is_task_created = false
+                        is_task_created = false,
+                        task_id = ""
                     )
                 })
 
@@ -370,8 +391,14 @@ fun NotesScreen(
                             taskDesc = task.task_desc!!,
                             dDate = task.due_date ?: "",
                             isTaskAdded = task.is_task_created,
-                            shouldShowOptions = false,
-                            onDeleteTaskClick = {},
+                            shouldShowOptions = task.is_task_created,
+                            onDeleteTaskClick = { id->
+                                selectedTaskId  = id
+                                val task = tasks!!.filter { it?.id == id }
+                                task[0].task_id?.let { accountDetailsViewModal.deleteAccountTask(accountId , taskId = it) }
+                                var updatedTask =  tasks!!.filter { it?.id != id }
+                                notesViewModel.setTasks(updatedTask)
+                            },
                             onSelectUSerClick = { id ->
                                 Log.i("onSelectUSerClick:" , "${id}")
                                 selectedTaskId = id
@@ -602,7 +629,8 @@ fun Header(
                     onClick = { NavigationService.navigateBack() })
                 .semantics {
                     testTagsAsResourceId = true
-                    testTag =  if (saveNoteApiIsSuccess) "btn_done_create_note" else "btn_cancel_create_note"
+                    testTag =
+                        if (saveNoteApiIsSuccess) "btn_done_create_note" else "btn_cancel_create_note"
                     contentDescription =
                         if (saveNoteApiIsSuccess) "btn_done_create_note" else "btn_cancel_create_note"
                 },
