@@ -73,12 +73,11 @@ import java.util.Date
 fun TaskScreen(
     accountId: String? = null,
     accountName: String? = null,
-    id: String = "1",
 ) {
 
     var taskDesc = ""
     var crmUserId = ""
-    var dueDate = "Select"
+    var dueDate = ""
 
 
     var task by remember { mutableStateOf(taskDesc) }
@@ -120,21 +119,18 @@ fun TaskScreen(
             createTaskApiInProgress = createTaskApiInProgress,
             createTasksApiIsSuccess = createTaskApiIsSuccess,
             accountId = accountId,
+            dueDate = dueDate,
+            taskDesc = task
         )
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
             accountId = accountId,
             accountName = accountName,
-            crmUserName = "Select",
-            crmUserId = crmUserId,
             dueDate = dueDate,
         )
         Spacer(modifier = Modifier.height(20.dp))
-        EditableTextField(note = task, placeholderText = if (id == "1") {
-            "Add task"
-        } else {
-            ""
-        }, onValueChange = {
+        EditableTextField(note = task, placeholderText =
+        "Add task", onValueChange = {
             task = it
         }, modifier = Modifier
             .fillMaxWidth()
@@ -148,13 +144,15 @@ fun TaskScreen(
 
 @Composable
 fun AddTaskContent(
-    crmUserName: String,
-    crmUserId: String,
     dueDate: String,
     accountId: String? = null,
     accountName: String? = null
-
 ) {
+
+
+    val tasksViewModel: TasksViewModal = hiltViewModel()
+    var crmUserName = tasksViewModel.getTasksScreenSelectedUserName();
+    var crmUserId = tasksViewModel.getTasksScreenSelectedUserId()
 
     var searchNameBottomSheetVisible by remember { mutableStateOf(false) }
 
@@ -168,7 +166,11 @@ fun AddTaskContent(
             toggleSearchNameBottomSheet,
             accountId = accountId!!,
             accountName = accountName!!,
-            id = ""
+            id = "",
+            onUpdateUserName = { userId, userName ->
+                tasksViewModel.setTasksScreenSelectedUserName(userName)
+                tasksViewModel.setTasksScreenSelectedUserId(userId)
+            }
         )
     }
 
@@ -190,6 +192,7 @@ fun AddTaskContent(
             val formattedDay = String.format("%02d", mDayOfMonth)
             val formattedMonth = String.format("%02d", mMonth + 1)
             selectedDueDate.value = "$mYear-$formattedMonth-$formattedDay"
+            tasksViewModel.setTaskScreenSelectedDueDate(selectedDueDate.value)
         }, dueDateYear, dueDateMonth, dueDateDay
     )
     mDatePickerDialog.datePicker.minDate = dueDateCalendar.timeInMillis
@@ -237,11 +240,11 @@ fun AddTaskContent(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if(crmUserId.isNotEmpty()){
+                    if (crmUserId.isNotEmpty()) {
                         UserAvatar(
                             id = crmUserId,
                             firstName = crmUserName.split(" ")[0],
-                            lastName =  crmUserName.split(" ")[0],
+                            lastName = crmUserName.split(" ")[0],
                             size = 18.dp,
                             textStyle = TextStyle(
                                 fontSize = 5.24.sp,
@@ -327,8 +330,8 @@ fun AddTaskContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = selectedDueDate.value.replace("-","/").ifEmpty {
-                            dueDate.replace("-","/").ifEmpty {
+                        text = selectedDueDate.value.replace("-", "/").ifEmpty {
+                            dueDate.replace("-", "/").ifEmpty {
                                 "Select"
                             }
                         },
@@ -361,6 +364,8 @@ fun AddTaskHeader(
     createTaskApiInProgress: Boolean,
     createTasksApiIsSuccess: Boolean,
     accountId: String? = null,
+    taskDesc: String,
+    dueDate: String
 ) {
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
@@ -398,9 +403,9 @@ fun AddTaskHeader(
         Button(onClick = {
             tasksViewModel.createTask(
                 accountId = accountId!!,
-                crmOrganizationUserId =  "",
-                description = "",
-                dueDate =  "",
+                crmOrganizationUserId = tasksViewModel.getTasksScreenSelectedUserId(),
+                description = taskDesc,
+                dueDate = tasksViewModel.getTaskScreenSelectedDueDate(),
             )
         },
             enabled = true,

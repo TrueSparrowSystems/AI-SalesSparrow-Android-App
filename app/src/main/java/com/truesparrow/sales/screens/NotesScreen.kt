@@ -101,6 +101,15 @@ fun NotesScreen(
 
     val deleteTaskResponse by accountDetailsViewModal.deleteAccountTaskLiveData.observeAsState();
 
+    var selectedCrmUserName  = remember {
+        mutableStateOf( "")
+    }
+
+    var selectedCrmUserId = remember {
+        mutableStateOf( "")
+    }
+
+
     deleteTaskResponse?.let {deleteTaskResponse
         when(deleteTaskResponse){
             is NetworkResponse.Success -> {
@@ -247,7 +256,13 @@ fun NotesScreen(
             toggleSearchNameBottomSheet,
             accountId = accountId!!,
             accountName = accountName!!,
-            id = selectedTaskId
+            id = selectedTaskId,
+            onUpdateUserName = {
+                userId, userName ->
+                    selectedCrmUserId.value = userId
+                    selectedCrmUserName.value = userName
+
+            }
         )
     }
 
@@ -328,7 +343,8 @@ fun NotesScreen(
                 crmUserName = "",
                 accountId = accountId!!,
                 accountName = accountName!!,
-                testId = "txt_create_note_getting_recommendations"
+                testId = "txt_create_note_getting_recommendations",
+                onPlusIconClick = {}
             )
             Spacer(modifier = Modifier.height(30.dp))
             Column(
@@ -371,7 +387,11 @@ fun NotesScreen(
                     crmUserId = "",
                     accountId = accountId!!,
                     accountName = accountName!!,
-                    testId = "txt_create_note_recommendations"
+                    testId = "txt_create_note_recommendations",
+                    onPlusIconClick = {
+                        selectedTaskId = ""
+                        toggleSheet()
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(30.dp))
@@ -447,7 +467,8 @@ fun RecommendedSectionHeader(
     crmUserId: String,
     accountId: String,
     shouldShowPlusIcon: Boolean,
-    testId: String
+    testId: String,
+    onPlusIconClick : () -> Unit
 ) {
     var recommendedPopup by remember { mutableStateOf(false) }
 
@@ -495,7 +516,8 @@ fun RecommendedSectionHeader(
                 UpdateTaskDropDownMenu(expanded = recommendedPopup,
                     onDismissRequest = { recommendedPopup = false },
                     onAddTaskMenuClick = {
-                        NavigationService.navigateTo("task_screen/${accountId}/${accountName}/1")
+                        onPlusIconClick()
+                        NavigationService.navigateTo("task_screen/${accountId}/${accountName}")
                     })
             }
         }

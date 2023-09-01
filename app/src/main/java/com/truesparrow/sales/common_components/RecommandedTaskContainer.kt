@@ -98,9 +98,13 @@ fun RecommandedTaskContainer(
             is NetworkResponse.Success -> {
                 createTaskApiInProgress = false
                 createTaskApiIsSuccess = true
-                CustomToast(
-                    message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
-                )
+                if (id.isNotEmpty()){
+                    CustomToast(
+                        message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
+                    )
+                }
+                Log.i("Task", "Task Created Successfully")
+
             }
 
             is NetworkResponse.Error -> {
@@ -188,7 +192,7 @@ fun RecommandedTaskContainer(
                     accountId = accountId!!,
                     crmOrganizationUserId = crmUserId ?: "",
                     description = taskDescription ?: "",
-                    dueDate = dueDate ?: "",
+                    dueDate = selectedDueDate.value ?: "",
                 )
             },
                 enabled = true,
@@ -367,7 +371,6 @@ fun RecommandedTaskContainer(
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontFamily = customFontFamily,
-
                         )
                 )
             }

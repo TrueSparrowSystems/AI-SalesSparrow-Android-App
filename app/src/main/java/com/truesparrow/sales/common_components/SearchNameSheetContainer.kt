@@ -63,7 +63,8 @@ fun SearchNameSheetContainer(
     bottomSheetVisible: () -> Unit,
     accountId: String,
     accountName: String,
-    id : String
+    id : String,
+    onUpdateUserName : (userId : String, userName: String) -> Unit
 ) {
     val searchCrmUserNameViewModal: SearchCrmUserNameViewModal = hiltViewModel()
     var searchQuery by remember { mutableStateOf("") }
@@ -230,11 +231,13 @@ fun SearchNameSheetContainer(
                                     crmUserId = recordInfo.id,
                                     id = id,
                                     searchNameTestId = "btn_search_user_user_name_${recordInfo.name}",
-                                    onAccountRowClick = {
-                                            searchCrmUserNameViewModal.onAccountRowClicked(
-                                                accountId = accountId,
-                                                accountName = accountName!!,
-                                            )
+                                    onAccountRowClick = { crmUserId: String, crmUserName : String ->
+
+//                                            searchCrmUserNameViewModal.onAccountRowClicked(
+//                                                accountId = accountId,
+//                                                accountName = accountName!!,
+//                                            )
+                                        onUpdateUserName(crmUserId, crmUserName)
                                         bottomSheetVisible()
                                     },
                                 )

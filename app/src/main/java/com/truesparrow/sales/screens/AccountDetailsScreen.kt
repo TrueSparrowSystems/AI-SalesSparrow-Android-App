@@ -447,7 +447,7 @@ fun TaskDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("task_screen/${accountId}/${accountName}/1")
+                    NavigationService.navigateTo("task_screen/${accountId}/${accountName}")
                 }
         )
     }
