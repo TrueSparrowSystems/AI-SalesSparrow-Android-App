@@ -40,14 +40,21 @@ fun AccountCard(
     onAccountCardClick: () -> Unit = {},
     website: String,
     contactName: String,
-    textModifier: Modifier? = null
+    textModifier: Modifier? = null,
+    accountCardTestTag: String,
+    accountListCardWebsiteTestTag: String,
+    accountListContactNameTestTag: String,
 ) {
     val context = LocalContext.current
 
     Card(
         modifier = Modifier
             .padding(14.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .semantics {
+                testTag = accountCardTestTag
+                testTagsAsResourceId = true
+            },
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
         ),
@@ -89,9 +96,12 @@ fun AccountCard(
                         style = Typography.labelMedium,
                         modifier = Modifier.clickable {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(website))
-                            Log.i("SalesSparow", "handleDeepLink authCode: $intent")
                             context.startActivity(intent);
                         }
+                            .semantics {
+                                testTag = accountListCardWebsiteTestTag
+                                testTagsAsResourceId = true
+                            }
                     )
                 }
             }
@@ -101,7 +111,7 @@ fun AccountCard(
 
             if (contactName.isNotEmpty()) {
                 CustomText(
-                    text = "CONTACT", Typography.titleSmall, color = eastBay.copy(alpha = 0.7f)
+                    text = "CONTACT", Typography.titleSmall, color = eastBay.copy(alpha = 0.7f),
                 )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -114,6 +124,10 @@ fun AccountCard(
                             Log.i("SalesSparow", "handleDeepLink authCode: $intent")
                             context.startActivity(intent);
                         }
+                            .semantics {
+                                testTagsAsResourceId = true
+                                testTag = accountListContactNameTestTag
+                            }
                     )
                 }
 

@@ -264,7 +264,14 @@ fun HomeScreen() {
                                     onAccountCardClick = {
                                         NavigationService.navigateTo("account_details_screen/${item?.id}/${item?.name}")
                                     },
-                                    contactName = item?.contactName ?: ""
+                                    contactName = item?.contactName ?: "",
+                                    textModifier = Modifier.semantics {
+                                        testTagsAsResourceId = true
+                                        testTag = "txt_account_list_account_name_index_${index}"
+                                    },
+                                    accountCardTestTag = "account_card_${index}",
+                                    accountListCardWebsiteTestTag = "txt_account_list_account_website_index_${index}",
+                                    accountListContactNameTestTag = "txt_account_list_account_contact_name_index_${index}",
                                 )
                             }
                         }
