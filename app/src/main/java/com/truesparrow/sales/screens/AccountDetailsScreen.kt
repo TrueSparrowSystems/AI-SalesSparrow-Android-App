@@ -256,7 +256,11 @@ fun AccountDetails(
             textModifier = Modifier.semantics {
                 testTagsAsResourceId = true
                 testTag = "txt_account_detail_${accountName}"
-            })
+            },
+            accountCardTestTag = "",
+            accountListCardWebsiteTestTag = "",
+            accountListContactNameTestTag = "",
+        )
         NotesDetailsHeader(accountId, accountName = accountName)
 
         if (isAccountNoteDetailsLoading) {
