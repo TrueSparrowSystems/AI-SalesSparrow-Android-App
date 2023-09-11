@@ -204,7 +204,7 @@ fun CustomBottomSheetContainer(
                 } else if (records?.isEmpty() == true) {
                     item {
                         Text(
-                            text = "No result found",
+                            text = "No Result Found",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp)
