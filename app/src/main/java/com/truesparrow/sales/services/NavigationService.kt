@@ -19,8 +19,10 @@ import com.truesparrow.sales.screens.LogInScreen
 import com.truesparrow.sales.screens.NoteDetailScreen
 import com.truesparrow.sales.screens.NotesScreen
 import com.truesparrow.sales.screens.SettingsScreen
+import com.truesparrow.sales.screens.TaskScreen
 import com.truesparrow.sales.util.Screens
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
+import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 
 
 object NavigationService {
@@ -76,8 +78,6 @@ object NavigationService {
     fun navigateBack() {
         navController.popBackStack()
     }
-
-    
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -91,7 +91,8 @@ fun NavigationService(intent: Intent?) {
         composable(route = Screens.SplashScreen.route) {
             SplashScreen()
         }
-        composable(route = Screens.LoginScreen.route,
+        composable(
+            route = Screens.LoginScreen.route,
             deepLinks = listOf(navDeepLink {
                 uriPattern = BuildConfig.REDIRECT_URI
                 action = Intent.ACTION_VIEW
@@ -117,11 +118,17 @@ fun NavigationService(intent: Intent?) {
         composable(route = Screens.SettingsScreen.route) {
             SettingsScreen()
         }
-        composable(route = Screens.NoteDetailsScreen.route){
+        composable(route = Screens.NoteDetailsScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
             val accountName = it.arguments?.getString("accountName") ?: ""
             val noteId = it.arguments?.getString("noteId") ?: ""
-            NoteDetailScreen(accountId, accountName,noteId)
+            NoteDetailScreen(accountId, accountName, noteId)
+        }
+
+        composable(route = Screens.TaskScreen.route) {
+            val accountId = it.arguments?.getString("accountId") ?: ""
+            val accountName = it.arguments?.getString("accountName") ?: ""
+            TaskScreen(accountId,accountName)
         }
     }
 }

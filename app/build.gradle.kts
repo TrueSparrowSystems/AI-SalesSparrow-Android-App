@@ -46,9 +46,9 @@ android {
     productFlavors {
 
         create("production") {
-            versionCode = 1
-            versionName = "0.0"
-            resValue("string", "app_name", "Sales")
+            versionCode = 2
+            versionName = "1.0.0"
+            resValue("string", "app_name", "SalesSparrow")
             buildConfigField(
                 "String",
                 "IS_MOCK",
@@ -92,7 +92,7 @@ android {
         }
         create("staging") {
             applicationIdSuffix = ".dev"
-            versionCode = 1
+            versionCode = 6
             versionName = "1.0.0"
             resValue("string", "app_name", "Sales-Dev")
             buildConfigField(

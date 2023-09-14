@@ -14,6 +14,7 @@ class RequestInterceptor @Inject constructor() : Interceptor {
         val cookie = cookieManager.getCookie()
         if (cookie != null) {
             request.addHeader("cookie", cookie)
+            request.addHeader("Content-Type", "application/json")
         }
         return chain.proceed(request.build())
     }

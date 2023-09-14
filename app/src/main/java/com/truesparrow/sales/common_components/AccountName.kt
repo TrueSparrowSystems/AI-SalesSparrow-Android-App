@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -46,17 +47,22 @@ fun AccountName(
                 .semantics {
                     testTagsAsResourceId = true
                     testTag = accountRowTestId
+                    contentDescription = accountRowTestId
                 }
                 .clickable(
                     onClick = onAccountRowClick,
-                    interactionSource =  MutableInteractionSource(),
+                    interactionSource = MutableInteractionSource(),
                     indication = null
                 ),
 
             ) {
             CustomText(
-                text = name, Typography.labelMedium, color = walkaway_gray
+                text = name, Typography.labelMedium, color = walkaway_gray, modifier = Modifier.semantics {
+                    testTagsAsResourceId  = true
+                    testTag = accountRowTestId
+                }
             )
+
             Spacer(Modifier.weight(1f))
             if (showAddNote) {
                 CustomText(
@@ -67,10 +73,11 @@ fun AccountName(
                         .semantics {
                             testTagsAsResourceId = true
                             testTag = addNoteButtonTestId
+                            contentDescription = addNoteButtonTestId
                         }
                         .clickable(
                             onClick = onAddNoteClick,
-                            interactionSource =  MutableInteractionSource(),
+                            interactionSource = MutableInteractionSource(),
                             indication = null
                         )
                 )

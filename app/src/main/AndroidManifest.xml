@@ -32,7 +32,6 @@
 
                 <action android:name="android.intent.action.VIEW" />
                 <data android:scheme="salessparrow" />
-                <data android:scheme="salessparrowdev" />
             </intent-filter>
         </activity>
     </application>

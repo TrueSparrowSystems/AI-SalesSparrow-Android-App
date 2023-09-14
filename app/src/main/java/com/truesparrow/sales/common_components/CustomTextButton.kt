@@ -19,11 +19,14 @@ fun CustomTextButton(
     imageModifier: Modifier? = Modifier,
     isButtonEnabled: Boolean = true,
     buttonTextStyle: TextStyle? = TextStyle.Default,
+    textModifier:  Modifier? = Modifier,
+    isRightButtonModifier: Modifier? = Modifier
 ) {
     TextButton(
         onClick = buttonAction,
         enabled = isButtonEnabled,
-        interactionSource = NoRippleInteractionSource()
+        interactionSource = NoRippleInteractionSource(),
+        modifier = isRightButtonModifier!!
     ) {
         if (imageId != null) {
             Image(
@@ -36,6 +39,7 @@ fun CustomTextButton(
         CustomText(
             text = buttonText,
             customTextStyle = buttonTextStyle!!,
+            modifier = textModifier!!
         )
     }
 }

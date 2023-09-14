@@ -26,10 +26,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -44,17 +49,20 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.truesparrow.sales.BuildConfig
 import com.truesparrow.sales.R
+import com.truesparrow.sales.common_components.CustomAlertDialog
 import com.truesparrow.sales.common_components.UserAvatar
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SettingsScreen() {
-    var switchCheckedState by remember { mutableStateOf(false) }
+    var switchCheckedState by remember { mutableStateOf(true) }
     val authenticationViewModal: AuthenticationViewModal = hiltViewModel();
     val currentUser =
         authenticationViewModal.currentUserLiveData?.observeAsState()?.value?.data?.current_user
+    val openDialogForSalesForceDisconnect = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -63,6 +71,20 @@ fun SettingsScreen() {
     ) {
         SettingHeader()
         Spacer(modifier = Modifier.padding(top = 20.dp))
+
+        CustomAlertDialog(
+            title = "Disconnect Salesforce",
+            message = "This will delete your account and all details associated with it. This is an irreversible process, are you sure you want to do this?",
+            onConfirmButtonClick = {
+                authenticationViewModal.disconnectSalesForce()
+                openDialogForSalesForceDisconnect.value = false
+            },
+            onDismissRequest = {
+                openDialogForSalesForceDisconnect.value = false
+            },
+            showConfirmationDialog = openDialogForSalesForceDisconnect.value
+        )
+
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
@@ -73,6 +95,7 @@ fun SettingsScreen() {
                     firstName = currentUser.name?.split(" ")?.get(0) ?: "",
                     lastName = currentUser.name?.split(" ")?.get(1) ?: "",
                     size = 40.dp,
+                    userAvatarTestId = "setting_screen_user_profile"
                 )
             }
             Log.i("SettingsScreen", "SettingsScreen: ${currentUser?.name}")
@@ -128,10 +151,13 @@ fun SettingsScreen() {
                             shape = RoundedCornerShape(size = 4.dp)
                         )
                         .padding(start = 4.dp, top = 2.dp, end = 8.dp, bottom = 2.dp)
+                        .clickable {
+                            openDialogForSalesForceDisconnect.value = true
+                        }
                 ) {
                     Switch(
                         checked = switchCheckedState,
-                        onCheckedChange = { switchCheckedState = it }
+                        onCheckedChange = { switchCheckedState = true }
                     )
                     Text(
                         text = "Disconnect Salesforce",
@@ -168,6 +194,11 @@ fun SettingsScreen() {
                 .height(40.dp)
                 .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp))
                 .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
+                .semantics {
+                    testTagsAsResourceId = true
+                     testTag = "btn_user_account_detail_logout"
+                    contentDescription = "btn_user_account_detail_logout"
+                    }
                 .clickable(
                     interactionSource =  MutableInteractionSource(),
                     indication = null,

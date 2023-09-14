@@ -39,7 +39,7 @@ fun CustomHeader(
     leftButtonTextStyle: TextStyle? = TextStyle.Default,
     leftIconModifier: Modifier? = Modifier,
     isLeftButtonEnabled: Boolean = true,
-
+    leftTextModifier: Modifier? = Modifier,
     isRightButtonPresent: Boolean = false,
     rightIcon: Int? = null,
     rightButtonText: String,
@@ -53,6 +53,8 @@ fun CustomHeader(
     shouldShowAvatarComponent: Boolean = false,
     userId: String? = null,
     userName: String? = null,
+    userAvatarModifier: Modifier? = Modifier,
+    rightButtonModifier: Modifier? = Modifier
 ) {
     Row(
         modifier = Modifier
@@ -71,7 +73,8 @@ fun CustomHeader(
                     imageId = leftIcon,
                     buttonTextStyle = leftButtonTextStyle,
                     imageModifier = leftIconModifier,
-                    isButtonEnabled = isLeftButtonEnabled
+                    isButtonEnabled = isLeftButtonEnabled,
+                    textModifier = leftTextModifier!!
                 )
             } else {
                 CustomButton(
@@ -104,7 +107,8 @@ fun CustomHeader(
                             imageId = rightIcon,
                             buttonTextStyle = rightButtonTextStyle,
                             imageModifier = rightIconModifier,
-                            isButtonEnabled = isRightButtonEnabled
+                            isButtonEnabled = isRightButtonEnabled,
+                            isRightButtonModifier = rightButtonModifier!!
                         )
 
                         UserAvatar(
@@ -121,7 +125,8 @@ fun CustomHeader(
                             ),
                             onUserAvatarClick = {
                                 NavigationService.navigateTo(Screens.SettingsScreen.route)
-                            }
+                            },
+                            userAvatarTestId = "txt_user_account_icon"
                         )
                     }
                 } else {

@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -24,7 +25,8 @@ fun EditableTextField(
     note: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    readOnly: Boolean = false
+    readOnly: Boolean = false,
+    placeholderText : String = ""
 ) {
 
     TextField(
@@ -32,7 +34,7 @@ fun EditableTextField(
         onValueChange = { onValueChange(it) },
         readOnly = readOnly,
         textStyle = TextStyle(
-            fontSize = 18.sp,
+            fontSize = 16.sp,
             lineHeight = 24.sp,
             fontFamily = FontFamily(Font(R.font.nunito_regular)),
             fontWeight = FontWeight(500),
@@ -44,13 +46,10 @@ fun EditableTextField(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
         ),
-        modifier = Modifier.semantics {
-            testTagsAsResourceId = true
-            testTag = "editableTextFieldTestId"
-        },
+        modifier = modifier!!,
         placeholder = {
             Text(
-                text = "Add a note",
+                text = placeholderText,
                 style = TextStyle(
                     fontSize = 18.sp,
                     lineHeight = 24.sp,

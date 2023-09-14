@@ -10,4 +10,5 @@ sealed class Screens(val route: String) {
 
     object NoteDetailsScreen : Screens("note_details_screen/{accountId}/{accountName}/{noteId}")
     object SettingsScreen : Screens("settings_screen")
+    object TaskScreen : Screens("task_screen/{accountId}/{accountName}")
 }

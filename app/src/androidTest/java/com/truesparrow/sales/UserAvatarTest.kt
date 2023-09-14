@@ -22,7 +22,9 @@ class UserAvatarTest {
                 id = "user123",
                 firstName = "John",
                 lastName = "Doe",
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
+                userAvatarTestId = "userAvatarTestId"
+
             )
         }
 
