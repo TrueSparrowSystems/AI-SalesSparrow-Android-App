@@ -46,7 +46,7 @@ android {
     productFlavors {
 
         create("production") {
-            versionCode = 2
+            versionCode = 4
             versionName = "1.0.0"
             resValue("string", "app_name", "SalesSparrow")
             buildConfigField(
