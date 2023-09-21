@@ -86,7 +86,7 @@ fun NotesCard(
             )
             .semantics {
                 testTagsAsResourceId = true
-                testTag = "NotesCardTestId"
+                testTag = "note_card_${index}"
             }
             .fillMaxWidth()
             .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp))
@@ -127,8 +127,8 @@ fun NotesCard(
                         letterSpacing = 0.56.sp,
                     ),
                     modifier = Modifier.semantics {
-                    testTag = "${username}_${index}"
-                    contentDescription = "${username}_${index}"
+                    testTag = "note_details_${username}_${index}"
+                    contentDescription = "note_details_${username}_${index}"
                     testTagsAsResourceId = true
                 }
                 )

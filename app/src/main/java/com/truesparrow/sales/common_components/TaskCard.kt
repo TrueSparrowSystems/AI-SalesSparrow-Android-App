@@ -93,7 +93,7 @@ fun TasksCard(
             )
             .semantics {
                 testTagsAsResourceId = true
-                testTag = "NotesCardTestId"
+                testTag = "task_card_${index}"
             }
             .fillMaxWidth()
             .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp))
@@ -132,7 +132,12 @@ fun TasksCard(
                         fontWeight = FontWeight(500),
                         color = Color(0xFF545A71),
                         letterSpacing = 0.56.sp,
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        testTag = "task_details_${username}_${index}"
+                        contentDescription = "task_details_${username}_${index}"
+                        testTagsAsResourceId = true
+                    }
                 )
             }
 

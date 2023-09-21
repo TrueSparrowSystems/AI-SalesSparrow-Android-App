@@ -267,7 +267,11 @@ fun AccountDetails(
             onDismissRequest = {
                 openDialogForNote.value = false
             },
-            showConfirmationDialog = openDialogForNote.value
+            showConfirmationDialog = openDialogForNote.value,
+            titleTestTag = "txt_account_detail_delete_note_title",
+            messageTestTag = "txt_account_detail_delete_note_message",
+            confirmButtonTestTag = "btn_account_detail_delete_note_confirm",
+            dismissButtonTestTag = "btn_account_detail_delete_note_cancel"
         )
 
         CustomAlertDialog(
@@ -283,7 +287,11 @@ fun AccountDetails(
             onDismissRequest = {
                 openDialogForTask.value = false
             },
-            showConfirmationDialog = openDialogForTask.value
+            showConfirmationDialog = openDialogForTask.value,
+            titleTestTag = "txt_account_detail_delete_task_title",
+            messageTestTag = "txt_account_detail_delete_task_message",
+            confirmButtonTestTag = "btn_account_detail_delete_task_confirm",
+            dismissButtonTestTag = "btn_account_detail_delete_task_cancel"
         )
 
         AccountDetailsHeader()
@@ -308,7 +316,7 @@ fun AccountDetails(
         } else if (notes?.isEmpty() == true || notes == null) {
             EmptyScreen(
                 "Add notes and sync with your salesforce account",
-                testId = "txt_account_detail_add_note_text"
+                testId = "txt_account_detail_note_empty_screen"
             )
         } else {
             var index = 0;
@@ -345,7 +353,10 @@ fun AccountDetails(
         if (isAccountTaskDetailsLoading) {
             Loader()
         } else if (tasks?.isEmpty() == true || tasks == null) {
-            EmptyScreen("Add tasks, set due dates and assign to your team", testId = "")
+            EmptyScreen(
+                "Add tasks, set due dates and assign to your team",
+                testId = "txt_account_detail_task_empty_screen"
+            )
         } else {
             var index = 0;
             tasks?.forEach { task ->
@@ -383,7 +394,10 @@ fun AccountDetails(
         if (isAccountEventsDetailsLoading) {
             Loader()
         } else if (events?.isEmpty() == true || events == null) {
-            EmptyScreen(emptyText = "Setup events, meetings and loop in your team", testId = "")
+            EmptyScreen(
+                emptyText = "Setup events, meetings and loop in your team",
+                testId = "txt_account_detail_event_empty_screen"
+            )
         } else {
             var index = 0;
             events?.forEach { event ->
@@ -471,11 +485,6 @@ fun EmptyScreen(
             .padding(0.75.dp)
             .fillMaxWidth()
             .height(height)
-            .semantics {
-                testTagsAsResourceId = true
-                testTag = testId
-                contentDescription = testId
-            }
             .padding(start = 14.dp, top = 12.dp, end = 14.dp, bottom = 12.dp)
     ) {
 
@@ -499,7 +508,12 @@ fun EmptyScreen(
                 color = Color(0xFF545A71),
                 textAlign = TextAlign.Center,
                 letterSpacing = 0.48.sp,
-            )
+            ),
+           modifier = Modifier.semantics {
+                testTagsAsResourceId = true
+                testTag = testId
+                contentDescription = testId
+            }
         )
     }
 }
@@ -521,14 +535,25 @@ fun TaskDetailsHeader(
             imageContentDescription = "buildings",
             imageModifier = Modifier
                 .width(17.dp)
-                .height(17.dp),
+                .height(17.dp)
+                .semantics {
+                    testTag = "img_account_detail_task_icon"
+                    contentDescription = "img_account_detail_task_icon"
+                    testTagsAsResourceId = true
+                },
             text = "Tasks",
             textStyle = TextStyle(
                 fontSize = 16.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_regular)),
                 fontWeight = FontWeight(600),
                 color = Color(0xFF212653),
-            )
+            ),
+            textModifier = Modifier
+                .semantics {
+                    testTag = "txt_account_detail_task_title"
+                    contentDescription = "txt_account_detail_task_title"
+                    testTagsAsResourceId = true
+                }
         )
         Image(
             painter = painterResource(id = R.drawable.add_icon),
@@ -537,7 +562,7 @@ fun TaskDetailsHeader(
                 .width(20.dp)
                 .height(20.dp)
                 .semantics {
-                    testTag = "btn_account_detail_add_event"
+                    testTag = "btn_account_detail_add_task"
                     testTagsAsResourceId = true
                 }
                 .clickable(
@@ -566,14 +591,25 @@ fun EventDetailsHeader(
             imageContentDescription = "buildings",
             imageModifier = Modifier
                 .width(17.dp)
-                .height(17.dp),
+                .height(17.dp)
+                .semantics {
+                    testTag = "img_account_detail_event_icon"
+                    contentDescription = "img_account_detail_event_icon"
+                    testTagsAsResourceId = true
+                },
             text = "Events",
             textStyle = TextStyle(
                 fontSize = 16.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_regular)),
                 fontWeight = FontWeight(600),
                 color = Color(0xFF212653),
-            )
+            ),
+            textModifier = Modifier
+                .semantics {
+                    testTag = "txt_account_detail_event_title"
+                    contentDescription = "txt_account_detail_event_title"
+                    testTagsAsResourceId = true
+                }
         )
         Image(
             painter = painterResource(id = R.drawable.add_icon),

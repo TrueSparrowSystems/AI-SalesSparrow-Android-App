@@ -1,7 +1,7 @@
 package com.truesparrow.sales.common_components
 
 
-import android.os. Build
+import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -67,9 +67,12 @@ fun EventCard(
     editMenuTestTag: String = "",
     startDateTime: String = "",
     endDateTime: String = "",
-    index : Number,
+    index: Number,
 ) {
-    Log.i("EventCard", "EventCard: $notes @date: $startDateTime  endDatetime: $endDateTime date : $date")
+    Log.i(
+        "EventCard",
+        "EventCard: $notes @date: $startDateTime  endDatetime: $endDateTime date : $date"
+    )
 
     var formattedStartDate = ""
     try {
@@ -112,7 +115,7 @@ fun EventCard(
             )
             .semantics {
                 testTagsAsResourceId = true
-                testTag = "NotesCardTestId"
+                testTag = "event_card_${index}"
             }
             .fillMaxWidth()
             .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp))
@@ -141,7 +144,7 @@ fun EventCard(
                         color = Color(0xFF000000),
                         letterSpacing = 0.21.sp,
                     ),
-                    userAvatarTestId = "user_avatar_note_details"
+                    userAvatarTestId = "user_avatar_note_details_${index}"
                 )
                 Text(
                     text = username,
@@ -151,7 +154,12 @@ fun EventCard(
                         fontWeight = FontWeight(500),
                         color = Color(0xFF545A71),
                         letterSpacing = 0.56.sp,
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        testTag = "event_details_${username}_${index}"
+                        contentDescription = "event_details_${username}_${index}"
+                        testTagsAsResourceId = true
+                    }
                 )
             }
 
@@ -164,7 +172,13 @@ fun EventCard(
                         fontWeight = FontWeight(300),
                         color = Color(0xFF545A71),
                         letterSpacing = 0.48.sp,
-                    )
+                    ),
+
+                    modifier = Modifier.semantics {
+                        testTag = "txt_account_detail_event_last_modified_time_${index}"
+                        contentDescription = "txt_account_detail_event_last_modified_time_${index}"
+                        testTagsAsResourceId = true
+                    }
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Box {
@@ -215,7 +229,12 @@ fun EventCard(
                 fontWeight = FontWeight(500),
                 color = Color(0xFF545A71),
                 letterSpacing = 0.56.sp,
-            )
+            ),
+            modifier = Modifier.semantics {
+                testTag = "txt_account_detail_event_text_${index}"
+                contentDescription = "txt_account_detail_event_text_${index}"
+                testTagsAsResourceId = true
+            }
         )
 
         Spacer(modifier = Modifier.padding(top = 12.dp))
