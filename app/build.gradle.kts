@@ -92,7 +92,7 @@ android {
         }
         create("staging") {
             applicationIdSuffix = ".dev"
-            versionCode = 7
+            versionCode = 8
             versionName = "1.0.0"
             resValue("string", "app_name", "Sales-Dev")
             buildConfigField(
