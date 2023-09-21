@@ -333,8 +333,9 @@ fun AccountDetails(
                     onEditMenuClick = { noteID ->
                         Log.i("AccountDetails onEditMenuClick", "NoteId: ${note.id}")
                         NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${noteID}")
-                    }
-
+                    },
+                    editMenuTestTag = "btn_account_detail_edit_note_${index}",
+                    deleteMenuTestTag = "btn_account_detail_delete_note_${index}"
                 )
             }
         }
@@ -346,6 +347,7 @@ fun AccountDetails(
         } else if (tasks?.isEmpty() == true || tasks == null) {
             EmptyScreen("Add tasks, set due dates and assign to your team", testId = "")
         } else {
+            var index = 0;
             tasks?.forEach { task ->
                 TasksCard(
                     firsName = task.creator_name.split(" ")[0],
@@ -355,6 +357,7 @@ fun AccountDetails(
                     date = task.last_modified_time,
                     assignedTaskUserName = task.crm_organization_user_name,
                     dueDate = task.due_date,
+                    index = index++,
                     onClick = {
                         Log.i("AccountDetails", "TaskId: ${task.id}")
                         NavigationService.navigateTo("task_details_screen/${accountId}/${accountName}/${task.id}")
@@ -368,18 +371,21 @@ fun AccountDetails(
                     onEditMenuClick = { task ->
                         Log.i("AccountDetails onEditMenuClick", "TaskId: $task")
                         NavigationService.navigateTo("task_screen/${accountId}/${accountName}/${task}")
-                    }
+                    },
+                    editMenuTestTag = "btn_account_detail_edit_task_${index}",
+                    deleteMenuTestTag = "btn_account_detail_delete_task_${index}"
                 )
             }
         }
 
         EventDetailsHeader(accountId, accountName = accountName)
 
-        if (isAccountEventsDetailsLoading){
+        if (isAccountEventsDetailsLoading) {
             Loader()
-        } else if (events?.isEmpty() == true || events == null){
-            EmptyScreen(emptyText = "Setup events, meetings and loop in your team", testId ="" )
+        } else if (events?.isEmpty() == true || events == null) {
+            EmptyScreen(emptyText = "Setup events, meetings and loop in your team", testId = "")
         } else {
+            var index = 0;
             events?.forEach { event ->
                 EventCard(
                     firsName = event.creator_name.split(" ")[0],
@@ -390,6 +396,7 @@ fun AccountDetails(
                     startDateTime = event.start_datetime,
                     endDateTime = event.end_datetime,
                     dueDate = event.start_datetime,
+                    index = index++,
                     onClick = {
                         Log.i("AccountDetails", "EventId: ${event.id}")
                         NavigationService.navigateTo("event_details_screen/${accountId}/${accountName}/${event.id}")
@@ -497,6 +504,7 @@ fun EmptyScreen(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TaskDetailsHeader(
     accountId: String,
@@ -528,6 +536,10 @@ fun TaskDetailsHeader(
             modifier = Modifier
                 .width(20.dp)
                 .height(20.dp)
+                .semantics {
+                    testTag = "btn_account_detail_add_event"
+                    testTagsAsResourceId = true
+                }
                 .clickable(
                     interactionSource = MutableInteractionSource(),
                     indication = null
@@ -538,6 +550,7 @@ fun TaskDetailsHeader(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EventDetailsHeader(
     accountId: String,
@@ -568,6 +581,10 @@ fun EventDetailsHeader(
             modifier = Modifier
                 .width(20.dp)
                 .height(20.dp)
+                .semantics {
+                    testTag = "btn_account_detail_add_event"
+                    testTagsAsResourceId = true
+                }
                 .clickable(
                     interactionSource = MutableInteractionSource(),
                     indication = null

@@ -9,6 +9,7 @@ import com.truesparrow.sales.models.CurrentUserResponse
 import com.truesparrow.sales.models.AccountListResponse
 import com.truesparrow.sales.models.AccountNotesResponse
 import com.truesparrow.sales.models.AccountTasksResponse
+import com.truesparrow.sales.models.CreateAccountEventResponse
 import com.truesparrow.sales.models.CreateAccountTaskRequest
 import com.truesparrow.sales.models.CreateAccountTaskResponse
 import com.truesparrow.sales.models.CrmOrganisationUsersResponse
@@ -127,5 +128,12 @@ interface ApiService {
     suspend fun getAccountEvents(
         @Path(value = "account_id", encoded = true) accountId: String
     ): Response<AccountEventsResponse>
+
+    @POST("v1/accounts/{account_id}/events")
+    @Headers("$MOCK_RESPONSE_HEADER: CreateAccountTaskResponse.json")
+    suspend fun createAccountEvents(
+        @Path(value = "account_id", encoded = true) accountId: String,
+        @Body request: CreateAccountTaskRequest
+    ): Response<CreateAccountEventResponse>
 
 }

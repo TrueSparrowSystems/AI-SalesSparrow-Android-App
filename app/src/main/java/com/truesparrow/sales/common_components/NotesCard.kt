@@ -60,7 +60,8 @@ fun NotesCard(
     onEditMenuClick: (noteId: String) -> Unit = {},
     editMenuTestTag: String = "",
     deleteMenuTestTag: String = "",
-    index : Number
+    index : Number,
+
 ) {
     var formattedTime: String = "";
     try {

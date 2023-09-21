@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -63,6 +64,7 @@ fun TasksCard(
     onEditMenuClick: (taskId: String) -> Unit = {},
     deleteMenuTestTag : String = "",
     editMenuTestTag : String = "",
+    index: Number,
 ) {
     Log.i("NotesCard", "NotesCard: $notes @date: $date @username: $username")
     var formattedTime: String = "";
@@ -120,7 +122,7 @@ fun TasksCard(
                         color = Color(0xFF000000),
                         letterSpacing = 0.21.sp,
                     ),
-                    userAvatarTestId = "user_avatar_note_details"
+                    userAvatarTestId = "user_avatar_task_details_${index}"
                 )
                 Text(
                     text = username,
@@ -143,7 +145,12 @@ fun TasksCard(
                         fontWeight = FontWeight(300),
                         color = Color(0xFF545A71),
                         letterSpacing = 0.48.sp,
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        testTag = "txt_account_detail_task_last_modified_time_${index}"
+                        contentDescription = "txt_account_detail_task_last_modified_time_${index}"
+                        testTagsAsResourceId = true
+                    }
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Box {
@@ -153,6 +160,11 @@ fun TasksCard(
                         modifier = Modifier
                             .width(20.dp)
                             .height(20.dp)
+                            .semantics {
+                                testTag = "btn_account_detail_task_more_${index}"
+                                contentDescription = "btn_account_detail_task_more_${index}"
+                                testTagsAsResourceId = true
+                            }
                             .pointerInput(true) {
                                 detectTapGestures(onPress = {
                                     expanded = true
@@ -189,7 +201,12 @@ fun TasksCard(
                 fontWeight = FontWeight(500),
                 color = Color(0xFF545A71),
                 letterSpacing = 0.56.sp,
-            )
+            ),
+            modifier = Modifier.semantics {
+                testTag = "txt_account_detail_task_text_${index}"
+                contentDescription = "txt_account_detail_task_text_${index}"
+                testTagsAsResourceId = true
+            }
         )
 
         Spacer(modifier = Modifier.padding(top = 12.dp))
@@ -276,6 +293,7 @@ fun TaskCardPreview() {
         notes = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
         dueDate = "2019-10-12",
         onClick = {},
-        assignedTaskUserName = "Zaire"
+        assignedTaskUserName = "Zaire",
+        index = 0
     )
 }

@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -66,6 +67,7 @@ fun EventCard(
     editMenuTestTag: String = "",
     startDateTime: String = "",
     endDateTime: String = "",
+    index : Number,
 ) {
     Log.i("EventCard", "EventCard: $notes @date: $startDateTime  endDatetime: $endDateTime date : $date")
 
@@ -172,6 +174,11 @@ fun EventCard(
                         modifier = Modifier
                             .width(20.dp)
                             .height(20.dp)
+                            .semantics {
+                                testTag = "btn_account_detail_event_more_${index}"
+                                contentDescription = "btn_account_detail_event_more_${index}"
+                                testTagsAsResourceId = true
+                            }
                             .pointerInput(true) {
                                 detectTapGestures(onPress = {
                                     expanded = true
@@ -309,5 +316,6 @@ fun EventCardPreview() {
         onClick = {},
         startDateTime = "2021-07-20T12:00:00Z",
         endDateTime = "2021-07-20T12:00:00Z",
+        index = 0
     )
 }
