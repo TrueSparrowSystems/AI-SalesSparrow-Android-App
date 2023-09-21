@@ -1,5 +1,6 @@
 package com.truesparrow.sales.api
 
+import com.truesparrow.sales.models.AccountEventsResponse
 import com.truesparrow.sales.models.AccountFeedResponse
 import com.truesparrow.sales.models.SalesForceConnectRequest
 import com.truesparrow.sales.models.RedirectUrl
@@ -120,5 +121,11 @@ interface ApiService {
     suspend fun getAccountFeedWithPagination(
         @Query("pagination_identifier") paginationIdentifier: String
     ): Response<AccountFeedResponse>
+
+    @GET("v1/accounts/{account_id}/events")
+    @Headers("$MOCK_RESPONSE_HEADER: AccountsEventResponse.json")
+    suspend fun getAccountEvents(
+        @Path(value = "account_id", encoded = true) accountId: String
+    ): Response<AccountEventsResponse>
 
 }

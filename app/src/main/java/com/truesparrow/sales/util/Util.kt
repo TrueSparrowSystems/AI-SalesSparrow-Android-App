@@ -6,7 +6,10 @@ import androidx.annotation.RequiresApi
 import androidx.core.graphics.ColorUtils
 import java.text.SimpleDateFormat
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -16,6 +19,18 @@ import kotlin.math.absoluteValue
 fun String.toHslColor(saturation: Float = 0.5f, lightness: Float = 0.4f): Int {
     val hue = fold(0) { acc, char -> char.code + acc * 37 } % 360
     return ColorUtils.HSLToColor(floatArrayOf(hue.absoluteValue.toFloat(), saturation, lightness))
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun convertTime(inputTime: String): String {
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    val instant = Instant.from(formatter.parse(inputTime))
+
+    val systemZone = ZoneId.systemDefault()
+    val localDateTime = LocalDateTime.ofInstant(instant, systemZone)
+
+    val outputFormatter = DateTimeFormatter.ofPattern("h a")
+    return outputFormatter.format(localDateTime)
 }
 
 

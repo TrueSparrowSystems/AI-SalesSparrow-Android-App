@@ -5,8 +5,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.truesparrow.sales.models.AccountEventsResponse
 import com.truesparrow.sales.models.AccountNotesResponse
 import com.truesparrow.sales.models.AccountTasksResponse
+import com.truesparrow.sales.models.Event
 import com.truesparrow.sales.models.Note
 import com.truesparrow.sales.models.Task
 import com.truesparrow.sales.repository.AccountDetailsRepository
@@ -27,6 +29,10 @@ class AccountDetailsViewModal @Inject constructor(
     private val _tasks = MutableLiveData<List<Task>>()
     val tasks: LiveData<List<Task>> = _tasks
 
+    private val _events = MutableLiveData<List<Event>>()
+    val events: LiveData<List<Event>> = _events
+
+
     fun setNotes(newNotes: List<Note>) {
         _notes.value = newNotes
     }
@@ -35,6 +41,13 @@ class AccountDetailsViewModal @Inject constructor(
     fun setTasks(newTasks: List<Task>) {
         _tasks.value = newTasks
     }
+
+    fun setEvents(newEvents: List<Event>) {
+        _events.value = newEvents
+    }
+
+    val accountEventsLiveData: LiveData<NetworkResponse<AccountEventsResponse>>
+        get() = accountDetailsRepository.accountEvents
 
     val accountDetailsLiveData: LiveData<NetworkResponse<AccountNotesResponse>>
         get() = accountDetailsRepository.accountNotes
@@ -68,6 +81,12 @@ class AccountDetailsViewModal @Inject constructor(
     fun getAccountTasks(accountId: String) {
         viewModelScope.launch {
             accountDetailsRepository.getAccountTasks(accountId)
+        }
+    }
+
+    fun getAccountEvents(accountId: String) {
+        viewModelScope.launch {
+            accountDetailsRepository.getAccountEvents(accountId)
         }
     }
 

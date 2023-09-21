@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.truesparrow.sales.api.ApiService
+import com.truesparrow.sales.models.AccountEventsResponse
 import com.truesparrow.sales.models.AccountNotesResponse
 import com.truesparrow.sales.models.AccountTasksResponse
 import com.truesparrow.sales.util.NetworkResponse
@@ -20,7 +21,9 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
     val accountTasks: LiveData<NetworkResponse<AccountTasksResponse>>
         get() = _accountTasks
 
-
+    private val _accountEvents = MutableLiveData<NetworkResponse<AccountEventsResponse>>()
+    val accountEvents: LiveData<NetworkResponse<AccountEventsResponse>>
+        get() = _accountEvents
 
     private val _deleteAccountNote = MutableLiveData<NetworkResponse<Unit>>()
     val deletAccountNote: LiveData<NetworkResponse<Unit>>
@@ -68,6 +71,26 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
         } catch (e: Exception) {
             Log.i("AccountDetails", "Exception: ${e.message}")
             _accountTasks.postValue(NetworkResponse.Error("Something went wrong"))
+        }
+    }
+
+    suspend fun getAccountEvents(accountId: String) {
+        try {
+            _accountEvents.postValue(NetworkResponse.Loading())
+            val response = apiService.getAccountEvents(accountId)
+
+            if (response.isSuccessful && response.body() != null) {
+                _accountEvents.postValue(NetworkResponse.Success(response.body()!!))
+            } else if (response.errorBody() != null) {
+                val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
+                _accountEvents.postValue(NetworkResponse.Error(errorObj.getString("message")))
+            } else {
+                Log.i("AccountDetails", "Exception: $response")
+                _accountEvents.postValue(NetworkResponse.Error("Error went wrong"))
+            }
+        } catch (e: Exception) {
+            Log.i("AccountDetails", "Exception: ${e.message}")
+            _accountEvents.postValue(NetworkResponse.Error("Something went wrong"))
         }
     }
 

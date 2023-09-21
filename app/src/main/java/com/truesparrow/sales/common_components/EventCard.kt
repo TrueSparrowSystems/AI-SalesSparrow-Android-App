@@ -1,6 +1,7 @@
 package com.truesparrow.sales.common_components
 
-import android.os.Build
+
+import android.os. Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
+import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -42,26 +43,47 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.truesparrow.sales.R
+import com.truesparrow.sales.util.convertDateFormat
+import com.truesparrow.sales.util.convertTime
 import com.truesparrow.sales.util.formatTime
 import com.truesparrow.sales.util.parseTime
 
 @OptIn(ExperimentalComposeUiApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NotesCard(
+fun EventCard(
     firsName: String,
     lastName: String,
     username: String,
     date: String,
     notes: String,
-    noteId: String = "",
+    dueDate: String,
     onClick: () -> Unit,
-    onDeleteMenuClick: (noteId: String) -> Unit = {},
-    onEditMenuClick: (noteId: String) -> Unit = {},
-    editMenuTestTag: String = "",
+    eventId: String = "",
+    onDeleteMenuClick: (eventId: String) -> Unit = {},
+    onEditMenuClick: (eventId: String) -> Unit = {},
     deleteMenuTestTag: String = "",
-    index : Number
+    editMenuTestTag: String = "",
+    startDateTime: String = "",
+    endDateTime: String = "",
 ) {
+    Log.i("EventCard", "EventCard: $notes @date: $startDateTime  endDatetime: $endDateTime date : $date")
+
+    var formattedStartDate = ""
+    try {
+        formattedStartDate = convertTime(startDateTime)
+    } catch (e: Exception) {
+        Log.i("EventCard", "NotesCard: $e")
+    }
+
+    var formattedEndDate = "";
+
+    try {
+        formattedEndDate = convertTime(endDateTime)
+    } catch (e: Exception) {
+        Log.i("EventCard", "NotesCard: $e")
+    }
+
     var formattedTime: String = "";
     try {
         val parsedTime = parseTime(date)
@@ -69,9 +91,12 @@ fun NotesCard(
     } catch (e: Exception) {
         Log.i("NotesCard", "NotesCard: $e")
     }
+
+    var formattedDueDate = convertDateFormat(startDateTime);
     var expanded by remember {
         mutableStateOf(false)
     }
+
 
 
     Column(
@@ -114,7 +139,7 @@ fun NotesCard(
                         color = Color(0xFF000000),
                         letterSpacing = 0.21.sp,
                     ),
-                    userAvatarTestId = "user_avatar_note_details_${index}"
+                    userAvatarTestId = "user_avatar_note_details"
                 )
                 Text(
                     text = username,
@@ -124,12 +149,7 @@ fun NotesCard(
                         fontWeight = FontWeight(500),
                         color = Color(0xFF545A71),
                         letterSpacing = 0.56.sp,
-                    ),
-                    modifier = Modifier.semantics {
-                    testTag = "${username}_${index}"
-                    contentDescription = "${username}_${index}"
-                    testTagsAsResourceId = true
-                }
+                    )
                 )
             }
 
@@ -142,12 +162,7 @@ fun NotesCard(
                         fontWeight = FontWeight(300),
                         color = Color(0xFF545A71),
                         letterSpacing = 0.48.sp,
-                    ),
-                    modifier = Modifier.semantics {
-                        testTag = "txt_account_detail_note_last_modified_time_${index}"
-                        contentDescription = "txt_account_detail_note_last_modified_time_${index}"
-                        testTagsAsResourceId = true
-                    }
+                    )
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Box {
@@ -157,11 +172,6 @@ fun NotesCard(
                         modifier = Modifier
                             .width(20.dp)
                             .height(20.dp)
-                            .semantics {
-                                testTag = "btn_account_detail_note_more_${index}"
-                                contentDescription = "btn_account_detail_note_more_${index}"
-                                testTagsAsResourceId = true
-                            }
                             .pointerInput(true) {
                                 detectTapGestures(onPress = {
                                     expanded = true
@@ -170,19 +180,19 @@ fun NotesCard(
                     CustomDropDownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false },
-                        onDeleteMenuClick = {
-                            Log.i("NotesCard", "NotesCard: $noteId")
-                            onDeleteMenuClick(noteId)
-                        },
-                        onEditMenuClick = {
-                            Log.i("NotesCard", "NotesCard: $noteId")
-                            onEditMenuClick(noteId)
-                        },
                         editMenuTestTag = editMenuTestTag,
-                        deleteMenuTestTag = deleteMenuTestTag
+                        deleteMenuTestTag = deleteMenuTestTag,
+                        onEditMenuClick = {
+                            Log.i("NotesCard", "NotesCard: $eventId")
+                            onEditMenuClick(eventId)
+                        },
+                        onDeleteMenuClick = {
+                            Log.i("NotesCard", "NotesCard: $eventId")
+                            onDeleteMenuClick(eventId)
+                        },
                     )
-                }
 
+                }
             }
 
         }
@@ -198,28 +208,106 @@ fun NotesCard(
                 fontWeight = FontWeight(500),
                 color = Color(0xFF545A71),
                 letterSpacing = 0.56.sp,
-            ),
-            modifier = Modifier.semantics {
-                testTag = "txt_account_detail_note_text_${index}"
-                contentDescription = "txt_account_detail_note_text_${index}"
-                testTagsAsResourceId = true
-            }
+            )
         )
+
+        Spacer(modifier = Modifier.padding(top = 12.dp))
+
+
+        Row {
+            Image(
+                painter = painterResource(id = R.drawable.calendar_check),
+                contentDescription = "calendar_check",
+                modifier = Modifier
+                    .height(16.dp)
+                    .width(16.dp)
+                    .padding(0.5.dp)
+            )
+
+            Text(
+                text = "From",
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                    fontWeight = FontWeight(400),
+                    color = Color(0xFF444A62),
+                    letterSpacing = 0.48.sp,
+                )
+            )
+
+            Spacer(modifier = Modifier.padding(start = 4.dp))
+            Text(
+                text = formattedDueDate,
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                    fontWeight = FontWeight(400),
+                    color = Color(0xFF444A62),
+                    letterSpacing = 0.48.sp,
+                )
+            )
+            Spacer(modifier = Modifier.padding(start = 4.dp))
+            Divider(
+                color = Color(0x1A444A62),
+                modifier = Modifier
+                    .height(16.dp)
+                    .width(1.dp)
+            )
+
+            Spacer(modifier = Modifier.padding(start = 4.dp))
+            Text(
+                text = formattedStartDate.toString(),
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                    fontWeight = FontWeight(400),
+                    color = Color(0xFF444A62),
+                    letterSpacing = 0.48.sp,
+                )
+            )
+            Text(
+                text = "-",
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                    fontWeight = FontWeight(400),
+                    color = Color(0xFF444A62),
+                    letterSpacing = 0.48.sp,
+                )
+            )
+
+
+            Text(
+                text = formattedEndDate.toString(),
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                    fontWeight = FontWeight(400),
+                    color = Color(0xFF444A62),
+                    letterSpacing = 0.48.sp,
+                )
+            )
+
+
+        }
+
 
     }
 }
 
+@Preview(showBackground = true)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-@Preview
-fun noteCardPreview() {
-    NotesCard(
+fun EventCardPreview() {
+    EventCard(
         firsName = "John",
         lastName = "Doe",
-        username = "johndoe",
-        date = "2021-08-10T12:00:00.000Z",
-        notes = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vi",
-        index = 0,
-        onClick = {}
+        username = "John Doe",
+        date = "2021-07-20T12:00:00Z",
+        notes = "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+        dueDate = "2019-10-12",
+        onClick = {},
+        startDateTime = "2021-07-20T12:00:00Z",
+        endDateTime = "2021-07-20T12:00:00Z",
     )
 }

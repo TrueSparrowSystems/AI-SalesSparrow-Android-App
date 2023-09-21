@@ -56,9 +56,11 @@ import com.truesparrow.sales.common_components.AccountCard
 import com.truesparrow.sales.common_components.CustomAlertDialog
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.CustomToast
+import com.truesparrow.sales.common_components.EventCard
 import com.truesparrow.sales.common_components.NotesCard
 import com.truesparrow.sales.common_components.TasksCard
 import com.truesparrow.sales.common_components.ToastType
+import com.truesparrow.sales.models.Event
 import com.truesparrow.sales.models.Note
 import com.truesparrow.sales.models.Task
 import com.truesparrow.sales.services.NavigationService
@@ -77,11 +79,14 @@ fun AccountDetails(
     val accountDetailsViewModal: AccountDetailsViewModal = hiltViewModel()
     var isAccountNoteDetailsLoading by remember { mutableStateOf(false) };
     var isAccountTaskDetailsLoading by remember { mutableStateOf(false) };
+    var isAccountEventsDetailsLoading by remember { mutableStateOf(false) };
     val openDialogForNote = remember { mutableStateOf(false) }
     val openDialogForTask = remember { mutableStateOf(false) }
+    val openDialogForEvent = remember { mutableStateOf(false) }
 
     var notes = accountDetailsViewModal.notes.observeAsState()?.value
     var tasks = accountDetailsViewModal.tasks.observeAsState()?.value
+    var events = accountDetailsViewModal.events.observeAsState()?.value
 
     val accountNotesResponse by accountDetailsViewModal.accountDetailsLiveData.observeAsState()
 
@@ -91,12 +96,16 @@ fun AccountDetails(
 
     val deleteAccountTaskResponse by accountDetailsViewModal.deleteAccountTaskLiveData.observeAsState()
 
+    val accountEventsResponse by accountDetailsViewModal.accountEventsLiveData.observeAsState()
+
     val noteId = remember { mutableStateOf("") }
     val taskId = remember { mutableStateOf("") }
+    val eventId = remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = accountId) {
         accountDetailsViewModal.getAccountNotes(accountId = accountId)
         accountDetailsViewModal.getAccountTasks(accountId = accountId)
+        accountDetailsViewModal.getAccountEvents(accountId = accountId)
     }
 
     accountNotesResponse?.let {
@@ -157,6 +166,37 @@ fun AccountDetails(
 
             is NetworkResponse.Loading -> {
                 isAccountTaskDetailsLoading = true
+                Log.i("AccountDetails", "Loading")
+            }
+        }
+    }
+
+    accountEventsResponse?.let {
+        when (it) {
+            is NetworkResponse.Success -> {
+                isAccountEventsDetailsLoading = false
+                val newEvents = it.data?.event_ids?.map { eventId ->
+                    val eventDetails = it.data?.event_map_by_id?.get(eventId)
+                    Event(
+                        creator_name = eventDetails?.creator_name ?: "",
+                        description = eventDetails?.description ?: "",
+                        end_datetime = eventDetails?.end_datetime ?: "",
+                        id = eventDetails?.id ?: "",
+                        last_modified_time = eventDetails?.last_modified_time ?: "",
+                        start_datetime = eventDetails?.start_datetime ?: ""
+                    )
+                }
+                accountDetailsViewModal.setEvents(newEvents ?: emptyList())
+                Log.i("AccountDetails", "Success: ${it.data}")
+            }
+
+            is NetworkResponse.Error -> {
+                isAccountEventsDetailsLoading = false
+                Log.i("AccountDetails", "Failure: ${it.message}")
+            }
+
+            is NetworkResponse.Loading -> {
+                isAccountEventsDetailsLoading = true
                 Log.i("AccountDetails", "Loading")
             }
         }
@@ -333,7 +373,40 @@ fun AccountDetails(
             }
         }
 
+        EventDetailsHeader(accountId, accountName = accountName)
 
+        if (isAccountEventsDetailsLoading){
+            Loader()
+        } else if (events?.isEmpty() == true || events == null){
+            EmptyScreen(emptyText = "Setup events, meetings and loop in your team", testId ="" )
+        } else {
+            events?.forEach { event ->
+                EventCard(
+                    firsName = event.creator_name.split(" ")[0],
+                    lastName = event.creator_name.split(" ")[1],
+                    username = event.creator_name,
+                    notes = event.description,
+                    date = event.last_modified_time,
+                    startDateTime = event.start_datetime,
+                    endDateTime = event.end_datetime,
+                    dueDate = event.start_datetime,
+                    onClick = {
+                        Log.i("AccountDetails", "EventId: ${event.id}")
+                        NavigationService.navigateTo("event_details_screen/${accountId}/${accountName}/${event.id}")
+                    },
+                    eventId = event.id,
+                    onDeleteMenuClick = { task ->
+                        Log.i("AccountDetails onDeleteMenuClick", "EventId: $task")
+                        eventId.value = task
+                        openDialogForEvent.value = true
+                    },
+                    onEditMenuClick = { task ->
+                        Log.i("AccountDetails onEditMenuClick", "EventId: $task")
+                        NavigationService.navigateTo("events_screen/${accountId}/${accountName}/${task}")
+                    }
+                )
+            }
+        }
     }
 }
 
@@ -465,6 +538,46 @@ fun TaskDetailsHeader(
     }
 }
 
+@Composable
+fun EventDetailsHeader(
+    accountId: String,
+    accountName: String,
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        CustomTextWithImage(
+            imageId = R.drawable.events,
+            imageContentDescription = "buildings",
+            imageModifier = Modifier
+                .width(17.dp)
+                .height(17.dp),
+            text = "Events",
+            textStyle = TextStyle(
+                fontSize = 16.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                fontWeight = FontWeight(600),
+                color = Color(0xFF212653),
+            )
+        )
+        Image(
+            painter = painterResource(id = R.drawable.add_icon),
+            contentDescription = "add_tasks",
+            modifier = Modifier
+                .width(20.dp)
+                .height(20.dp)
+                .clickable(
+                    interactionSource = MutableInteractionSource(),
+                    indication = null
+                ) {
+                    NavigationService.navigateTo("events_screen/${accountId}/${accountName}")
+                }
+        )
+    }
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NotesDetailsHeader(
@@ -495,7 +608,7 @@ fun NotesDetailsHeader(
                 fontWeight = FontWeight(600),
                 color = Color(0xFF212653),
             ),
-            textModifier =Modifier
+            textModifier = Modifier
                 .semantics {
                     testTag = "txt_account_detail_notes_title"
                     contentDescription = "txt_account_detail_notes_title"
