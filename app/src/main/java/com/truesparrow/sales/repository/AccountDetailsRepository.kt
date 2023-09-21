@@ -21,6 +21,7 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
         get() = _accountTasks
 
 
+
     private val _deleteAccountNote = MutableLiveData<NetworkResponse<Unit>>()
     val deletAccountNote: LiveData<NetworkResponse<Unit>>
         get() = _deleteAccountNote

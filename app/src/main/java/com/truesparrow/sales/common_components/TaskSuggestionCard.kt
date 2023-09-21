@@ -84,7 +84,10 @@ fun TaskSuggestionCard(
     ) -> Unit,
     createTaskApiInProgress: Boolean = false,
     isTaskAdded: Boolean = false,
-    noteViewModal: NotesViewModel
+    noteViewModal: NotesViewModel,
+    deleteMenuTestTag: String = "",
+    editMenuTestTag: String = ""
+
 ) {
 
     var expanded by remember {
@@ -227,7 +230,10 @@ fun TaskSuggestionCard(
                                 onDismissRequest = { expanded = false },
                                 onDeleteMenuClick = {
                                     onDeleteTaskClick(id)
-                                }
+                                },
+                                onEditMenuClick = {},
+                                deleteMenuTestTag = deleteMenuTestTag,
+                                editMenuTestTag = editMenuTestTag,
                             )
                         }
                     }

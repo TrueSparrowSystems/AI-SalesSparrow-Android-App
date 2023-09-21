@@ -59,7 +59,10 @@ fun TasksCard(
     assignedTaskUserName: String,
     onClick: () -> Unit,
     taskId: String = "",
-    onDeleteMenuClick: (taskId: String) -> Unit = {}
+    onDeleteMenuClick: (taskId: String) -> Unit = {},
+    onEditMenuClick: (taskId: String) -> Unit = {},
+    deleteMenuTestTag : String = "",
+    editMenuTestTag : String = "",
 ) {
     Log.i("NotesCard", "NotesCard: $notes @date: $date @username: $username")
     var formattedTime: String = "";
@@ -157,11 +160,19 @@ fun TasksCard(
                             })
                     CustomDropDownMenu(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        Log.i("NotesCard", "NotesCard: $taskId")
-                        onDeleteMenuClick(taskId)
-                    }
+                        onDismissRequest = { expanded = false },
+                        editMenuTestTag = editMenuTestTag,
+                        deleteMenuTestTag = deleteMenuTestTag,
+                        onEditMenuClick = {
+                            Log.i("NotesCard", "NotesCard: $taskId")
+                            onEditMenuClick(taskId)
+                        },
+                        onDeleteMenuClick = {
+                            Log.i("NotesCard", "NotesCard: $taskId")
+                            onDeleteMenuClick(taskId)
+                        },
+                    )
+
                 }
             }
 

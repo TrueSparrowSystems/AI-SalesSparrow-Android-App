@@ -289,6 +289,10 @@ fun AccountDetails(
                         Log.i("AccountDetails onDeleteMenuClick", "NoteId: ${note.id}")
                         noteId.value = noteID
                         openDialogForNote.value = true
+                    },
+                    onEditMenuClick = { noteID ->
+                        Log.i("AccountDetails onEditMenuClick", "NoteId: ${note.id}")
+                        NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${noteID}")
                     }
 
                 )
@@ -320,6 +324,10 @@ fun AccountDetails(
                         Log.i("AccountDetails onDeleteMenuClick", "TaskId: $task")
                         taskId.value = task
                         openDialogForTask.value = true
+                    },
+                    onEditMenuClick = { task ->
+                        Log.i("AccountDetails onEditMenuClick", "TaskId: $task")
+                        NavigationService.navigateTo("task_screen/${accountId}/${accountName}/${task}")
                     }
                 )
             }

@@ -58,6 +58,9 @@ fun NotesCard(
     noteId: String = "",
     onClick: () -> Unit,
     onDeleteMenuClick: (noteId: String) -> Unit = {},
+    onEditMenuClick: (noteId: String) -> Unit = {},
+    editMenuTestTag: String = "",
+    deleteMenuTestTag: String = "",
     index : Number
 ) {
     var formattedTime: String = "";
@@ -171,7 +174,13 @@ fun NotesCard(
                         onDeleteMenuClick = {
                             Log.i("NotesCard", "NotesCard: $noteId")
                             onDeleteMenuClick(noteId)
-                        }
+                        },
+                        onEditMenuClick = {
+                            Log.i("NotesCard", "NotesCard: $noteId")
+                            onEditMenuClick(noteId)
+                        },
+                        editMenuTestTag = editMenuTestTag,
+                        deleteMenuTestTag = deleteMenuTestTag
                     )
                 }
 
