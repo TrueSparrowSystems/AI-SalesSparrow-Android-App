@@ -375,7 +375,7 @@ fun NotesScreen(
                 emptyText = "You are all set, no recommendation for now!",
                 shouldShowIcon = true,
                 height = 95.dp,
-                testId = ""
+                testId = "note_screen_empty_screen"
             )
         } else {
             Log.i("NotesScreen re com", "NotesScreen: ${tasks?.size} $tasks")
