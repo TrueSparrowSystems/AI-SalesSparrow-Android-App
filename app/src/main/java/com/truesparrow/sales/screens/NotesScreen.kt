@@ -395,6 +395,7 @@ fun NotesScreen(
                 )
 
                 Spacer(modifier = Modifier.height(30.dp))
+                var index = 0;
                 tasks?.forEach { task ->
                     Column(
                         modifier = Modifier
@@ -446,7 +447,8 @@ fun NotesScreen(
                                     dueDate = dueDate,
                                 )
                             },
-                            noteViewModal = notesViewModel
+                            noteViewModal = notesViewModel,
+                            index = index++,
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))

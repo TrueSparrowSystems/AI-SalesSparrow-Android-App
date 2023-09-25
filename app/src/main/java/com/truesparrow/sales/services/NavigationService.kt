@@ -2,6 +2,7 @@ package com.truesparrow.sales.services
 
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -13,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import com.truesparrow.sales.BuildConfig
 import com.truesparrow.sales.screens.AccountDetails
+import com.truesparrow.sales.screens.EventScreen
 import com.truesparrow.sales.screens.HomeScreen
 import com.truesparrow.sales.screens.SplashScreen
 import com.truesparrow.sales.screens.LogInScreen
@@ -129,6 +131,13 @@ fun NavigationService(intent: Intent?) {
             val accountId = it.arguments?.getString("accountId") ?: ""
             val accountName = it.arguments?.getString("accountName") ?: ""
             TaskScreen(accountId,accountName)
+        }
+
+        composable(route = Screens.EventScreen.route) {
+            val accountId = it.arguments?.getString("accountId") ?: ""
+            val accountName = it.arguments?.getString("accountName") ?: ""
+            Log.i("EventScreen", "accountId: $accountId, accountName: $accountName")
+            EventScreen(accountId,accountName)
         }
     }
 }

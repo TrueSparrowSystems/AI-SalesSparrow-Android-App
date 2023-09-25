@@ -86,7 +86,8 @@ fun TaskSuggestionCard(
     isTaskAdded: Boolean = false,
     noteViewModal: NotesViewModel,
     deleteMenuTestTag: String = "",
-    editMenuTestTag: String = ""
+    editMenuTestTag: String = "",
+    index: Number
 
 ) {
 
@@ -208,7 +209,12 @@ fun TaskSuggestionCard(
                             fontWeight = FontWeight(300),
                             color = Color(0xFF545A71),
                             letterSpacing = 0.48.sp,
-                        )
+                        ),
+                        modifier = Modifier.semantics {
+                            testTagsAsResourceId = true
+                            testTag = "txt_create_note_date_$index"
+                            contentDescription = "txt_create_note_date_$index"
+                        }
                     )
 
                     if (shouldShowOptions) {
@@ -218,6 +224,11 @@ fun TaskSuggestionCard(
                                 modifier = Modifier
                                     .width(20.dp)
                                     .height(20.dp)
+                                    .semantics {
+                                        testTagsAsResourceId = true
+                                        testTag = "btn_suggested_task_more_menu_$index"
+                                        contentDescription = "btn_suggested_task_more_menu_$index"
+                                    }
                                     .pointerInput(true) {
                                         detectTapGestures(onPress = {
                                             pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
@@ -232,8 +243,8 @@ fun TaskSuggestionCard(
                                     onDeleteTaskClick(id)
                                 },
                                 onEditMenuClick = {},
-                                deleteMenuTestTag = deleteMenuTestTag,
-                                editMenuTestTag = editMenuTestTag,
+                                deleteMenuTestTag = "btn_delete_task_$index",
+                                editMenuTestTag = "btn_edit_task_$index",
                             )
                         }
                     }
@@ -274,7 +285,12 @@ fun TaskSuggestionCard(
                         fontWeight = FontWeight(600),
                         color = Color(0xFF444A62),
                         letterSpacing = 0.64.sp,
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag = "txt_create_note_task_desc_$index"
+                        contentDescription = "txt_create_note_task_desc_$index"
+                    }
                 )
             }
 
@@ -335,7 +351,7 @@ fun TaskSuggestionCard(
                                 color = Color(0xFF000000),
                                 letterSpacing = 0.21.sp,
                             ),
-                            userAvatarTestId = "user_avatar_note_details"
+                            userAvatarTestId = "user_avatar_task_${crmUserName}"
                         )
                     }
                     Text(text = crmUserName.ifEmpty {

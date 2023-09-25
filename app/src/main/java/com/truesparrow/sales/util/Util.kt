@@ -7,12 +7,12 @@ import androidx.core.graphics.ColorUtils
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.OffsetDateTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Locale
+import java.util.TimeZone
 import kotlin.math.absoluteValue
 
 @ColorInt
@@ -57,4 +57,31 @@ fun convertDateFormat(inputDate: String): String {
     val outputFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
     val date = inputFormat.parse(inputDate)
     return outputFormat.format(date!!)
+}
+
+fun convertToISO8601(startDate: String, startTime: String): String {
+    // Parse the date and time strings
+    val datePattern = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val timePattern = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+    val parsedDate = datePattern.parse(startDate)
+    val parsedTime = timePattern.parse(startTime)
+
+    // Combine date and time
+    val combinedDateTime = Calendar.getInstance()
+    combinedDateTime.time = parsedDate
+    combinedDateTime.set(Calendar.HOUR_OF_DAY, parsedTime.hours)
+    combinedDateTime.set(Calendar.MINUTE, parsedTime.minutes)
+    combinedDateTime.set(Calendar.SECOND, 0)
+
+    // Set the timezone to UTC
+    combinedDateTime.timeZone = TimeZone.getTimeZone("UTC")
+
+    // Format as ISO 8601 without 'Z' at the end
+    val iso8601Pattern = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault())
+    iso8601Pattern.timeZone = TimeZone.getTimeZone("UTC")
+
+    // Format the output to remove ':' in the timezone offset
+    val iso8601DateTime = iso8601Pattern.format(combinedDateTime.time)
+    return iso8601DateTime.substring(0, iso8601DateTime.length - 2)  +iso8601DateTime.substring(iso8601DateTime.length - 2)
 }

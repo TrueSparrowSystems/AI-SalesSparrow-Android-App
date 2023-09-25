@@ -72,6 +72,7 @@ import com.truesparrow.sales.viewmodals.TasksViewModal
 import java.util.Calendar
 import java.util.Date
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TaskScreen(
     accountId: String? = null,
@@ -140,6 +141,7 @@ fun TaskScreen(
             .semantics {
                 contentDescription = "et_create_task"
                 testTag = "et_create_task"
+                testTagsAsResourceId = true
             })
 
     }

@@ -625,7 +625,7 @@ fun EventDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("events_screen/${accountId}/${accountName}")
+                    NavigationService.navigateTo("event_screen/${accountId}/${accountName}")
                 }
         )
     }

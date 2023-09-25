@@ -1,16 +1,19 @@
 package com.truesparrow.sales.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.truesparrow.sales.api.ApiService
 import com.truesparrow.sales.models.CreateAccountEventResponse
+import com.truesparrow.sales.models.createAccountEventRequest
 import com.truesparrow.sales.util.NetworkResponse
+import org.json.JSONObject
 import javax.inject.Inject
 
 class EventRepository @Inject constructor(private val apiService: ApiService) {
 
     private val _eventsLiveData = MutableLiveData<NetworkResponse<CreateAccountEventResponse>>()
-    val tasksLiveData: LiveData<NetworkResponse<CreateAccountEventResponse>>
+    val eventsLiveData: LiveData<NetworkResponse<CreateAccountEventResponse>>
         get() = _eventsLiveData
 
     suspend fun createEvent(
@@ -20,18 +23,24 @@ class EventRepository @Inject constructor(private val apiService: ApiService) {
         description: String,
     ) {
         try {
-//            _eventsLiveData.postValue(NetworkResponse.Loading())
-//            val result = apiService.createAccountEvents(
-//                accountId,
-//                startDateTime,
-//                endDateTime,
-//                description
-//            )
-//            if (result.isSuccessful && result.body() != null) {
-//                _eventsLiveData.postValue(NetworkResponse.Success(result.body()!!))
-//            } else {
-//                _eventsLiveData.postValue(NetworkResponse.Error("Error Creating Event"))
-//            }
+            _eventsLiveData.postValue(NetworkResponse.Loading())
+            Log.i("Event Screen re", "$accountId $startDateTime $endDateTime $description")
+            val result = apiService.createAccountEvents(
+                accountId,
+                createAccountEventRequest(
+                    start_datetime = startDateTime,
+                    end_datetime = endDateTime,
+                    description = description
+                )
+            )
+            if (result.isSuccessful && result.body() != null) {
+                _eventsLiveData.postValue(NetworkResponse.Success(result.body()!!))
+            } else if (result.errorBody() != null) {
+                val errorObj = JSONObject(result.errorBody()!!.charStream().readText())
+                _eventsLiveData.postValue(NetworkResponse.Error(errorObj.getString("message")))
+            } else {
+                _eventsLiveData.postValue(NetworkResponse.Error("Error Creating Task:}"))
+            }
         } catch (e: Exception) {
             _eventsLiveData.postValue(NetworkResponse.Error("Error Creating Event"))
         }

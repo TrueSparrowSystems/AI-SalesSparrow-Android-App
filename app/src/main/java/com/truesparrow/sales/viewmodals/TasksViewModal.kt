@@ -15,6 +15,7 @@ import com.truesparrow.sales.util.NetworkResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 @HiltViewModel
 
 class TasksViewModal @Inject constructor(
@@ -27,32 +28,32 @@ class TasksViewModal @Inject constructor(
 
     private var tasksScreenSelectedUserName: String = "Select"
 
-   private var tasksScreenSelectedUserId: String= ""
+    private var tasksScreenSelectedUserId: String = ""
 
     private var taskScreenSelectedDueDate: String = ""
 
 
-    fun getTasksScreenSelectedUserName() : String{
+    fun getTasksScreenSelectedUserName(): String {
         return tasksScreenSelectedUserName
     }
 
-    fun getTasksScreenSelectedUserId() : String{
+    fun getTasksScreenSelectedUserId(): String {
         return tasksScreenSelectedUserId
     }
 
-    fun getTaskScreenSelectedDueDate() : String{
+    fun getTaskScreenSelectedDueDate(): String {
         return taskScreenSelectedDueDate
     }
 
-    fun setTasksScreenSelectedUserId(userId: String){
+    fun setTasksScreenSelectedUserId(userId: String) {
         tasksScreenSelectedUserId = userId
     }
 
-    fun setTasksScreenSelectedUserName(userName: String){
+    fun setTasksScreenSelectedUserName(userName: String) {
         tasksScreenSelectedUserName = userName
     }
 
-    fun setTaskScreenSelectedDueDate(dueDate: String){
+    fun setTaskScreenSelectedDueDate(dueDate: String) {
         taskScreenSelectedDueDate = dueDate
     }
 
@@ -60,7 +61,10 @@ class TasksViewModal @Inject constructor(
     fun createTask(
         accountId: String, crmOrganizationUserId: String, description: String, dueDate: String
     ) {
-        Log.i("Task", "Account ID: $accountId, User ID: $crmOrganizationUserId, Description: $description, Due Date: $dueDate")
+        Log.i(
+            "Task",
+            "Account ID: $accountId, User ID: $crmOrganizationUserId, Description: $description, Due Date: $dueDate"
+        )
 
         viewModelScope.launch {
             tasksRepository.createTask(

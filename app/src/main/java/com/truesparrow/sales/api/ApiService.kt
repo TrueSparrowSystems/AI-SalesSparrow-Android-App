@@ -17,6 +17,7 @@ import com.truesparrow.sales.models.GetCrmActionRequest
 import com.truesparrow.sales.models.GetCrmActionsResponse
 import com.truesparrow.sales.models.NotesDetailResponse
 import com.truesparrow.sales.models.SaveNoteRequest
+import com.truesparrow.sales.models.createAccountEventRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -133,7 +134,7 @@ interface ApiService {
     @Headers("$MOCK_RESPONSE_HEADER: CreateAccountTaskResponse.json")
     suspend fun createAccountEvents(
         @Path(value = "account_id", encoded = true) accountId: String,
-        @Body request: CreateAccountTaskRequest
+        @Body request: createAccountEventRequest
     ): Response<CreateAccountEventResponse>
 
 }
