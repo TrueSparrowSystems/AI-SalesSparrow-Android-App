@@ -61,6 +61,9 @@ class AccountDetailsViewModal @Inject constructor(
     val deleteAccountTaskLiveData: LiveData<NetworkResponse<Unit>>
         get() = accountDetailsRepository.deletAccountTask
 
+    val deleteAccountEventLiveData: LiveData<NetworkResponse<Unit>>
+        get() = accountDetailsRepository.deletAccountEvent
+
     fun deleteAccountTask(accountId: String, taskId: String) {
         viewModelScope.launch {
             accountDetailsRepository.deleteAccountTask(
@@ -98,6 +101,18 @@ class AccountDetailsViewModal @Inject constructor(
             accountDetailsRepository.deleteAccountNote(
                 accountId,
                 noteId
+            )
+        }
+    }
+
+    fun deleteAccountEvent(
+        accountId: String,
+        eventId: String
+    ) {
+        viewModelScope.launch {
+            accountDetailsRepository.deleteAccountEvent(
+                accountId,
+                eventId
             )
         }
     }

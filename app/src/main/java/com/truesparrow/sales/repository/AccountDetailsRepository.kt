@@ -33,6 +33,10 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
     val deletAccountTask: LiveData<NetworkResponse<Unit>>
         get() = _deleteAccountTask
 
+    private val _deleteAccountEvent = MutableLiveData<NetworkResponse<Unit>>()
+    val deletAccountEvent: LiveData<NetworkResponse<Unit>>
+        get() = _deleteAccountEvent
+
     suspend fun getAccountNotes(accountId: String) {
 
         try {
@@ -102,8 +106,7 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
             if (response.code() == 204) {
                 Log.i("deleteAccountNote", "Success: ${response.body()}")
                 _deleteAccountNote.postValue(NetworkResponse.Success(Unit))
-            }
-            else if (response.errorBody() != null) {
+            } else if (response.errorBody() != null) {
                 Log.i("deleteAccountNote", "Error: ${response.body()}")
                 val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
                 _deleteAccountNote.postValue(NetworkResponse.Error(errorObj.getString("message")))
@@ -125,8 +128,7 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
             if (response.code() == 204) {
                 Log.i("deleteAccountTask", "Success: ${response.body()}")
                 _deleteAccountTask.postValue(NetworkResponse.Success(Unit))
-            }
-            else if (response.errorBody() != null) {
+            } else if (response.errorBody() != null) {
                 Log.i("deleteAccountTask", "Error: ${response.body()}")
                 val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
                 _deleteAccountTask.postValue(NetworkResponse.Error(errorObj.getString("message")))
@@ -137,6 +139,28 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
         } catch (e: Exception) {
             Log.i("deleteAccountTask", "Exception: ${e.message}")
             _deleteAccountTask.postValue(NetworkResponse.Error("Something went wrong"))
+        }
+    }
+
+    suspend fun deleteAccountEvent(accountId: String, eventId: String) {
+        try {
+            _deleteAccountEvent.postValue(NetworkResponse.Loading())
+            val response = apiService.deleteEvent(accountId, eventId)
+
+            if (response.code() == 204) {
+                Log.i("deleteAccountEvent", "Success: ${response.body()}")
+                _deleteAccountEvent.postValue(NetworkResponse.Success(Unit))
+            } else if (response.errorBody() != null) {
+                Log.i("deleteAccountEvent", "Error: ${response.body()}")
+                val errorObj = JSONObject(response.errorBody()!!.charStream().readText())
+                _deleteAccountEvent.postValue(NetworkResponse.Error(errorObj.getString("message")))
+            } else {
+                Log.i("deleteAccountEvent", "Exception: $response")
+                _deleteAccountEvent.postValue(NetworkResponse.Error("Something went wrong"))
+            }
+        } catch (e: Exception) {
+            Log.i("deleteAccountEvent", "Exception: ${e.message}")
+            _deleteAccountEvent.postValue(NetworkResponse.Error("Something went wrong"))
         }
     }
 

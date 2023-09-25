@@ -137,4 +137,10 @@ interface ApiService {
         @Body request: createAccountEventRequest
     ): Response<CreateAccountEventResponse>
 
+    @DELETE("v1/accounts/{account_id}/events/{event_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: DeleteAccountTaskResponse.json")
+    suspend fun deleteEvent(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "event_id") eventId: String
+    ): Response<Unit>
 }

@@ -98,6 +98,8 @@ fun AccountDetails(
 
     val accountEventsResponse by accountDetailsViewModal.accountEventsLiveData.observeAsState()
 
+    val deleteAccountEventResponse by accountDetailsViewModal.deleteAccountEventLiveData.observeAsState()
+
     val noteId = remember { mutableStateOf("") }
     val taskId = remember { mutableStateOf("") }
     val eventId = remember { mutableStateOf("") }
@@ -246,6 +248,27 @@ fun AccountDetails(
         }
     }
 
+    deleteAccountEventResponse?.let {
+        when(it){
+            is NetworkResponse.Success -> {
+                Log.i("AccountDetails deleteAccount Success", "Success: ${it.data}")
+                LaunchedEffect(key1 = accountId) {
+                    accountDetailsViewModal.getAccountEvents(accountId = accountId)
+                }
+                CustomToast(message = "Event Deleted", type = ToastType.Success)
+            }
+
+            is NetworkResponse.Error -> {
+                CustomToast(message = it.message ?: "Something went wrong", type = ToastType.Error)
+                Log.i("AccountDetails deleteAccount Error", "Failure: ${it.message}")
+            }
+
+            is NetworkResponse.Loading -> {
+                Log.i("AccountDetails deleteAccount Loading", "Loading")
+            }
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -292,6 +315,26 @@ fun AccountDetails(
             messageTestTag = "txt_account_detail_delete_task_message",
             confirmButtonTestTag = "btn_account_detail_delete_task_confirm",
             dismissButtonTestTag = "btn_account_detail_delete_task_cancel"
+        )
+
+        CustomAlertDialog(
+            title = "Delete Event",
+            message = "Are you sure you want to delete this event?",
+            onConfirmButtonClick = {
+                accountDetailsViewModal.deleteAccountEvent(
+                    accountId = accountId,
+                    eventId = eventId.value
+                )
+                openDialogForEvent.value = false
+            },
+            onDismissRequest = {
+                openDialogForEvent.value = false
+            },
+            showConfirmationDialog = openDialogForEvent.value,
+            titleTestTag = "txt_account_detail_delete_event_title",
+            messageTestTag = "txt_account_detail_delete_event_message",
+            confirmButtonTestTag = "btn_account_detail_delete_event_confirm",
+            dismissButtonTestTag = "btn_account_detail_delete_event_cancel"
         )
 
         AccountDetailsHeader()
