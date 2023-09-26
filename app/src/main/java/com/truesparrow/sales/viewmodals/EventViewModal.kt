@@ -17,6 +17,9 @@ class EventViewModal @Inject constructor(private val eventRepository: EventRepos
     val eventsLiveData : LiveData<NetworkResponse<CreateAccountEventResponse>>
         get() = eventRepository.eventsLiveData
 
+    val updateEventLiveData : LiveData<NetworkResponse<Unit>>
+        get() = eventRepository.updateEventLiveData
+
     private var eventScreenSelectedStartDate: String = ""
     private var eventScreenSelectedEndDate: String = ""
     private var eventScreenSelectedStartTime: String = ""
@@ -64,6 +67,20 @@ class EventViewModal @Inject constructor(private val eventRepository: EventRepos
         viewModelScope.launch {
             Log.i("EventScreen", "$accountId $startDateTime $endDateTime $description")
             eventRepository.createEvent(accountId, startDateTime, endDateTime, description)
+        }
+
+    }
+
+    fun updateEvent(
+        accountId: String,
+        eventId: String,
+        startDateTime: String,
+        endDateTime: String,
+        description: String,
+    ) {
+        viewModelScope.launch {
+            Log.i("EventScreen", "$accountId $startDateTime $endDateTime $description")
+            eventRepository.updateEvent(accountId, eventId, startDateTime, endDateTime, description)
         }
 
     }

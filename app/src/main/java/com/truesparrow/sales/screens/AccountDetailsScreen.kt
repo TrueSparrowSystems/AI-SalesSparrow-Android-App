@@ -61,6 +61,7 @@ import com.truesparrow.sales.common_components.NotesCard
 import com.truesparrow.sales.common_components.TasksCard
 import com.truesparrow.sales.common_components.ToastType
 import com.truesparrow.sales.models.Event
+import com.truesparrow.sales.models.EventDetailsObject
 import com.truesparrow.sales.models.Note
 import com.truesparrow.sales.models.Task
 import com.truesparrow.sales.services.NavigationService
@@ -466,7 +467,13 @@ fun AccountDetails(
                     },
                     onEditMenuClick = { task ->
                         Log.i("AccountDetails onEditMenuClick", "EventId: $task")
-                        NavigationService.navigateTo("events_screen/${accountId}/${accountName}/${task}")
+                        var eventData = EventDetailsObject(
+                            eventId = event.id,
+                            eventStartDate = event.start_datetime,
+                            eventEndDate = event.end_datetime,
+                            eventDescription = event.description
+                        )
+                        NavigationService.navigateToEventScreen(accountId, eventData)
                     }
                 )
             }
@@ -668,7 +675,7 @@ fun EventDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("event_screen/${accountId}/${accountName}")
+                    NavigationService.navigateToEventScreen(accountId, null)
                 }
         )
     }

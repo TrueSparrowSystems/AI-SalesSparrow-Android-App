@@ -74,21 +74,30 @@ import java.util.Calendar
 @Composable
 fun EventScreen(
     accountId: String? = "",
-    accountName: String? = "",
+    startDate: String = "",
+    endDate: String = "",
+    startTime: String = "",
+    endTime: String = "",
+    eventDescription: String = "",
+    eventId: String = ""
 ) {
 
     var createEventApiIsSuccess by remember { mutableStateOf(false) }
     var createEventApiInProgress by remember { mutableStateOf(false) }
-    var eventDescription by remember { mutableStateOf("") }
+
+    var updateEventApiIsSuccess by remember { mutableStateOf(false) }
+    var updateEventApiInProgress by remember { mutableStateOf(false) }
+
+    var eventDescription by remember { mutableStateOf(eventDescription) }
     val eventViewModal: EventViewModal = hiltViewModel()
 
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
-    var selectedStartDateText by remember { mutableStateOf("") }
-    var selectedEndDateText by remember { mutableStateOf("") }
-    var selectedStartTimeText by remember { mutableStateOf("") }
-    var selectedEndTimeText by remember { mutableStateOf("") }
+    var selectedStartDateText by remember { mutableStateOf(startDate) }
+    var selectedEndDateText by remember { mutableStateOf(endDate) }
+    var selectedStartTimeText by remember { mutableStateOf(startTime) }
+    var selectedEndTimeText by remember { mutableStateOf(endTime) }
     val year = calendar[Calendar.YEAR]
     val month = calendar[Calendar.MONTH]
     val dayOfMonth = calendar[Calendar.DAY_OF_MONTH]
@@ -152,9 +161,29 @@ fun EventScreen(
                     type = ToastType.Error
                 )
             }
+        }
+    }
 
-            else -> {
-                createEventApiInProgress = false
+    val updateEventResponse by eventViewModal.updateEventLiveData.observeAsState()
+
+    updateEventResponse?.let {
+        when (it) {
+            is NetworkResponse.Success -> {
+                updateEventApiIsSuccess = true
+                updateEventApiInProgress = false
+                CustomToast(message = "Event Updated", type = ToastType.Success)
+            }
+
+            is NetworkResponse.Loading -> {
+                updateEventApiInProgress = true
+            }
+
+            is NetworkResponse.Error -> {
+                updateEventApiInProgress = false
+                CustomToast(
+                    message = it.message ?: "Failed to update the event",
+                    type = ToastType.Error
+                )
             }
         }
     }
@@ -202,18 +231,81 @@ fun EventScreen(
                 }
             if (accountId != null) {
                 Button(onClick = {
-                    val iso8601StartDateTime =convertToISO8601(selectedStartDateText, selectedStartTimeText);
-                    val iso8601EndDateTime =convertToISO8601(selectedEndDateText, selectedEndTimeText);
-                    Log.i(
-                        "EventScreen",
-                        "Create Event Clicked $accountId $iso8601StartDateTime $iso8601EndDateTime  $eventDescription "
-                    )
-                    eventViewModal.createEvent(
-                        accountId = accountId,
-                        startDateTime = iso8601StartDateTime,
-                        endDateTime = iso8601EndDateTime,
-                        description = eventDescription
-                    )
+                    if (selectedStartDateText.isEmpty() || selectedStartTimeText.isEmpty() || selectedEndDateText.isEmpty() || selectedEndTimeText.isEmpty()) {
+                        Toast.makeText(
+                            context,
+                            "Please select start and end date",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+
+                    if (selectedEndDateText == selectedStartDateText) {
+                        if (selectedEndTimeText < selectedStartTimeText) {
+                            Toast.makeText(
+                                context,
+                                "End time should be greater than start time",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    if (selectedEndDateText != selectedStartDateText) {
+                        val startDate = selectedStartDateText.split("/")
+                        val endDate = selectedEndDateText.split("/")
+                        val startYear = startDate[2].toInt()
+                        val startMonth = startDate[1].toInt()
+                        val startDay = startDate[0].toInt()
+                        val endYear = endDate[2].toInt()
+                        val endMonth = endDate[1].toInt()
+                        val endDay = endDate[0].toInt()
+                        val startDateCalendar = Calendar.getInstance()
+                        startDateCalendar.set(startYear, startMonth, startDay)
+                        val endDateCalendar = Calendar.getInstance()
+                        endDateCalendar.set(endYear, endMonth, endDay)
+                        val difference =
+                            endDateCalendar.timeInMillis - startDateCalendar.timeInMillis
+                        val days = (difference / (1000 * 60 * 60 * 24)).toInt()
+                        if (days > 14) {
+                            Toast.makeText(
+                                context,
+                                "Difference between start date and end date should be less than 14 days",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    //if all value exist then execute the below functions
+                    if (selectedStartDateText.isNotEmpty() && selectedEndDateText.isNotEmpty() && selectedStartTimeText.isNotEmpty() && selectedEndTimeText.isNotEmpty() && eventDescription.isNotEmpty() && accountId.isNotEmpty() && !(createEventApiInProgress || createEventApiIsSuccess)) {
+                        val iso8601StartDateTime =
+                            convertToISO8601(selectedStartDateText, selectedStartTimeText);
+                        val iso8601EndDateTime =
+                            convertToISO8601(selectedEndDateText, selectedEndTimeText);
+
+
+                        Log.i(
+                            "EventScreen",
+                            "Create Event Clicked $accountId $iso8601StartDateTime $iso8601EndDateTime  $eventDescription "
+                        )
+
+                        if (eventId.isNotEmpty()) {
+                            eventViewModal.updateEvent(
+                                accountId = accountId,
+                                eventId = eventId,
+                                startDateTime = iso8601StartDateTime,
+                                endDateTime = iso8601EndDateTime,
+                                description = eventDescription
+                            )
+                        } else {
+
+                            eventViewModal.createEvent(
+                                accountId = accountId,
+                                startDateTime = iso8601StartDateTime,
+                                endDateTime = iso8601EndDateTime,
+                                description = eventDescription
+                            )
+                        }
+                    }
                 },
 
                     enabled = eventDescription.isNotEmpty() && accountId.isNotEmpty() && !(createEventApiInProgress || createEventApiIsSuccess),
@@ -252,9 +344,9 @@ fun EventScreen(
                             }
                         }.build()
 
-                        Image(painter = if (createEventApiInProgress) {
+                        Image(painter = if (createEventApiInProgress || updateEventApiInProgress) {
                             rememberAsyncImagePainter(R.drawable.loader, imageLoader)
-                        } else if (createEventApiIsSuccess) {
+                        } else if (createEventApiIsSuccess || updateEventApiIsSuccess) {
                             painterResource(id = R.drawable.check)
                         } else {
                             painterResource(id = R.drawable.cloud)
@@ -268,9 +360,9 @@ fun EventScreen(
                                     testTagsAsResourceId = true
                                     testTag = "cloud"
                                 })
-                        Text(text = if (createEventApiInProgress) {
+                        Text(text = if (createEventApiInProgress || updateEventApiInProgress) {
                             "Saving..."
-                        } else if (createEventApiIsSuccess) {
+                        } else if (createEventApiIsSuccess || updateEventApiIsSuccess) {
                             "Saved"
                         } else {
                             "Save"
@@ -521,7 +613,6 @@ fun EventScreen(
 @Composable
 fun EventScreenPreview() {
     EventScreen(
-        accountName = "Account Name",
         accountId = "Account Id",
     )
 }

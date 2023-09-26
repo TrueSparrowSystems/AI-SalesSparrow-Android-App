@@ -24,6 +24,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -142,5 +143,13 @@ interface ApiService {
     suspend fun deleteEvent(
         @Path(value = "account_id") accountId: String,
         @Path(value = "event_id") eventId: String
+    ): Response<Unit>
+
+    @PUT("v1/accounts/{account_id}/events/{event_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: CreateAccountTaskResponse.json")
+    suspend fun updateEvent(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "event_id") eventId: String,
+        @Body request: createAccountEventRequest
     ): Response<Unit>
 }

@@ -16,6 +16,10 @@ class EventRepository @Inject constructor(private val apiService: ApiService) {
     val eventsLiveData: LiveData<NetworkResponse<CreateAccountEventResponse>>
         get() = _eventsLiveData
 
+    private val _updateEventLiveData = MutableLiveData<NetworkResponse<Unit>>()
+    val updateEventLiveData: LiveData<NetworkResponse<Unit>>
+        get() = _updateEventLiveData
+
     suspend fun createEvent(
         accountId: String,
         startDateTime: String,
@@ -45,4 +49,37 @@ class EventRepository @Inject constructor(private val apiService: ApiService) {
             _eventsLiveData.postValue(NetworkResponse.Error("Error Creating Event"))
         }
     }
+
+    suspend fun updateEvent(
+        accountId: String,
+        eventId: String,
+        startDateTime: String,
+        endDateTime: String,
+        description: String,
+    ) {
+        try {
+            _updateEventLiveData.postValue(NetworkResponse.Loading())
+            Log.i("Event Screen re", "$accountId $startDateTime $endDateTime $description")
+            val result = apiService.updateEvent(
+                accountId,
+                eventId,
+                createAccountEventRequest(
+                    start_datetime = startDateTime,
+                    end_datetime = endDateTime,
+                    description = description
+                )
+            )
+            if (result.isSuccessful && result.body() != null) {
+                _updateEventLiveData.postValue(NetworkResponse.Success(result.body()!!))
+            } else if (result.errorBody() != null) {
+                val errorObj = JSONObject(result.errorBody()!!.charStream().readText())
+                _updateEventLiveData.postValue(NetworkResponse.Error(errorObj.getString("message")))
+            } else {
+                _updateEventLiveData.postValue(NetworkResponse.Error("Error Updating Task:}"))
+            }
+        } catch (e: Exception) {
+            _updateEventLiveData.postValue(NetworkResponse.Error("Error Updating Event"))
+        }
+    }
+
 }

@@ -9,6 +9,7 @@ plugins {
     id("com.google.firebase.crashlytics")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id ("kotlin-parcelize")
 }
 
 

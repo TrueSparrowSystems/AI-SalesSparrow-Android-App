@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.ColorInt
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.ColorUtils
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
@@ -84,4 +85,23 @@ fun convertToISO8601(startDate: String, startTime: String): String {
     // Format the output to remove ':' in the timezone offset
     val iso8601DateTime = iso8601Pattern.format(combinedDateTime.time)
     return iso8601DateTime.substring(0, iso8601DateTime.length - 2)  +iso8601DateTime.substring(iso8601DateTime.length - 2)
+}
+
+
+fun extractDateAndTime(input: String): Pair<String, String>? {
+    try {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault())
+        val date = dateFormat.parse(input)
+
+        val datePattern = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val timePattern = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+        val formattedDate = datePattern.format(date)
+        val formattedTime = timePattern.format(date)
+
+        return Pair(formattedDate, formattedTime)
+    } catch (e: ParseException) {
+        e.printStackTrace()
+        return null
+    }
 }

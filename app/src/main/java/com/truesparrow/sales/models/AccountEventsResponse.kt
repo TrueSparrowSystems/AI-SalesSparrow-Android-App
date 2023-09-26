@@ -1,5 +1,8 @@
 package com.truesparrow.sales.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 data class AccountEventsResponse(
     val event_ids: List<String>,
     val event_map_by_id: Map<String, EventMapById>
@@ -22,3 +25,13 @@ data class Event(
     val end_datetime: String,
     val last_modified_time: String
 )
+
+
+@Parcelize
+data class EventDetailsObject(
+    val eventId: String,
+    val eventStartDate: String,
+    val eventEndDate: String,
+    val eventDescription: String,
+    val dummy: String? = ""
+) : Parcelable

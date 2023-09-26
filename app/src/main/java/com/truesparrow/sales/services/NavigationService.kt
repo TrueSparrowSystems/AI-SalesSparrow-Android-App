@@ -12,7 +12,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
+import com.google.gson.Gson
 import com.truesparrow.sales.BuildConfig
+import com.truesparrow.sales.models.EventDetailsObject
 import com.truesparrow.sales.screens.AccountDetails
 import com.truesparrow.sales.screens.EventScreen
 import com.truesparrow.sales.screens.HomeScreen
@@ -23,8 +25,8 @@ import com.truesparrow.sales.screens.NotesScreen
 import com.truesparrow.sales.screens.SettingsScreen
 import com.truesparrow.sales.screens.TaskScreen
 import com.truesparrow.sales.util.Screens
+import com.truesparrow.sales.util.extractDateAndTime
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
-import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 
 
 object NavigationService {
@@ -60,6 +62,18 @@ object NavigationService {
             }
         }
     }
+
+    fun navigateToEventScreen(
+        accountId: String,
+        eventData: EventDetailsObject?
+    ) {
+        val eventDataJson = eventData?.let { Gson().toJson(it) } ?: "null_placeholder"
+
+        navController.navigate("event_screen/$accountId/$eventDataJson") {
+            launchSingleTop = true
+        }
+    }
+
 
     fun navigateWithPopUpClearingAllStack(screenName: String) {
         navController.navigate(screenName) {
@@ -130,15 +144,52 @@ fun NavigationService(intent: Intent?) {
         composable(route = Screens.TaskScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
             val accountName = it.arguments?.getString("accountName") ?: ""
-            TaskScreen(accountId,accountName)
+            TaskScreen(accountId, accountName)
         }
 
         composable(route = Screens.EventScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
             val accountName = it.arguments?.getString("accountName") ?: ""
-            Log.i("EventScreen", "accountId: $accountId, accountName: $accountName")
-            EventScreen(accountId,accountName)
+            val eventDataJson = it.arguments?.getString("eventData") ?: ""
+            val eventData = if (eventDataJson != "null_placeholder") Gson().fromJson(
+                eventDataJson,
+                EventDetailsObject::class.java
+            ) else null
+
+            var startDateTime = if (eventDataJson != "null_placeholder") extractDateAndTime(eventData!!.eventStartDate) else Pair("", "")
+            var endDateTime =if (eventDataJson != "null_placeholder") extractDateAndTime(eventData!!.eventEndDate) else Pair("", "")
+
+
+            Log.i(
+                "EventScreen",
+                "accountId: $accountId, accountName: $accountName eventData: $eventData  $startDateTime $endDateTime "
+            )
+
+            if (eventData != null) {
+                EventScreen(
+                    accountId,
+                    startDateTime?.first ?: "",
+                    endDateTime?.first ?: "",
+                    startDateTime?.second ?: "",
+                    endDateTime?.second ?: "",
+                    eventData.eventDescription ?: "",
+                    eventData.eventId ?: ""
+                )
+
+            } else {
+                EventScreen(
+                    accountId,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                )
+            }
+
         }
+
     }
 }
 
