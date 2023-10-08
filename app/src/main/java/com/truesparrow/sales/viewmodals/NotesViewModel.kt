@@ -7,16 +7,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.truesparrow.sales.models.GetCrmActionsResponse
-import com.truesparrow.sales.models.Note
 import com.truesparrow.sales.models.NotesDetailResponse
 import com.truesparrow.sales.models.SaveNote
+import com.truesparrow.sales.models.SuggestedEvents
 import com.truesparrow.sales.models.Tasks
 import com.truesparrow.sales.repository.NotesRepository
 import com.truesparrow.sales.util.NetworkResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.log
 
 
 @HiltViewModel
@@ -33,36 +32,76 @@ class NotesViewModel @Inject constructor(
     private val _tasks = MutableLiveData<List<Tasks>>()
     val tasks: MutableLiveData<List<Tasks>> = _tasks
 
+    private val _suggestedEvents = MutableLiveData<List<SuggestedEvents>>()
+    val suggestedEvents: MutableLiveData<List<SuggestedEvents>> = _suggestedEvents
+
+
     fun setTasks(newTasks: List<Tasks>) {
         _tasks.postValue(newTasks)
-        Log.i(" _tasks.value","${ _tasks.value}")
+        Log.i(" _tasks.value", "${_tasks.value}")
     }
+
+    fun setSuggestedEvents(newSuggestedEvents: List<SuggestedEvents>) {
+        _suggestedEvents.postValue(newSuggestedEvents)
+        Log.i(" _suggestedEvents.value", "${_suggestedEvents.value}")
+    }
+
+    fun updateSuggestedEventById(eventId: String, updatedEvent: SuggestedEvents) {
+
+        Log.i("UpdateById=", "${updatedEvent} ${eventId}")
+
+        val currentEvents = _suggestedEvents.value.orEmpty()
+        Log.i("currentEvents=", "${currentEvents}")
+        val updatedEvents = currentEvents.map { event ->
+            if (event.id == eventId) {
+                Log.i("Checking", "Log")
+                updatedEvent
+            } else {
+                Log.i("Existing event", "${event.id}")
+                event
+
+            }
+        }
+        Log.i("Checking", "${updatedEvents}")
+        _suggestedEvents.postValue(updatedEvents)
+
+
+        Log.i("UpdateById", "${_suggestedEvents.value}")
+    }
+
+    fun getSuggestedEventById(eventId: String): SuggestedEvents? {
+        Log.i("eventId get event", "${eventId}")
+        return _suggestedEvents.value?.find { it.id == eventId }
+    }
+
     fun updateTaskById(taskId: String, updatedTask: Tasks) {
 
-        Log.i("UpdateById=","${updatedTask} ${taskId}")
+        Log.i("UpdateById=", "${updatedTask} ${taskId}")
 
         val currentTasks = _tasks.value.orEmpty()
-        Log.i("currentTasks=","${currentTasks}")
+        Log.i("currentTasks=", "${currentTasks}")
         val updatedTasks = currentTasks.map { task ->
             if (task.id == taskId) {
-                Log.i("Checking","Log")
+                Log.i("Checking", "Log")
                 updatedTask
             } else {
-                Log.i("Existing task","${task.id}")
+                Log.i("Existing task", "${task.id}")
                 task
 
             }
         }
-        Log.i("Checking","${updatedTasks}")
+        Log.i("Checking", "${updatedTasks}")
 //        setTasks(updatedTasks)
         _tasks.postValue(updatedTasks)
 
-        Log.i("UpdateById","${_tasks.value}")
+        Log.i("UpdateById", "${_tasks.value}")
     }
+
     fun getTaskById(taskId: String): Tasks? {
-        Log.i("taskId get task","${taskId}")
+        Log.i("taskId get task", "${taskId}")
         return _tasks.value?.find { it.id == taskId }
     }
+
 
     val noteDetailsLiveData: LiveData<NetworkResponse<NotesDetailResponse>>
         get() = notesRepository.noteDetails

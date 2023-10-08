@@ -20,14 +20,10 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -79,7 +75,10 @@ fun EventScreen(
     startTime: String = "",
     endTime: String = "",
     eventDescription: String = "",
-    eventId: String = ""
+    eventId: String = "",
+    onAddEventClick: (id: String) -> Unit = {},
+    onCancelEventClick: (id: String, eventDescription: String, startDateTime: String, endDateTime: String) -> Unit = { _, _, _, _ -> },
+    selectedEventId: String = "",
 ) {
 
     var createEventApiIsSuccess by remember { mutableStateOf(false) }
@@ -148,6 +147,9 @@ fun EventScreen(
                 createEventApiIsSuccess = true
                 createEventApiInProgress = false
                 CustomToast(message = "Event Added", type = ToastType.Success)
+                if (selectedEventId.isNotEmpty()) {
+                    onAddEventClick(selectedEventId)
+                }
             }
 
             is NetworkResponse.Loading -> {
@@ -213,7 +215,23 @@ fun EventScreen(
                 modifier = Modifier
                     .clickable(interactionSource = MutableInteractionSource(),
                         indication = null,
-                        onClick = { NavigationService.navigateBack() })
+                        onClick = {
+                            if (selectedEventId.isNotEmpty()) {
+                                val iso8601StartDateTime =
+                                    convertToISO8601(selectedStartDateText, selectedStartTimeText);
+                                val iso8601EndDateTime =
+                                    convertToISO8601(selectedEndDateText, selectedEndTimeText);
+
+                                onCancelEventClick(
+                                    selectedEventId,
+                                    eventDescription,
+                                    iso8601StartDateTime,
+                                    iso8601EndDateTime
+                                )
+                            } else {
+                                NavigationService.navigateBack()
+                            }
+                        })
                     .semantics {
                         testTagsAsResourceId = true
                         testTag =

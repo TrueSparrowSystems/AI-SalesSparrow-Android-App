@@ -3,6 +3,7 @@ package com.truesparrow.sales.screens
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -50,20 +51,28 @@ import com.truesparrow.sales.common_components.AccountListBottomSheet
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
+import com.truesparrow.sales.common_components.EventSuggestionCard
 import com.truesparrow.sales.common_components.RecommandedTaskSheet
+import com.truesparrow.sales.common_components.RecommondedEventSheet
 import com.truesparrow.sales.common_components.SearchNameBottomSheet
 import com.truesparrow.sales.common_components.TaskSuggestionCard
 import com.truesparrow.sales.common_components.ToastType
 import com.truesparrow.sales.common_components.UpdateTaskDropDownMenu
+import com.truesparrow.sales.models.SuggestedEvents
 import com.truesparrow.sales.models.Tasks
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
+import com.truesparrow.sales.util.convertToISO8601
+import com.truesparrow.sales.util.extractDateAndTime
 import com.truesparrow.sales.viewmodals.AccountDetailsViewModal
+import com.truesparrow.sales.viewmodals.EventViewModal
 import com.truesparrow.sales.viewmodals.NotesViewModel
 import com.truesparrow.sales.viewmodals.TasksViewModal
+import kotlinx.coroutines.delay
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NotesScreen(
@@ -74,7 +83,9 @@ fun NotesScreen(
 
     val notesViewModel: NotesViewModel = hiltViewModel()
     var selectedTaskId by remember { mutableStateOf("") }
+    var selectedEventId by remember { mutableStateOf("") }
     var addTaskId by remember { mutableStateOf("") }
+    var addEventId by remember { mutableStateOf("") }
 
 
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
@@ -89,10 +100,15 @@ fun NotesScreen(
     val tasksViewModel: TasksViewModal = hiltViewModel()
     var createTaskApiInProgress by remember { mutableStateOf(false) }
     var createTaskApiIsSuccess by remember { mutableStateOf(false) }
+    var createEventApiInProgress by remember { mutableStateOf(false) }
+    var createEventApiIsSuccess by remember { mutableStateOf(false) }
+
+    val eventsViewModal: EventViewModal = hiltViewModel()
 
     var noteDesc by remember { mutableStateOf("") }
 
     var tasks = notesViewModel.tasks.observeAsState()?.value
+
     var isTasksListUpdated by remember { mutableStateOf(false) }
 
     val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
@@ -101,31 +117,71 @@ fun NotesScreen(
 
     val deleteTaskResponse by accountDetailsViewModal.deleteAccountTaskLiveData.observeAsState();
 
-    var selectedCrmUserName  = remember {
-        mutableStateOf( "")
+    val createEventResponse by eventsViewModal.eventsLiveData.observeAsState();
+
+    var selectedCrmUserName = remember {
+        mutableStateOf("")
     }
 
     var selectedCrmUserId = remember {
-        mutableStateOf( "")
+        mutableStateOf("")
     }
 
+    var suggestedEvents = notesViewModel.suggestedEvents.observeAsState()?.value
 
-    deleteTaskResponse?.let {deleteTaskResponse
-        when(deleteTaskResponse){
+
+    deleteTaskResponse?.let {
+        deleteTaskResponse
+        when (deleteTaskResponse) {
             is NetworkResponse.Success -> {
                 CustomToast(message = "Task Deleted", type = ToastType.Success)
             }
-            is NetworkResponse.Error ->{
-                CustomToast(message =  "Something went wrong", type = ToastType.Error)
+
+            is NetworkResponse.Error -> {
+                CustomToast(message = "Something went wrong", type = ToastType.Error)
             }
+
             is NetworkResponse.Loading -> {
             }
+
             else -> {}
         }
     }
 
+    createEventResponse?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                createEventApiInProgress = false;
+                createEventApiIsSuccess = true
+                CustomToast(message = "Event Added", type = ToastType.Success)
+                val currEvent = notesViewModel.getSuggestedEventById(addEventId)
+                Log.i("log4--------------", "${currEvent}")
+                notesViewModel.updateSuggestedEventById(
+                    addEventId, SuggestedEvents(
+                        start_datetime = currEvent?.start_datetime ?: "",
+                        end_datetime = currEvent?.end_datetime ?: "",
+                        description = currEvent?.description ?: "",
+                        id = addEventId,
+                        is_event_created = true,
+                        event_id = response.data?.event_id
+                    )
+                )
+
+            }
+
+            is NetworkResponse.Error -> {
+                createEventApiInProgress = false;
+                CustomToast(message = "Something went wrong", type = ToastType.Error)
+            }
+
+            is NetworkResponse.Loading -> {
+                createEventApiInProgress = true;
+            }
+        }
+    }
+
     createTaskResponse?.let { response ->
-        Log.i("response====","${createTaskResponse}")
+        Log.i("response====", "${createTaskResponse}")
         when (response) {
             is NetworkResponse.Success -> {
                 createTaskApiInProgress = false;
@@ -134,7 +190,7 @@ fun NotesScreen(
                     message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
                 val currTask = notesViewModel.getTaskById(addTaskId)
-                Log.i("log4--------------","${currTask}")
+                Log.i("log4--------------", "${currTask}")
 
                 notesViewModel.updateTaskById(
                     addTaskId, Tasks(
@@ -183,11 +239,25 @@ fun NotesScreen(
                     )
                 })
 
-                Log.i("newTasks","$newTasks")
+                val newEvents = (it.data?.add_event_suggestions?.map { event ->
+                    val id = "temp_event_${index++}_${System.currentTimeMillis()}"
+                    SuggestedEvents(
+                        start_datetime = event?.start_datetime ?: "",
+                        end_datetime = event?.end_datetime ?: "",
+                        description = event?.description ?: "",
+                        id = id,
+                        is_event_created = false,
+                        event_id = ""
+                    )
+                })
+
+
+                Log.i("newTasks", "$newTasks")
                 if (!isTasksListUpdated) {
                     isTasksListUpdated = true
-                    Log.i("Heelo","Hello")
+                    Log.i("Heelo", "Hello")
                     notesViewModel.setTasks(newTasks ?: emptyList())
+                    notesViewModel.setSuggestedEvents(newEvents ?: emptyList())
                 } else {
                 }
             }
@@ -247,8 +317,14 @@ fun NotesScreen(
 
     var RecommTaksBottomSheetVisible by remember { mutableStateOf(false) }
 
+    var RecommEventBottomSheetVisible by remember { mutableStateOf(false) }
+
     val toggleSheet: () -> Unit = {
         RecommTaksBottomSheetVisible = !RecommTaksBottomSheetVisible
+    }
+
+    val toggleEventSheet: () -> Unit = {
+        RecommEventBottomSheetVisible = !RecommEventBottomSheetVisible
     }
 
     if (searchNameBottomSheetVisible) {
@@ -257,10 +333,9 @@ fun NotesScreen(
             accountId = accountId!!,
             accountName = accountName!!,
             id = selectedTaskId,
-            onUpdateUserName = {
-                userId, userName ->
-                    selectedCrmUserId.value = userId
-                    selectedCrmUserName.value = userName
+            onUpdateUserName = { userId, userName ->
+                selectedCrmUserId.value = userId
+                selectedCrmUserName.value = userName
 
             }
         )
@@ -300,6 +375,45 @@ fun NotesScreen(
                         is_task_created = false
                     )
                 )
+            },
+        )
+    }
+
+    if (RecommEventBottomSheetVisible) {
+        val event = suggestedEvents?.find { it.id == selectedEventId }
+        var startDateTime = extractDateAndTime(event!!.start_datetime)
+        var endDateTime = extractDateAndTime(event!!.end_datetime)
+        Log.i("event==", "${event}")
+        Log.i("Ids test", "${selectedEventId}")
+
+        RecommondedEventSheet(
+            toggleEventSheet,
+            accountId = accountId,
+            startDate = startDateTime!!.first ?: "",
+            endDate = endDateTime!!.first ?: "",
+            startTime = startDateTime!!.second ?: "",
+            selectedEventId = event!!.id,
+            endTime = endDateTime!!.second ?: "",
+            eventDescription = event?.description ?: "",
+            onCancelEventClick = { id: String, eventDescription: String, startDateTime: String, endDateTime: String ->
+                Log.i(
+                    "onCancelClick",
+                    " id ${id} eventDescription ${eventDescription} startDateTime ${startDateTime} endDateTime ${endDateTime}"
+                )
+
+                notesViewModel.updateSuggestedEventById(
+                    id, SuggestedEvents(
+                        start_datetime = startDateTime,
+                        end_datetime = endDateTime,
+                        description = eventDescription,
+                        id = id,
+                        is_event_created = false
+                    )
+                )
+
+                toggleEventSheet()
+
+
             },
         )
     }
@@ -370,7 +484,7 @@ fun NotesScreen(
                     )
                 )
             }
-        } else if (tasks?.isEmpty() == true) {
+        } else if (tasks?.isEmpty() == true && suggestedEvents?.isEmpty() == true) {
             EmptyScreen(
                 emptyText = "You are all set, no recommendation for now!",
                 shouldShowIcon = true,
@@ -403,6 +517,7 @@ fun NotesScreen(
                             .fillMaxWidth()
                             .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
                     ) {
+                        Log.i("tasks rerendering", "${task.task_desc}")
                         TaskSuggestionCard(
                             id = task?.id!!,
                             accountId = accountId!!,
@@ -413,15 +528,20 @@ fun NotesScreen(
                             dDate = task.due_date ?: "",
                             isTaskAdded = task.is_task_created,
                             shouldShowOptions = task.is_task_created,
-                            onDeleteTaskClick = { id->
-                                selectedTaskId  = id
+                            onDeleteTaskClick = { id ->
+                                selectedTaskId = id
                                 val task = tasks!!.filter { it?.id == id }
-                                task[0].task_id?.let { accountDetailsViewModal.deleteAccountTask(accountId , taskId = it) }
-                                var updatedTask =  tasks!!.filter { it?.id != id }
+                                task[0].task_id?.let {
+                                    accountDetailsViewModal.deleteAccountTask(
+                                        accountId,
+                                        taskId = it
+                                    )
+                                }
+                                var updatedTask = tasks!!.filter { it?.id != id }
                                 notesViewModel.setTasks(updatedTask)
                             },
                             onSelectUSerClick = { id ->
-                                Log.i("onSelectUSerClick:" , "${id}")
+                                Log.i("onSelectUSerClick:", "${id}")
                                 selectedTaskId = id
                                 toggleSearchNameBottomSheet()
                             },
@@ -434,7 +554,10 @@ fun NotesScreen(
                                 Log.i("NotesScreen oncancel", "NotesScreen: ${tasks!!.size} $tasks")
                                 val updatedTasks = tasks!!.filter { it?.id != taskId }
                                 notesViewModel.setTasks(updatedTasks)
-                                Log.i("NotesScreen oncancel", "NotesScreen: ${updatedTasks!!.size} $updatedTasks")
+                                Log.i(
+                                    "NotesScreen oncancel",
+                                    "NotesScreen: ${updatedTasks!!.size} $updatedTasks"
+                                )
                             },
                             createTaskApiInProgress = createTaskApiInProgress,
                             onAddTaskClick = { crmOrganizationUserId: String, description: String, dueDate: String, id: String ->
@@ -454,6 +577,84 @@ fun NotesScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
+
+                suggestedEvents?.forEach {
+                    var startDateTime = extractDateAndTime(it!!.start_datetime)
+                    var endDateTime = extractDateAndTime(it!!.end_datetime)
+                    Log.i("event desc rerendering", "${it.description}")
+                    Column(
+                        modifier = Modifier
+                            .dashedBorder(1.dp, 5.dp, Color(0x80545A71))
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
+                    ) {
+                        EventSuggestionCard(
+                            index = index++,
+                            id = it?.id!!,
+                            accountId = accountId!!,
+                            startDate = startDateTime!!.first ?: "",
+                            endDate = endDateTime!!.first ?: "",
+                            startTime = startDateTime!!.second ?: "",
+                            endTime = endDateTime!!.second ?: "",
+                            eventDescription = it.description,
+                            isEventAdded = it.is_event_created,
+//                            shouldShowOptions = it.is_event_created,
+                            onDeleteEventClick = { id ->
+                                val event = suggestedEvents!!.filter { it?.id == id }
+                                event[0].event_id?.let {
+//                                    accountDetailsViewModal.deleteAccountEvent(
+//                                        accountId,
+//                                        eventId = it
+//                                    )
+                                }
+                                var updatedEvents = suggestedEvents!!.filter { it?.id != id }
+                                notesViewModel.setSuggestedEvents(updatedEvents)
+                            },
+                            onEditEventClick = { id ->
+                                selectedEventId = id
+                                toggleEventSheet()
+                            },
+                            onCancelEventClick = { eventId ->
+                                Log.i("NotesScreen oncancel", "NotesScreen: $eventId")
+                                Log.i(
+                                    "NotesScreen oncancel",
+                                    "NotesScreen: ${suggestedEvents!!.size} $suggestedEvents"
+                                )
+                                val updatedEvents =
+                                    suggestedEvents!!.filter { it?.id != eventId }
+                                notesViewModel.setSuggestedEvents(updatedEvents)
+                                Log.i(
+                                    "NotesScreen oncancel",
+                                    "NotesScreen: ${updatedEvents!!.size} $updatedEvents"
+                                )
+                            },
+                            createEventApiInProgress = createEventApiInProgress,
+                            noteViewModal = notesViewModel,
+                            onAddEventClick = { accountId,
+                                                eventDescription,
+                                                selectedStartDateText,
+                                                selectedEndDateText,
+                                                selectedStartTimeText,
+                                                selectedEndTimeText,
+                                                id ->
+                                addEventId = id
+                                createTaskApiInProgress = true
+                                val iso8601StartDateTime =
+                                    convertToISO8601(
+                                        selectedStartDateText,
+                                        selectedStartTimeText
+                                    );
+                                val iso8601EndDateTime =
+                                    convertToISO8601(selectedEndDateText, selectedEndTimeText);
+                                eventsViewModal.createEvent(
+                                    accountId = accountId!!,
+                                    description = eventDescription,
+                                    startDateTime = iso8601StartDateTime,
+                                    endDateTime = iso8601EndDateTime,
+                                )
+                            })
+                    }
+                }
             }
         }
     }
@@ -470,7 +671,7 @@ fun RecommendedSectionHeader(
     accountId: String,
     shouldShowPlusIcon: Boolean,
     testId: String,
-    onPlusIconClick : () -> Unit
+    onPlusIconClick: () -> Unit
 ) {
     var recommendedPopup by remember { mutableStateOf(false) }
 
@@ -527,6 +728,11 @@ fun RecommendedSectionHeader(
 
 }
 
+
+@Composable
+fun suggestedTaskMap() {
+
+}
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
