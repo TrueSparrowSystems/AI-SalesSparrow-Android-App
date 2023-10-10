@@ -720,7 +720,7 @@ fun RecommendedSectionHeader(
                     onDismissRequest = { recommendedPopup = false },
                     onAddTaskMenuClick = {
                         onPlusIconClick()
-                        NavigationService.navigateTo("task_screen/${accountId}/${accountName}")
+                        NavigationService.navigateToTaskScreen(accountId, accountName, null)
                     })
             }
         }

@@ -114,6 +114,14 @@ interface ApiService {
         @Body request: CreateAccountTaskRequest
     ): Response<CreateAccountTaskResponse>
 
+    @PUT("v1/accounts/{account_id}/tasks/{task_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: CreateAccountTaskResponse.json")
+    suspend fun updateTask(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "task_id") taskId: String,
+        @Body request: CreateAccountTaskRequest
+    ): Response<Unit>
+
     @GET("./v1/accounts/feed")
     @Headers("$MOCK_RESPONSE_HEADER: AccountFeedResponse.json")
     suspend fun getAccountFeed(

@@ -25,6 +25,9 @@ class TasksViewModal @Inject constructor(
     val tasksLiveData: LiveData<NetworkResponse<CreateAccountTaskResponse>>
         get() = tasksRepository.tasksLiveData
 
+    val updateTaskLiveData: LiveData<NetworkResponse<Unit>>
+        get() = tasksRepository.updateTaskLiveData
+
 
     private var tasksScreenSelectedUserName: String = "Select"
 
@@ -69,6 +72,24 @@ class TasksViewModal @Inject constructor(
         viewModelScope.launch {
             tasksRepository.createTask(
                 accountId = accountId,
+                crmOrganizationUserId = crmOrganizationUserId,
+                description = description,
+                dueDate = dueDate
+            )
+        }
+    }
+
+    fun updateTask(
+        accountId: String,
+        taskId: String,
+        crmOrganizationUserId: String,
+        description: String,
+        dueDate: String
+    ) {
+        viewModelScope.launch {
+            tasksRepository.updateTask(
+                accountId = accountId,
+                taskId = taskId,
                 crmOrganizationUserId = crmOrganizationUserId,
                 description = description,
                 dueDate = dueDate

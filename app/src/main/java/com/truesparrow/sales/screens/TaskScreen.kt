@@ -77,17 +77,60 @@ import java.util.Date
 fun TaskScreen(
     accountId: String? = null,
     accountName: String? = null,
+    taskDesc: String = "",
+    dueDate: String = "",
+    crmUserId: String = "",
+    crmUserName: String = "",
+    taskId: String = "",
 ) {
 
-    var taskDesc = ""
-    var crmUserId = ""
-    var dueDate = ""
+    var taskDesc = taskDesc
+    var crmUserId = crmUserId
+    var dueDate = dueDate
+    var crmUserName = crmUserName
 
 
     var task by remember { mutableStateOf(taskDesc) }
     val tasksViewModel: TasksViewModal = hiltViewModel()
+    if (taskId.isNotEmpty()) {
+        tasksViewModel.setTasksScreenSelectedUserName(crmUserName)
+        tasksViewModel.setTasksScreenSelectedUserId(crmUserId)
+        tasksViewModel.setTaskScreenSelectedDueDate(dueDate)
+    }
+
     var createTaskApiInProgress by remember { mutableStateOf(false) }
     var createTaskApiIsSuccess by remember { mutableStateOf(false) }
+    var updateTaskApiInProgress by remember { mutableStateOf(false) }
+    var updateTaskApiIsSuccess by remember { mutableStateOf(false) }
+
+    val  updateTaskResponse by tasksViewModel.updateTaskLiveData.observeAsState()
+
+    updateTaskResponse?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                updateTaskApiInProgress = false
+                updateTaskApiIsSuccess = true
+                CustomToast(
+                    message = "Task Updated.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
+                )
+            }
+
+            is NetworkResponse.Error -> {
+                updateTaskApiInProgress = false
+                CustomToast(
+                    message = response.message ?: "Failed to update the task",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Error
+                )
+
+            }
+
+            is NetworkResponse.Loading -> {
+                updateTaskApiInProgress = true
+                Log.d("TaskScreen", "Loading")
+            }
+        }
+    }
 
     val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
 
@@ -122,8 +165,10 @@ fun TaskScreen(
         AddTaskHeader(
             createTaskApiInProgress = createTaskApiInProgress,
             createTasksApiIsSuccess = createTaskApiIsSuccess,
+            updateTaskApiInProgress = updateTaskApiInProgress,
+            updateTaskApiIsSuccess = updateTaskApiIsSuccess,
             accountId = accountId,
-            dueDate = dueDate,
+            taskId = taskId,
             taskDesc = task
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -131,6 +176,7 @@ fun TaskScreen(
             accountId = accountId,
             accountName = accountName,
             dueDate = dueDate,
+            crmUserName = crmUserName,
         )
         Spacer(modifier = Modifier.height(20.dp))
         EditableTextField(note = task, placeholderText =
@@ -152,7 +198,8 @@ fun TaskScreen(
 fun AddTaskContent(
     dueDate: String,
     accountId: String? = null,
-    accountName: String? = null
+    accountName: String? = null,
+    crmUserName: String? = "",
 ) {
 
 
@@ -397,9 +444,11 @@ fun AddTaskContent(
 fun AddTaskHeader(
     createTaskApiInProgress: Boolean,
     createTasksApiIsSuccess: Boolean,
+    updateTaskApiInProgress: Boolean,
+    updateTaskApiIsSuccess: Boolean,
     accountId: String? = null,
     taskDesc: String,
-    dueDate: String
+    taskId: String = "",
 ) {
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
@@ -443,12 +492,22 @@ fun AddTaskHeader(
         }
 
         Button(onClick = {
-            tasksViewModel.createTask(
-                accountId = accountId!!,
-                crmOrganizationUserId = tasksViewModel.getTasksScreenSelectedUserId(),
-                description = taskDesc,
-                dueDate = tasksViewModel.getTaskScreenSelectedDueDate(),
-            )
+            if (taskId.isNotEmpty()) {
+                tasksViewModel.updateTask(
+                    accountId = accountId!!,
+                    taskId = taskId,
+                    crmOrganizationUserId = tasksViewModel.getTasksScreenSelectedUserId(),
+                    description = taskDesc,
+                    dueDate = tasksViewModel.getTaskScreenSelectedDueDate(),
+                )
+            } else {
+                tasksViewModel.createTask(
+                    accountId = accountId!!,
+                    crmOrganizationUserId = tasksViewModel.getTasksScreenSelectedUserId(),
+                    description = taskDesc,
+                    dueDate = tasksViewModel.getTaskScreenSelectedDueDate(),
+                )
+            }
         },
             enabled = true,
             contentPadding = PaddingValues(all = 8.dp),
@@ -483,7 +542,7 @@ fun AddTaskHeader(
                 }.build()
 
 
-                if (createTaskApiInProgress || createTasksApiIsSuccess) {
+                if (createTaskApiInProgress || createTasksApiIsSuccess || updateTaskApiInProgress || updateTaskApiIsSuccess) {
                     Image(
                         painter = if (createTaskApiInProgress) {
                             rememberAsyncImagePainter(R.drawable.loader, imageLoader)
@@ -502,9 +561,9 @@ fun AddTaskHeader(
                     )
 
                 }
-                Text(text = if (createTaskApiInProgress) {
+                Text(text = if (createTaskApiInProgress || updateTaskApiInProgress) {
                     "Saving Task..."
-                } else if (createTasksApiIsSuccess) {
+                } else if (createTasksApiIsSuccess || updateTaskApiIsSuccess) {
                     "Saved"
                 } else {
                     "Save Task"

@@ -18,6 +18,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.truesparrow.sales.common_components.EditableTextField
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.viewmodals.NotesViewModel
 
@@ -72,16 +73,18 @@ fun NoteDetailScreen(
             isAccountSelectionEnabled = false
         )
 
-        HtmlWebView(htmlContent = note)
+        HtmlWebView(htmlContent = note, onValueChange = {
+            note = it
+        })
 
     }
 }
 
 @Composable
-fun HtmlWebView(htmlContent: String) {
+fun HtmlWebView(htmlContent: String, onValueChange : (String) -> Unit) {
     Log.i("HtmlWebView", "HtmlWebView: $htmlContent")
     val plainText = Html.fromHtml(htmlContent)
-    Text(text = plainText.toString())
+    EditableTextField(note = plainText.toString(), onValueChange = onValueChange)
 }
 
 

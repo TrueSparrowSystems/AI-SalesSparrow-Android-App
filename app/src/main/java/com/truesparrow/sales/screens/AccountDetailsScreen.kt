@@ -64,6 +64,7 @@ import com.truesparrow.sales.models.Event
 import com.truesparrow.sales.models.EventDetailsObject
 import com.truesparrow.sales.models.Note
 import com.truesparrow.sales.models.Task
+import com.truesparrow.sales.models.TaskData
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.viewmodals.AccountDetailsViewModal
@@ -155,7 +156,8 @@ fun AccountDetails(
                         description = taskDetails?.description ?: "",
                         due_date = taskDetails?.due_date ?: "",
                         id = taskDetails?.id ?: "",
-                        last_modified_time = taskDetails?.last_modified_time ?: ""
+                        last_modified_time = taskDetails?.last_modified_time ?: "",
+                        crm_organization_user_id = taskDetails?.crm_organization_user_id ?: ""
                     )
                 }
                 accountDetailsViewModal.setTasks(newTasks ?: emptyList())
@@ -415,7 +417,7 @@ fun AccountDetails(
                     index = index++,
                     onClick = {
                         Log.i("AccountDetails", "TaskId: ${task.id}")
-                        NavigationService.navigateTo("task_details_screen/${accountId}/${accountName}/${task.id}")
+//                        NavigationService.navigateTo("task_details_screen/${accountId}/${accountName}/${task.id}")
                     },
                     taskId = task.id,
                     onDeleteMenuClick = { task ->
@@ -423,9 +425,17 @@ fun AccountDetails(
                         taskId.value = task
                         openDialogForTask.value = true
                     },
-                    onEditMenuClick = { task ->
+                    onEditMenuClick = {
                         Log.i("AccountDetails onEditMenuClick", "TaskId: $task")
-                        NavigationService.navigateTo("task_screen/${accountId}/${accountName}/${task}")
+                        var taskData = TaskData(
+                            creator_name = task.creator_name,
+                            crm_organization_user_name = task.crm_organization_user_name,
+                            description = task.description,
+                            due_date = task.due_date,
+                            id = task.id,
+                            crm_organization_user_id = task.crm_organization_user_id
+                        )
+                        NavigationService.navigateToTaskScreen(accountId, accountName, taskData)
                     },
                     editMenuTestTag = "btn_account_detail_edit_task_${index}",
                     deleteMenuTestTag = "btn_account_detail_delete_task_${index}"
@@ -619,7 +629,7 @@ fun TaskDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("task_screen/${accountId}/${accountName}")
+                    NavigationService.navigateToTaskScreen(accountId, accountName, null)
                 }
         )
     }

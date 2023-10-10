@@ -17,6 +17,10 @@ class TasksRepository @Inject constructor(
     val tasksLiveData: LiveData<NetworkResponse<CreateAccountTaskResponse>>
         get() = _tasksLiveData
 
+    private val _updateTaskLiveData = MutableLiveData<NetworkResponse<Unit>>()
+    val updateTaskLiveData: LiveData<NetworkResponse<Unit>>
+        get() = _updateTaskLiveData
+
 
     suspend fun createTask(
         accountId: String, crmOrganizationUserId: String, description: String, dueDate: String
@@ -41,6 +45,35 @@ class TasksRepository @Inject constructor(
             }
         } catch (e: Exception) {
             _tasksLiveData.postValue(NetworkResponse.Error("Error  Creating Task:"))
+        }
+    }
+
+    suspend fun updateTask(
+        accountId: String,
+        taskId: String,
+        crmOrganizationUserId: String,
+        description: String,
+        dueDate: String
+    ) {
+        try {
+            _updateTaskLiveData.postValue(NetworkResponse.Loading())
+            val result = apiService.updateTask(
+                accountId, taskId, CreateAccountTaskRequest(
+                    crm_organization_user_id = crmOrganizationUserId,
+                    description = description,
+                    due_date = dueDate
+                )
+            );
+            if (result.isSuccessful && result.body() != null) {
+                _updateTaskLiveData.postValue(NetworkResponse.Success(result.body()!!))
+            } else if (result.errorBody() != null) {
+                val errorObj = JSONObject(result.errorBody()!!.charStream().readText())
+                _updateTaskLiveData.postValue(NetworkResponse.Error(errorObj.getString("message")))
+            } else {
+                _updateTaskLiveData.postValue(NetworkResponse.Error("Error Updating Task:}"))
+            }
+        } catch (e: Exception) {
+            _updateTaskLiveData.postValue(NetworkResponse.Error("Error  Updating Task:"))
         }
     }
 }

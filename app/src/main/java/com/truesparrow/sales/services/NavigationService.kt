@@ -15,6 +15,7 @@ import androidx.navigation.navDeepLink
 import com.google.gson.Gson
 import com.truesparrow.sales.BuildConfig
 import com.truesparrow.sales.models.EventDetailsObject
+import com.truesparrow.sales.models.TaskData
 import com.truesparrow.sales.screens.AccountDetails
 import com.truesparrow.sales.screens.EventScreen
 import com.truesparrow.sales.screens.HomeScreen
@@ -70,6 +71,18 @@ object NavigationService {
         val eventDataJson = eventData?.let { Gson().toJson(it) } ?: "null_placeholder"
 
         navController.navigate("event_screen/$accountId/$eventDataJson") {
+            launchSingleTop = true
+        }
+    }
+
+    fun navigateToTaskScreen(
+        accountId: String,
+        accountName: String,
+        taskData: TaskData?
+    ) {
+        val taskDataJson = taskData?.let { Gson().toJson(it) } ?: "null_placeholder"
+
+        navController.navigate("task_screen/$accountId/$accountName/$taskDataJson") {
             launchSingleTop = true
         }
     }
@@ -144,7 +157,34 @@ fun NavigationService(intent: Intent?) {
         composable(route = Screens.TaskScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
             val accountName = it.arguments?.getString("accountName") ?: ""
-            TaskScreen(accountId, accountName)
+            val taskDataJson = it.arguments?.getString("taskData") ?: ""
+            val taskData = if (taskDataJson != "null_placeholder") Gson().fromJson(
+                taskDataJson,
+                TaskData::class.java
+            ) else null
+
+            if (taskData != null) {
+                TaskScreen(
+                    accountId,
+                    accountName,
+                    taskData.description ?: "",
+                    taskData.due_date ?: "",
+                    taskData.crm_organization_user_id ?: "",
+                    taskData.crm_organization_user_name ?: "",
+                    taskData.id ?: "",
+
+                    )
+            } else {
+                TaskScreen(
+                    accountId,
+                    accountName,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                )
+            }
         }
 
         composable(route = Screens.EventScreen.route) {
@@ -156,8 +196,16 @@ fun NavigationService(intent: Intent?) {
                 EventDetailsObject::class.java
             ) else null
 
-            var startDateTime = if (eventDataJson != "null_placeholder") extractDateAndTime(eventData!!.eventStartDate) else Pair("", "")
-            var endDateTime =if (eventDataJson != "null_placeholder") extractDateAndTime(eventData!!.eventEndDate) else Pair("", "")
+            var startDateTime =
+                if (eventDataJson != "null_placeholder") extractDateAndTime(eventData!!.eventStartDate) else Pair(
+                    "",
+                    ""
+                )
+            var endDateTime =
+                if (eventDataJson != "null_placeholder") extractDateAndTime(eventData!!.eventEndDate) else Pair(
+                    "",
+                    ""
+                )
 
 
             Log.i(

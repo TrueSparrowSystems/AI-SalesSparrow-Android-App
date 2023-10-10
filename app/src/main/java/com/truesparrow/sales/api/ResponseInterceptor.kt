@@ -19,12 +19,18 @@ class ResponseInterceptor @Inject constructor(private val assetReader: JsonReade
         return if (BuildConfig.IS_MOCK.toBoolean()) {
             handleMockResponse(chain)
         } else {
-            chain.proceed(
-                chain.request()
+            var request = chain.request()
+            val response = chain.proceed(request)
+            if (response.code == 204) {
+                response.newBuilder().removeHeader(MOCK_RESPONSE_HEADER).code(200).build()
+            } else {
+                response
                     .newBuilder()
                     .removeHeader(MOCK_RESPONSE_HEADER)
                     .build()
-            )
+
+            }
+
         }
     }
 
