@@ -29,6 +29,34 @@ class NotesRepository @Inject constructor(
     val getCrmActions: LiveData<NetworkResponse<GetCrmActionsResponse>>
         get() = _getCrmActions
 
+    private val _updateNoteLiveData = MutableLiveData<NetworkResponse<Unit>>()
+    val updateNoteLiveData: LiveData<NetworkResponse<Unit>>
+        get() = _updateNoteLiveData
+
+    suspend fun updateNote(
+        accountId: String,
+        noteId: String,
+        text: String,
+    ) {
+        try {
+            _updateNoteLiveData.postValue(NetworkResponse.Loading())
+            val result = apiService.updateNote(
+                accountId, noteId, SaveNoteRequest(text = text)
+            );
+            if (result.isSuccessful && result.body() != null) {
+                _updateNoteLiveData.postValue(NetworkResponse.Success(result.body()!!))
+                Log.i("res", "result - update Note: ${result.body()}")
+            } else if (result.errorBody() != null) {
+                val errorObj = JSONObject(result.errorBody()!!.charStream().readText())
+                _updateNoteLiveData.postValue(NetworkResponse.Error(errorObj.getString("message")))
+            } else {
+                _updateNoteLiveData.postValue(NetworkResponse.Error("Error Updating Note:}"))
+            }
+        } catch (e: Exception) {
+            _updateNoteLiveData.postValue(NetworkResponse.Error("Error Updating Note:"))
+        }
+    }
+
     suspend fun saveNote(
         accountId: String,
         text: String,

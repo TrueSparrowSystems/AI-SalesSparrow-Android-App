@@ -15,6 +15,8 @@ import androidx.navigation.navDeepLink
 import com.google.gson.Gson
 import com.truesparrow.sales.BuildConfig
 import com.truesparrow.sales.models.EventDetailsObject
+import com.truesparrow.sales.models.NoteData
+import com.truesparrow.sales.models.NoteDetailsObject
 import com.truesparrow.sales.models.TaskData
 import com.truesparrow.sales.screens.AccountDetails
 import com.truesparrow.sales.screens.EventScreen
@@ -61,6 +63,19 @@ object NavigationService {
             popUpTo(popUpTo) {
                 inclusive = true
             }
+        }
+    }
+
+    fun navigateToNotesScreen(
+        accountId: String,
+        accountName: String,
+        isAccountSelectionEnabled: Boolean,
+        noteData: NoteData?
+    ) {
+        val noteDataJson = noteData?.let { Gson().toJson(it) } ?: "null_placeholder"
+
+        navController.navigate("notes_screen/$accountId/$accountName/$isAccountSelectionEnabled/$noteDataJson") {
+            launchSingleTop = true
         }
     }
 
@@ -137,7 +152,24 @@ fun NavigationService(intent: Intent?) {
             val accountName = it.arguments?.getString("accountName") ?: ""
             val isAccountSelectionEnabled =
                 it.arguments?.getString("isAccountSelectionEnabled")?.toBoolean() ?: false
-            NotesScreen(accountName, accountId, isAccountSelectionEnabled)
+            val noteDataJson = it.arguments?.getString("noteData") ?: ""
+            val noteData = if (noteDataJson != "null_placeholder") Gson().fromJson(
+                noteDataJson,
+                NoteDetailsObject::class.java
+            ) else null
+
+            if (noteData != null) {
+                NotesScreen(
+                    accountName,
+                    accountId,
+                    isAccountSelectionEnabled,
+                    noteData.id,
+                    noteData.text,
+                    noteData.shouldShowCrmSuggestion
+                )
+            } else {
+                NotesScreen(accountName, accountId, isAccountSelectionEnabled, "", "", true)
+            }
         }
         composable(route = Screens.AccountDetailsScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""

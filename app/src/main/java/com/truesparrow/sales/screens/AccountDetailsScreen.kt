@@ -63,6 +63,7 @@ import com.truesparrow.sales.common_components.ToastType
 import com.truesparrow.sales.models.Event
 import com.truesparrow.sales.models.EventDetailsObject
 import com.truesparrow.sales.models.Note
+import com.truesparrow.sales.models.NoteData
 import com.truesparrow.sales.models.Task
 import com.truesparrow.sales.models.TaskData
 import com.truesparrow.sales.services.NavigationService
@@ -384,9 +385,15 @@ fun AccountDetails(
                         noteId.value = noteID
                         openDialogForNote.value = true
                     },
-                    onEditMenuClick = { noteID ->
+                    onEditMenuClick = {
                         Log.i("AccountDetails onEditMenuClick", "NoteId: ${note.id}")
-                        NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${noteID}")
+                        //TODO: fetch the full notes details and pass it to the screen, make api call to get the note details
+                        var noteData = NoteData(
+                            id = note.id,
+                            text = note.text_preview,
+                            shouldShowCrmSuggestion = false
+                        )
+                        NavigationService.navigateToNotesScreen(accountId, accountName, false, noteData)
                     },
                     editMenuTestTag = "btn_account_detail_edit_note_${index}",
                     deleteMenuTestTag = "btn_account_detail_delete_note_${index}"
@@ -696,7 +703,7 @@ fun EventDetailsHeader(
 fun NotesDetailsHeader(
     accountId: String,
     accountName: String,
-    isAccountSelectionEnabled: Boolean? = false
+    isAccountSelectionEnabled: Boolean = false
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -742,7 +749,7 @@ fun NotesDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
+                    NavigationService.navigateToNotesScreen(accountId, accountName, isAccountSelectionEnabled, null)
                 }
         )
     }

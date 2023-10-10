@@ -36,6 +36,10 @@ class NotesViewModel @Inject constructor(
     val suggestedEvents: MutableLiveData<List<SuggestedEvents>> = _suggestedEvents
 
 
+    val updateNoteLiveData: LiveData<NetworkResponse<Unit>>
+        get() = notesRepository.updateNoteLiveData
+
+
     fun setTasks(newTasks: List<Tasks>) {
         _tasks.postValue(newTasks)
         Log.i(" _tasks.value", "${_tasks.value}")
@@ -114,6 +118,20 @@ class NotesViewModel @Inject constructor(
         Log.i("NotesDetails", "Account Id: $accountId Note Id: $noteId");
         viewModelScope.launch {
             notesRepository.getNoteDetails(accountId, noteId)
+        }
+    }
+
+    fun updateNote(
+        accountId: String,
+        noteId: String,
+        text: String,
+    ) {
+        viewModelScope.launch {
+            notesRepository.updateNote(
+                accountId = accountId,
+                noteId = noteId,
+                text = text
+            )
         }
     }
 

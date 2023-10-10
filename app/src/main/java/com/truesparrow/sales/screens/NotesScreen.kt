@@ -79,6 +79,9 @@ fun NotesScreen(
     accountName: String? = null,
     accountId: String? = null,
     isAccountSelectionEnabled: Boolean = false,
+    noteId: String? = "",
+    noteDescription: String = "",
+    shouldShowCrmSuggestions: Boolean = false,
 ) {
 
     val notesViewModel: NotesViewModel = hiltViewModel()
@@ -90,12 +93,16 @@ fun NotesScreen(
 
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
     var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
+    var updateNoteApiInProgress by remember { mutableStateOf(false) }
+    var updateNoteApiIsSuccess by remember { mutableStateOf(false) }
+
 
     val getCrmActionsResponse by notesViewModel.getCrmActionsLiveData.observeAsState()
     var getCrmActionLoading by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
     val saveNoteRespose by notesViewModel.notesLiveData.observeAsState()
+    val updateNoteRespose by notesViewModel.updateNoteLiveData.observeAsState()
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
     var createTaskApiInProgress by remember { mutableStateOf(false) }
@@ -105,7 +112,7 @@ fun NotesScreen(
 
     val eventsViewModal: EventViewModal = hiltViewModel()
 
-    var noteDesc by remember { mutableStateOf("") }
+    var noteDesc by remember { mutableStateOf(noteDescription) }
 
     var tasks = notesViewModel.tasks.observeAsState()?.value
 
@@ -118,6 +125,7 @@ fun NotesScreen(
     val deleteTaskResponse by accountDetailsViewModal.deleteAccountTaskLiveData.observeAsState();
 
     val createEventResponse by eventsViewModal.eventsLiveData.observeAsState();
+
 
     var selectedCrmUserName = remember {
         mutableStateOf("")
@@ -286,7 +294,9 @@ fun NotesScreen(
                     type = ToastType.Success
                 )
                 LaunchedEffect(true) {
-                    notesViewModel.getCrmActions(noteDesc);
+                    if (shouldShowCrmSuggestions) {
+                        notesViewModel.getCrmActions(noteDesc);
+                    }
                 }
             }
 
@@ -303,6 +313,37 @@ fun NotesScreen(
 
             is NetworkResponse.Loading -> {
                 saveNoteApiInProgress = true;
+                Log.d("NotesScreen", "Loading")
+            }
+        }
+    }
+
+    updateNoteRespose?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                updateNoteApiInProgress = false;
+                updateNoteApiIsSuccess = true;
+                Log.i("NotesScreen", "Success : ${response.data}")
+                CustomToast(
+                    message = "Note is updated to your Salesforce Account",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Success
+                )
+            }
+
+            is NetworkResponse.Error -> {
+                updateNoteApiInProgress = false;
+                CustomToast(
+                    message = response.message
+                        ?: "Failed to update the note to your Salesforce Account",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Error
+                )
+
+            }
+
+            is NetworkResponse.Loading -> {
+                updateNoteApiInProgress = true;
                 Log.d("NotesScreen", "Loading")
             }
         }
@@ -425,10 +466,12 @@ fun NotesScreen(
     ) {
         Header(
             note = noteDesc,
-            accountName = accountName,
+            noteId = noteId,
             accountId = accountId!!,
             saveNoteApiInProgress = saveNoteApiInProgress,
             saveNoteApiIsSuccess = saveNoteApiIsSuccess,
+            updateNoteApiInProgress = updateNoteApiInProgress,
+            updateNoteApiIsSuccess = updateNoteApiIsSuccess,
         )
         NotesHeader(
             accountName = accountName, isAccountSelectionEnabled = isAccountSelectionEnabled
@@ -439,7 +482,7 @@ fun NotesScreen(
                 noteDesc = it
             },
             placeholderText = "Add A Note",
-            readOnly = saveNoteApiIsSuccess,
+            readOnly = saveNoteApiIsSuccess || updateNoteApiIsSuccess,
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics {
@@ -826,10 +869,12 @@ fun NotesHeader(accountName: String?, isAccountSelectionEnabled: Boolean) {
 @Composable
 fun Header(
     note: String,
-    accountName: String?,
+    noteId: String?,
     accountId: String,
     saveNoteApiInProgress: Boolean,
     saveNoteApiIsSuccess: Boolean,
+    updateNoteApiInProgress: Boolean,
+    updateNoteApiIsSuccess: Boolean,
 ) {
     val notesViewModel: NotesViewModel = hiltViewModel()
 
@@ -872,13 +917,21 @@ fun Header(
             Color(0xFF212653).copy(alpha = 0.7f)
         }
         Button(onClick = {
-            notesViewModel.saveNote(
-                accountId = accountId!!,
-                text = note,
-            )
+            if (noteId.isNullOrBlank()) {
+                notesViewModel.saveNote(
+                    accountId = accountId!!,
+                    text = note,
+                )
+            } else {
+                notesViewModel.updateNote(
+                    accountId = accountId!!,
+                    text = note,
+                    noteId = noteId
+                )
+            }
         },
 
-            enabled = note.isNotEmpty() && accountId.isNotEmpty() && !(saveNoteApiInProgress || saveNoteApiIsSuccess),
+            enabled = note.isNotEmpty() && accountId.isNotEmpty() && !(saveNoteApiInProgress || saveNoteApiIsSuccess || updateNoteApiInProgress || updateNoteApiIsSuccess),
             contentPadding = PaddingValues(all = 8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent, contentColor = Color.White
@@ -911,9 +964,9 @@ fun Header(
                     }
                 }.build()
 
-                Image(painter = if (saveNoteApiInProgress) {
+                Image(painter = if (saveNoteApiInProgress || updateNoteApiInProgress) {
                     rememberAsyncImagePainter(R.drawable.loader, imageLoader)
-                } else if (saveNoteApiIsSuccess) {
+                } else if (saveNoteApiIsSuccess || updateNoteApiIsSuccess) {
                     painterResource(id = R.drawable.check)
                 } else {
                     painterResource(id = R.drawable.cloud)
@@ -927,9 +980,9 @@ fun Header(
                             testTagsAsResourceId = true
                             testTag = "cloud"
                         })
-                Text(text = if (saveNoteApiInProgress) {
+                Text(text = if (saveNoteApiInProgress || updateNoteApiInProgress) {
                     "Saving..."
-                } else if (saveNoteApiIsSuccess) {
+                } else if (saveNoteApiIsSuccess || updateNoteApiIsSuccess) {
                     "Saved"
                 } else {
                     "Save"

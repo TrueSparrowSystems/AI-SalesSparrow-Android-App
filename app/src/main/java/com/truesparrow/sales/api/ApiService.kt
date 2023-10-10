@@ -67,6 +67,14 @@ interface ApiService {
         @Path(value = "note_id") noteId: String
     ): Response<Unit>
 
+    @PUT("v1/accounts/{account_id}/notes/{note_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: SaveNoteResponse.json")
+    suspend fun updateNote(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "note_id") noteId: String,
+        @Body request: SaveNoteRequest
+    ): Response<Unit>
+
     @GET("v1/accounts/{account_id}/notes/{note_id}")
     @Headers("$MOCK_RESPONSE_HEADER: NoteDetailsResponse.json")
     suspend fun getNoteDetails(

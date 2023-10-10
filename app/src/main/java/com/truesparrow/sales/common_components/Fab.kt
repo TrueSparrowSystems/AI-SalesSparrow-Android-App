@@ -27,8 +27,7 @@ fun Fab() {
         onClick = {
             Log.d("Fab", "Fab clicked")
             val isAccountSelectionEnabled = true;
-            NavigationService.navigateTo("notes_screen/{1}/${"Select Account"}/${isAccountSelectionEnabled}")
-
+            NavigationService.navigateToNotesScreen("1", "Select Account", isAccountSelectionEnabled, null)
         },
         interactionSource = NoRippleInteractionSource(),
         shape = RoundedCornerShape(4.dp),

@@ -72,7 +72,6 @@ fun NoteDetailScreen(
             accountName = accountName,
             isAccountSelectionEnabled = false
         )
-
         HtmlWebView(htmlContent = note, onValueChange = {
             note = it
         })
@@ -81,7 +80,7 @@ fun NoteDetailScreen(
 }
 
 @Composable
-fun HtmlWebView(htmlContent: String, onValueChange : (String) -> Unit) {
+fun HtmlWebView(htmlContent: String, onValueChange: (String) -> Unit) {
     Log.i("HtmlWebView", "HtmlWebView: $htmlContent")
     val plainText = Html.fromHtml(htmlContent)
     EditableTextField(note = plainText.toString(), onValueChange = onValueChange)
