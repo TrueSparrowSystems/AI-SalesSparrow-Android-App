@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import com.truesparrow.sales.api.ApiService
 import com.truesparrow.sales.models.CreateAccountTaskRequest
 import com.truesparrow.sales.models.CreateAccountTaskResponse
+import com.truesparrow.sales.models.TaskDetailsResponse
 import com.truesparrow.sales.util.NetworkResponse
 import org.json.JSONObject
 import javax.inject.Inject
@@ -20,6 +21,27 @@ class TasksRepository @Inject constructor(
     private val _updateTaskLiveData = MutableLiveData<NetworkResponse<Unit>>()
     val updateTaskLiveData: LiveData<NetworkResponse<Unit>>
         get() = _updateTaskLiveData
+
+    private val _taskDetails = MutableLiveData<NetworkResponse<TaskDetailsResponse>>()
+    val taskDetails: LiveData<NetworkResponse<TaskDetailsResponse>>
+        get() = _taskDetails
+
+    suspend fun getTaskDetails(accountId: String, taskId: String) {
+        try {
+            _taskDetails.postValue(NetworkResponse.Loading())
+            val result = apiService.getTaskDetails(accountId, taskId)
+            if (result.isSuccessful && result.body() != null) {
+                _taskDetails.postValue(NetworkResponse.Success(result.body()!!))
+            } else if (result.errorBody() != null) {
+                val errorObj = JSONObject(result.errorBody()!!.charStream().readText())
+                _taskDetails.postValue(NetworkResponse.Error(errorObj.getString("message")))
+            } else {
+                _taskDetails.postValue(NetworkResponse.Error("Error Fetching Task Details:}"))
+            }
+        } catch (e: Exception) {
+            _taskDetails.postValue(NetworkResponse.Error("Error Fetching Task Details"))
+        }
+    }
 
 
     suspend fun createTask(

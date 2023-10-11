@@ -82,6 +82,7 @@ fun NotesScreen(
     noteId: String? = "",
     noteDescription: String = "",
     shouldShowCrmSuggestions: Boolean = false,
+    isNotesScreenEditable: Boolean = true
 ) {
 
     val notesViewModel: NotesViewModel = hiltViewModel()
@@ -111,6 +112,7 @@ fun NotesScreen(
     var createEventApiIsSuccess by remember { mutableStateOf(false) }
 
     val eventsViewModal: EventViewModal = hiltViewModel()
+    var noteDescription = noteDescription
 
     var noteDesc by remember { mutableStateOf(noteDescription) }
 
@@ -136,6 +138,34 @@ fun NotesScreen(
     }
 
     var suggestedEvents = notesViewModel.suggestedEvents.observeAsState()?.value
+
+    if (noteId != null && accountId != null) {
+        if (noteId.isNotEmpty()) {
+            LaunchedEffect(key1 = noteId) {
+                notesViewModel.getNoteDetails(accountId, noteId)
+            }
+        }
+    }
+
+    val noteDetailsResponse by notesViewModel.noteDetailsLiveData.observeAsState()
+
+    noteDetailsResponse?.let {
+        when (it) {
+            is NetworkResponse.Success -> {
+                val noteDetails = it.data?.note_detail
+                noteDescription = noteDetails?.text ?: ""
+            }
+
+            is NetworkResponse.Error -> {
+                CustomToast(message = "Something went wrong", type = ToastType.Error)
+            }
+
+            is NetworkResponse.Loading -> {
+            }
+        }
+    }
+
+
 
 
     deleteTaskResponse?.let {
@@ -472,24 +502,31 @@ fun NotesScreen(
             saveNoteApiIsSuccess = saveNoteApiIsSuccess,
             updateNoteApiInProgress = updateNoteApiInProgress,
             updateNoteApiIsSuccess = updateNoteApiIsSuccess,
+            isNotesScreenEditable = isNotesScreenEditable,
         )
         NotesHeader(
             accountName = accountName, isAccountSelectionEnabled = isAccountSelectionEnabled
         )
 
-        EditableTextField(note = noteDesc,
-            onValueChange = {
-                noteDesc = it
-            },
-            placeholderText = "Add A Note",
-            readOnly = saveNoteApiIsSuccess || updateNoteApiIsSuccess,
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics {
-                    contentDescription = "et_create_note"
-                    testTag = "et_create_note"
-                    testTagsAsResourceId = true
-                })
+        if (noteDetailsResponse is NetworkResponse.Loading) {
+            Loader()
+        } else {
+            EditableTextField(note = noteDesc,
+                onValueChange = {
+                    noteDesc = it
+                },
+                placeholderText = "Add A Note",
+                readOnly = !isNotesScreenEditable || saveNoteApiIsSuccess || updateNoteApiIsSuccess,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics {
+                        contentDescription = "et_create_note"
+                        testTag = "et_create_note"
+                        testTagsAsResourceId = true
+                    })
+        }
+
+
 
         Log.i("After posting values", "values")
         if (getCrmActionLoading) {
@@ -536,7 +573,7 @@ fun NotesScreen(
             )
         } else {
             Log.i("NotesScreen re com", "NotesScreen: ${tasks?.size} $tasks")
-            if (tasks?.isNotEmpty() == true) {
+            if (tasks?.isNotEmpty() == true || suggestedEvents?.isNotEmpty() == true) {
                 RecommendedSectionHeader(
                     heading = "We have some recommendations ",
                     shouldShowPlusIcon = true,
@@ -772,11 +809,6 @@ fun RecommendedSectionHeader(
 }
 
 
-@Composable
-fun suggestedTaskMap() {
-
-}
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NotesHeader(accountName: String?, isAccountSelectionEnabled: Boolean) {
@@ -875,6 +907,7 @@ fun Header(
     saveNoteApiIsSuccess: Boolean,
     updateNoteApiInProgress: Boolean,
     updateNoteApiIsSuccess: Boolean,
+    isNotesScreenEditable: Boolean,
 ) {
     val notesViewModel: NotesViewModel = hiltViewModel()
 
@@ -916,91 +949,95 @@ fun Header(
         } else {
             Color(0xFF212653).copy(alpha = 0.7f)
         }
-        Button(onClick = {
-            if (noteId.isNullOrBlank()) {
-                notesViewModel.saveNote(
-                    accountId = accountId!!,
-                    text = note,
-                )
-            } else {
-                notesViewModel.updateNote(
-                    accountId = accountId!!,
-                    text = note,
-                    noteId = noteId
-                )
-            }
-        },
-
-            enabled = note.isNotEmpty() && accountId.isNotEmpty() && !(saveNoteApiInProgress || saveNoteApiIsSuccess || updateNoteApiInProgress || updateNoteApiIsSuccess),
-            contentPadding = PaddingValues(all = 8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent, contentColor = Color.White
-            ),
-            modifier = Modifier
-                .background(
-                    color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
-                )
-                .width(92.dp)
-                .height(46.dp)
-                .clip(shape = RoundedCornerShape(size = 5.dp))
-                .semantics {
-                    testTagsAsResourceId = true
-                    testTag = "btn_save_note"
-                    contentDescription = "btn_save_note"
+        if (isNotesScreenEditable) {
+            Button(onClick = {
+                if (noteId.isNullOrBlank()) {
+                    notesViewModel.saveNote(
+                        accountId = accountId!!,
+                        text = note,
+                    )
+                } else {
+                    notesViewModel.updateNote(
+                        accountId = accountId!!,
+                        text = note,
+                        noteId = noteId
+                    )
                 }
+            },
 
+                enabled = note.isNotEmpty() && accountId.isNotEmpty() && !(saveNoteApiInProgress || saveNoteApiIsSuccess || updateNoteApiInProgress || updateNoteApiIsSuccess),
+                contentPadding = PaddingValues(all = 8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent, contentColor = Color.White
+                ),
+                modifier = Modifier
+                    .background(
+                        color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
+                    )
+                    .width(92.dp)
+                    .height(46.dp)
+                    .clip(shape = RoundedCornerShape(size = 5.dp))
+                    .semantics {
+                        testTagsAsResourceId = true
+                        testTag = "btn_save_note"
+                        contentDescription = "btn_save_note"
+                    }
 
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically
 
             ) {
-                val imageLoader = ImageLoader.Builder(LocalContext.current).components {
-                    if (Build.VERSION.SDK_INT >= 28) {
-                        add(ImageDecoderDecoder.Factory())
-                    } else {
-                        add(GifDecoder.Factory())
-                    }
-                }.build()
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(
+                        4.dp,
+                        Alignment.CenterHorizontally
+                    ),
+                    verticalAlignment = Alignment.CenterVertically
 
-                Image(painter = if (saveNoteApiInProgress || updateNoteApiInProgress) {
-                    rememberAsyncImagePainter(R.drawable.loader, imageLoader)
-                } else if (saveNoteApiIsSuccess || updateNoteApiIsSuccess) {
-                    painterResource(id = R.drawable.check)
-                } else {
-                    painterResource(id = R.drawable.cloud)
-                },
-                    contentDescription = "cloud",
-                    colorFilter = ColorFilter.tint(Color.White),
-                    modifier = Modifier
-                        .width(width = 17.dp)
-                        .height(height = 12.dp)
-                        .semantics {
-                            testTagsAsResourceId = true
-                            testTag = "cloud"
-                        })
-                Text(text = if (saveNoteApiInProgress || updateNoteApiInProgress) {
-                    "Saving..."
-                } else if (saveNoteApiIsSuccess || updateNoteApiIsSuccess) {
-                    "Saved"
-                } else {
-                    "Save"
-                }, color = Color.White, style = TextStyle(
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFFFFFFFF),
-                    letterSpacing = 0.48.sp,
-                ), modifier = Modifier.semantics {
-                    testTagsAsResourceId = true
-                    testTag =
-                        if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
-                    contentDescription =
-                        if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
-                })
+                ) {
+                    val imageLoader = ImageLoader.Builder(LocalContext.current).components {
+                        if (Build.VERSION.SDK_INT >= 28) {
+                            add(ImageDecoderDecoder.Factory())
+                        } else {
+                            add(GifDecoder.Factory())
+                        }
+                    }.build()
+
+                    Image(painter = if (saveNoteApiInProgress || updateNoteApiInProgress) {
+                        rememberAsyncImagePainter(R.drawable.loader, imageLoader)
+                    } else if (saveNoteApiIsSuccess || updateNoteApiIsSuccess) {
+                        painterResource(id = R.drawable.check)
+                    } else {
+                        painterResource(id = R.drawable.cloud)
+                    },
+                        contentDescription = "cloud",
+                        colorFilter = ColorFilter.tint(Color.White),
+                        modifier = Modifier
+                            .width(width = 17.dp)
+                            .height(height = 12.dp)
+                            .semantics {
+                                testTagsAsResourceId = true
+                                testTag = "cloud"
+                            })
+                    Text(text = if (saveNoteApiInProgress || updateNoteApiInProgress) {
+                        "Saving..."
+                    } else if (saveNoteApiIsSuccess || updateNoteApiIsSuccess) {
+                        "Saved"
+                    } else {
+                        "Save"
+                    }, color = Color.White, style = TextStyle(
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                        fontWeight = FontWeight(500),
+                        color = Color(0xFFFFFFFF),
+                        letterSpacing = 0.48.sp,
+                    ), modifier = Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag =
+                            if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
+                        contentDescription =
+                            if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
+                    })
+                }
             }
         }
     }
-
 }

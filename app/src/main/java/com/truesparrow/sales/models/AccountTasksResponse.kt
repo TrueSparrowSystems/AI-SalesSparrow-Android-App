@@ -35,6 +35,7 @@ data class TaskData(
     val description: String,
     val due_date: String,
     val id: String,
+    val isTaskScreenEditable: Boolean = true
 )
 
 @Parcelize
@@ -44,4 +45,5 @@ data class TaskDetailsObject(
     val description: String,
     val due_date: String,
     val id: String,
+    val isTaskScreenEditable: Boolean = true
 ) : Parcelable

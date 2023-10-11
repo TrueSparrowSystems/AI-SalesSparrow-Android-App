@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -82,6 +83,7 @@ fun TaskScreen(
     crmUserId: String = "",
     crmUserName: String = "",
     taskId: String = "",
+    isTaskScreenEditable: Boolean = true
 ) {
 
     var taskDesc = taskDesc
@@ -96,6 +98,11 @@ fun TaskScreen(
         tasksViewModel.setTasksScreenSelectedUserName(crmUserName)
         tasksViewModel.setTasksScreenSelectedUserId(crmUserId)
         tasksViewModel.setTaskScreenSelectedDueDate(dueDate)
+        LaunchedEffect(key1 = taskId) {
+            if (accountId != null) {
+                tasksViewModel.taskDetails(accountId, taskId)
+            }
+        }
     }
 
     var createTaskApiInProgress by remember { mutableStateOf(false) }
@@ -103,7 +110,31 @@ fun TaskScreen(
     var updateTaskApiInProgress by remember { mutableStateOf(false) }
     var updateTaskApiIsSuccess by remember { mutableStateOf(false) }
 
-    val  updateTaskResponse by tasksViewModel.updateTaskLiveData.observeAsState()
+    val updateTaskResponse by tasksViewModel.updateTaskLiveData.observeAsState()
+    val taskDetailsApiResponse by tasksViewModel.taskDetails.observeAsState()
+
+    taskDetailsApiResponse?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                Log.i("TaskScreen", "Success ${response.data?.task_detail?.description}")
+                val taskDetails = response.data?.task_detail
+                taskDesc = taskDetails?.description ?: ""
+            }
+
+            is NetworkResponse.Error -> {
+                CustomToast(
+                    message = response.message ?: "Something went wrong",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Error
+                )
+
+            }
+
+            is NetworkResponse.Loading -> {
+                Log.d("TaskScreen", "Loading")
+            }
+        }
+    }
 
     updateTaskResponse?.let { response ->
         when (response) {
@@ -111,7 +142,9 @@ fun TaskScreen(
                 updateTaskApiInProgress = false
                 updateTaskApiIsSuccess = true
                 CustomToast(
-                    message = "Task Updated.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
+                    message = "Task Updated.",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Success
                 )
             }
 
@@ -169,8 +202,12 @@ fun TaskScreen(
             updateTaskApiIsSuccess = updateTaskApiIsSuccess,
             accountId = accountId,
             taskId = taskId,
-            taskDesc = task
+            taskDesc = task,
+            isTaskScreenEditable = isTaskScreenEditable
         )
+        if (taskDetailsApiResponse is NetworkResponse.Loading) {
+            Loader()
+        }
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
             accountId = accountId,
@@ -182,7 +219,9 @@ fun TaskScreen(
         EditableTextField(note = task, placeholderText =
         "Add task", onValueChange = {
             task = it
-        }, modifier = Modifier
+        },
+            readOnly = !isTaskScreenEditable  || createTaskApiIsSuccess  || updateTaskApiIsSuccess,
+            modifier = Modifier
             .fillMaxWidth()
             .semantics {
                 contentDescription = "et_create_task"
@@ -449,6 +488,7 @@ fun AddTaskHeader(
     accountId: String? = null,
     taskDesc: String,
     taskId: String = "",
+    isTaskScreenEditable: Boolean = true
 ) {
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
@@ -491,93 +531,98 @@ fun AddTaskHeader(
             Color(0xFF212653)
         }
 
-        Button(onClick = {
-            if (taskId.isNotEmpty()) {
-                tasksViewModel.updateTask(
-                    accountId = accountId!!,
-                    taskId = taskId,
-                    crmOrganizationUserId = tasksViewModel.getTasksScreenSelectedUserId(),
-                    description = taskDesc,
-                    dueDate = tasksViewModel.getTaskScreenSelectedDueDate(),
-                )
-            } else {
-                tasksViewModel.createTask(
-                    accountId = accountId!!,
-                    crmOrganizationUserId = tasksViewModel.getTasksScreenSelectedUserId(),
-                    description = taskDesc,
-                    dueDate = tasksViewModel.getTaskScreenSelectedDueDate(),
-                )
-            }
-        },
-            enabled = true,
-            contentPadding = PaddingValues(all = 8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent, contentColor = Color.White
-            ),
-            modifier = Modifier
-                .background(
-                    color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
-                )
-                .width(112.dp)
-                .height(46.dp)
-                .clip(shape = RoundedCornerShape(size = 5.dp))
-                .semantics {
-                    testTagsAsResourceId = true
-                    testTag = "btn_save_task"
-                    contentDescription = "btn_save_task"
+        if (isTaskScreenEditable) {
+            Button(onClick = {
+                if (taskId.isNotEmpty()) {
+                    tasksViewModel.updateTask(
+                        accountId = accountId!!,
+                        taskId = taskId,
+                        crmOrganizationUserId = tasksViewModel.getTasksScreenSelectedUserId(),
+                        description = taskDesc,
+                        dueDate = tasksViewModel.getTaskScreenSelectedDueDate(),
+                    )
+                } else {
+                    tasksViewModel.createTask(
+                        accountId = accountId!!,
+                        crmOrganizationUserId = tasksViewModel.getTasksScreenSelectedUserId(),
+                        description = taskDesc,
+                        dueDate = tasksViewModel.getTaskScreenSelectedDueDate(),
+                    )
                 }
-
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically
+            },
+                enabled = true,
+                contentPadding = PaddingValues(all = 8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent, contentColor = Color.White
+                ),
+                modifier = Modifier
+                    .background(
+                        color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
+                    )
+                    .width(112.dp)
+                    .height(46.dp)
+                    .clip(shape = RoundedCornerShape(size = 5.dp))
+                    .semantics {
+                        testTagsAsResourceId = true
+                        testTag = "btn_save_task"
+                        contentDescription = "btn_save_task"
+                    }
 
             ) {
-                val imageLoader = ImageLoader.Builder(LocalContext.current).components {
-                    if (Build.VERSION.SDK_INT >= 28) {
-                        add(ImageDecoderDecoder.Factory())
-                    } else {
-                        add(GifDecoder.Factory())
-                    }
-                }.build()
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(
+                        4.dp,
+                        Alignment.CenterHorizontally
+                    ),
+                    verticalAlignment = Alignment.CenterVertically
 
-
-                if (createTaskApiInProgress || createTasksApiIsSuccess || updateTaskApiInProgress || updateTaskApiIsSuccess) {
-                    Image(
-                        painter = if (createTaskApiInProgress) {
-                            rememberAsyncImagePainter(R.drawable.loader, imageLoader)
+                ) {
+                    val imageLoader = ImageLoader.Builder(LocalContext.current).components {
+                        if (Build.VERSION.SDK_INT >= 28) {
+                            add(ImageDecoderDecoder.Factory())
                         } else {
-                            painterResource(id = R.drawable.check)
-                        },
-                        contentDescription = "Loader",
-                        colorFilter = ColorFilter.tint(Color.White),
-                        modifier = Modifier
-                            .width(width = 12.dp)
-                            .height(height = 12.dp)
-                            .semantics {
-                                testTagsAsResourceId = true
-                                testTag = "task_screen_cloud"
-                            }
-                    )
+                            add(GifDecoder.Factory())
+                        }
+                    }.build()
 
-                }
-                Text(text = if (createTaskApiInProgress || updateTaskApiInProgress) {
-                    "Saving Task..."
-                } else if (createTasksApiIsSuccess || updateTaskApiIsSuccess) {
-                    "Saved"
-                } else {
-                    "Save Task"
-                }, color = Color.White, style = TextStyle(
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFFFFFFFF),
-                    letterSpacing = 0.48.sp,
-                ), modifier = Modifier.semantics {
-                    if (createTasksApiIsSuccess) "txt_create_task_saved" else "txt_create_task_save"
-                    contentDescription =
+
+                    if (createTaskApiInProgress || createTasksApiIsSuccess || updateTaskApiInProgress || updateTaskApiIsSuccess) {
+                        Image(
+                            painter = if (createTaskApiInProgress) {
+                                rememberAsyncImagePainter(R.drawable.loader, imageLoader)
+                            } else {
+                                painterResource(id = R.drawable.check)
+                            },
+                            contentDescription = "Loader",
+                            colorFilter = ColorFilter.tint(Color.White),
+                            modifier = Modifier
+                                .width(width = 12.dp)
+                                .height(height = 12.dp)
+                                .semantics {
+                                    testTagsAsResourceId = true
+                                    testTag = "task_screen_cloud"
+                                }
+                        )
+
+                    }
+                    Text(text = if (createTaskApiInProgress || updateTaskApiInProgress) {
+                        "Saving Task..."
+                    } else if (createTasksApiIsSuccess || updateTaskApiIsSuccess) {
+                        "Saved"
+                    } else {
+                        "Save Task"
+                    }, color = Color.White, style = TextStyle(
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                        fontWeight = FontWeight(500),
+                        color = Color(0xFFFFFFFF),
+                        letterSpacing = 0.48.sp,
+                    ), modifier = Modifier.semantics {
                         if (createTasksApiIsSuccess) "txt_create_task_saved" else "txt_create_task_save"
-                })
+                        contentDescription =
+                            if (createTasksApiIsSuccess) "txt_create_task_saved" else "txt_create_task_save"
+                    })
+                }
             }
         }
     }

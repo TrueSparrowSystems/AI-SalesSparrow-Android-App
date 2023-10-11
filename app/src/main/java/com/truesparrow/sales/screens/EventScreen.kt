@@ -1,7 +1,6 @@
 package com.truesparrow.sales.screens
 
 import android.os.Build
-import android.widget.DatePicker
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,14 +18,14 @@ import androidx.compose.material3.ButtonDefaults
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.util.Log
+import android.widget.DatePicker
 import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -79,7 +78,9 @@ fun EventScreen(
     onAddEventClick: (id: String) -> Unit = {},
     onCancelEventClick: (id: String, eventDescription: String, startDateTime: String, endDateTime: String) -> Unit = { _, _, _, _ -> },
     selectedEventId: String = "",
+    isEventScreenEditable: Boolean = true
 ) {
+
 
     var createEventApiIsSuccess by remember { mutableStateOf(false) }
     var createEventApiInProgress by remember { mutableStateOf(false) }
@@ -87,7 +88,8 @@ fun EventScreen(
     var updateEventApiIsSuccess by remember { mutableStateOf(false) }
     var updateEventApiInProgress by remember { mutableStateOf(false) }
 
-    var eventDescription by remember { mutableStateOf(eventDescription) }
+   var eventDescription = eventDescription
+    var eventDesc by remember { mutableStateOf(eventDescription) }
     val eventViewModal: EventViewModal = hiltViewModel()
 
     val context = LocalContext.current
@@ -102,6 +104,33 @@ fun EventScreen(
     val dayOfMonth = calendar[Calendar.DAY_OF_MONTH]
     val hour = calendar[Calendar.HOUR_OF_DAY]
     val minute = calendar[Calendar.MINUTE]
+
+    val eventDetailsApiRespone by eventViewModal.eventDetails.observeAsState()
+
+    if (eventId.isNotEmpty()) {
+        LaunchedEffect(key1 = accountId + eventId) {
+            if (accountId != null) {
+                eventViewModal.eventDetails(accountId = accountId, eventId = eventId)
+            }
+        }
+    }
+
+
+    eventDetailsApiRespone?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                Log.i("EventScreen cc", "Event Details ${response.data?.event_detail?.description}")
+                eventDescription = response.data?.event_detail?.description ?: ""
+            }
+
+            is NetworkResponse.Loading -> {
+            }
+
+            is NetworkResponse.Error -> {
+            }
+        }
+
+    }
 
 
     val startDatePicker = DatePickerDialog(
@@ -224,7 +253,7 @@ fun EventScreen(
 
                                 onCancelEventClick(
                                     selectedEventId,
-                                    eventDescription,
+                                    eventDesc,
                                     iso8601StartDateTime,
                                     iso8601EndDateTime
                                 )
@@ -242,12 +271,12 @@ fun EventScreen(
             )
 
             val buttonColor =
-                if (eventDescription.isNotEmpty() && accountId?.isNotEmpty() == true) {
+                if (eventDesc.isNotEmpty() && accountId?.isNotEmpty() == true) {
                     Color(0xFF212653)
                 } else {
                     Color(0xFF212653).copy(alpha = 0.7f)
                 }
-            if (accountId != null) {
+            if (accountId != null && isEventScreenEditable) {
                 Button(onClick = {
                     if (selectedStartDateText.isEmpty() || selectedStartTimeText.isEmpty() || selectedEndDateText.isEmpty() || selectedEndTimeText.isEmpty()) {
                         Toast.makeText(
@@ -294,7 +323,7 @@ fun EventScreen(
                     }
 
                     //if all value exist then execute the below functions
-                    if (selectedStartDateText.isNotEmpty() && selectedEndDateText.isNotEmpty() && selectedStartTimeText.isNotEmpty() && selectedEndTimeText.isNotEmpty() && eventDescription.isNotEmpty() && accountId.isNotEmpty() && !(createEventApiInProgress || createEventApiIsSuccess)) {
+                    if (selectedStartDateText.isNotEmpty() && selectedEndDateText.isNotEmpty() && selectedStartTimeText.isNotEmpty() && selectedEndTimeText.isNotEmpty() && eventDesc.isNotEmpty() && accountId.isNotEmpty() && !(createEventApiInProgress || createEventApiIsSuccess)) {
                         val iso8601StartDateTime =
                             convertToISO8601(selectedStartDateText, selectedStartTimeText);
                         val iso8601EndDateTime =
@@ -303,7 +332,7 @@ fun EventScreen(
 
                         Log.i(
                             "EventScreen",
-                            "Create Event Clicked $accountId $iso8601StartDateTime $iso8601EndDateTime  $eventDescription "
+                            "Create Event Clicked $accountId $iso8601StartDateTime $iso8601EndDateTime  $eventDesc "
                         )
 
                         if (eventId.isNotEmpty()) {
@@ -312,7 +341,7 @@ fun EventScreen(
                                 eventId = eventId,
                                 startDateTime = iso8601StartDateTime,
                                 endDateTime = iso8601EndDateTime,
-                                description = eventDescription
+                                description = eventDesc
                             )
                         } else {
 
@@ -320,13 +349,13 @@ fun EventScreen(
                                 accountId = accountId,
                                 startDateTime = iso8601StartDateTime,
                                 endDateTime = iso8601EndDateTime,
-                                description = eventDescription
+                                description = eventDesc
                             )
                         }
                     }
                 },
 
-                    enabled = eventDescription.isNotEmpty() && accountId.isNotEmpty() && !(createEventApiInProgress || createEventApiIsSuccess),
+                    enabled = eventDesc.isNotEmpty() && accountId.isNotEmpty() && !(createEventApiInProgress || createEventApiIsSuccess),
                     contentPadding = PaddingValues(all = 8.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent, contentColor = Color.White
@@ -404,6 +433,10 @@ fun EventScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        if (eventDetailsApiRespone is NetworkResponse.Loading) {
+            Loader()
+        }
+
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Top),
             horizontalAlignment = Alignment.Start,
@@ -444,7 +477,9 @@ fun EventScreen(
                         .height(36.dp)
                         .padding(start = 14.dp, end = 8.dp, bottom = 10.dp)
                         .clickable {
-                            startDatePicker.show()
+                            if (isEventScreenEditable) {
+                                startDatePicker.show()
+                            }
                         }
                 ) {
                     Text(
@@ -485,7 +520,9 @@ fun EventScreen(
                         .height(36.dp)
                         .padding(start = 14.dp, end = 8.dp, bottom = 10.dp)
                         .clickable {
-                            startTimePicker.show()
+                            if(isEventScreenEditable){
+                                startTimePicker.show()
+                            }
                         }
                 ) {
                     Text(
@@ -542,7 +579,9 @@ fun EventScreen(
                         .height(36.dp)
                         .padding(start = 14.dp, end = 8.dp, bottom = 10.dp)
                         .clickable {
-                            endDatePicker.show()
+                            if (isEventScreenEditable) {
+                                endDatePicker.show()
+                            }
                         }
                 ) {
                     Text(
@@ -582,7 +621,11 @@ fun EventScreen(
                         .width(138.dp)
                         .height(36.dp)
                         .padding(start = 14.dp, end = 8.dp, bottom = 10.dp)
-                        .clickable { endTimePicker.show() }
+                        .clickable {
+                            if (isEventScreenEditable){
+                                endTimePicker.show()
+                            }
+                        }
                 ) {
                     Text(
                         text = if (selectedEndTimeText.isNotEmpty()) {
@@ -609,12 +652,15 @@ fun EventScreen(
             }
         }
 
-        EditableTextField(note = eventDescription,
+        Log.i("EventScreen", "Event Description: $eventDesc")
+
+        EditableTextField(
+            note = eventDesc,
             onValueChange = {
-                eventDescription = it
+                eventDesc = it
             },
             placeholderText = "Add Event",
-            readOnly = createEventApiIsSuccess,
+            readOnly = createEventApiIsSuccess || updateEventApiIsSuccess || !isEventScreenEditable,
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics {

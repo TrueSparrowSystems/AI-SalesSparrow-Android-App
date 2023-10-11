@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.truesparrow.sales.models.CreateAccountTaskResponse
 import com.truesparrow.sales.models.Task
+import com.truesparrow.sales.models.TaskDetailsResponse
 import com.truesparrow.sales.repository.TasksRepository
 import com.truesparrow.sales.util.NetworkResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +28,9 @@ class TasksViewModal @Inject constructor(
 
     val updateTaskLiveData: LiveData<NetworkResponse<Unit>>
         get() = tasksRepository.updateTaskLiveData
+
+    val taskDetails: LiveData<NetworkResponse<TaskDetailsResponse>>
+        get() = tasksRepository.taskDetails
 
 
     private var tasksScreenSelectedUserName: String = "Select"
@@ -93,6 +97,18 @@ class TasksViewModal @Inject constructor(
                 crmOrganizationUserId = crmOrganizationUserId,
                 description = description,
                 dueDate = dueDate
+            )
+        }
+    }
+
+    fun taskDetails(
+        accountId: String,
+        taskId: String,
+    ) {
+        viewModelScope.launch {
+            tasksRepository.getTaskDetails(
+                accountId = accountId,
+                taskId = taskId,
             )
         }
     }

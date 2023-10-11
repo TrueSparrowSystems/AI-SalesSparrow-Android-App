@@ -13,10 +13,12 @@ import com.truesparrow.sales.models.CreateAccountEventResponse
 import com.truesparrow.sales.models.CreateAccountTaskRequest
 import com.truesparrow.sales.models.CreateAccountTaskResponse
 import com.truesparrow.sales.models.CrmOrganisationUsersResponse
+import com.truesparrow.sales.models.EventDetailsResponse
 import com.truesparrow.sales.models.GetCrmActionRequest
 import com.truesparrow.sales.models.GetCrmActionsResponse
 import com.truesparrow.sales.models.NotesDetailResponse
 import com.truesparrow.sales.models.SaveNoteRequest
+import com.truesparrow.sales.models.TaskDetailsResponse
 import com.truesparrow.sales.models.createAccountEventRequest
 import retrofit2.Response
 import retrofit2.http.Body
@@ -130,6 +132,13 @@ interface ApiService {
         @Body request: CreateAccountTaskRequest
     ): Response<Unit>
 
+    @GET("v1/accounts/{account_id}/tasks/{task_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: TaskDetailsResponse.json")
+    suspend fun getTaskDetails(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "task_id") noteId: String
+    ): Response<TaskDetailsResponse>
+
     @GET("./v1/accounts/feed")
     @Headers("$MOCK_RESPONSE_HEADER: AccountFeedResponse.json")
     suspend fun getAccountFeed(
@@ -168,4 +177,11 @@ interface ApiService {
         @Path(value = "event_id") eventId: String,
         @Body request: createAccountEventRequest
     ): Response<Unit>
+
+    @GET("v1/accounts/{account_id}/events/{event_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: EventDetailsResponse.json")
+    suspend fun getEventDetails(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "event_id") noteId: String
+    ): Response<EventDetailsResponse>
 }

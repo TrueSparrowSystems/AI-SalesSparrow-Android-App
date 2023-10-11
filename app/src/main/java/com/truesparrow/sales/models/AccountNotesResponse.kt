@@ -26,12 +26,14 @@ data class Note(
 data class NoteData(
     val id: String,
     val text: String,
-    val shouldShowCrmSuggestion: Boolean = false
+    val shouldShowCrmSuggestion: Boolean = false,
+    val isNoteScreenEditable : Boolean = true
 )
 
 @Parcelize
 data class NoteDetailsObject(
     val id: String,
     val text: String,
-    val shouldShowCrmSuggestion: Boolean = false
+    val shouldShowCrmSuggestion: Boolean = false,
+    val isNoteScreenEditable : Boolean = true
 ) : Parcelable

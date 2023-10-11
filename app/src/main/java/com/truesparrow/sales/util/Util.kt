@@ -90,6 +90,9 @@ fun convertToISO8601(startDate: String, startTime: String): String {
 
 fun extractDateAndTime(input: String): Pair<String, String>? {
     try {
+        if (input == null) {
+            return Pair("", "")
+        }
         val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault())
         val date = dateFormat.parse(input)
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.truesparrow.sales.models.CreateAccountEventResponse
+import com.truesparrow.sales.models.EventDetailsResponse
 import com.truesparrow.sales.repository.EventRepository
 import com.truesparrow.sales.util.NetworkResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,43 +21,8 @@ class EventViewModal @Inject constructor(private val eventRepository: EventRepos
     val updateEventLiveData : LiveData<NetworkResponse<Unit>>
         get() = eventRepository.updateEventLiveData
 
-    private var eventScreenSelectedStartDate: String = ""
-    private var eventScreenSelectedEndDate: String = ""
-    private var eventScreenSelectedStartTime: String = ""
-    private var eventScreenSelectedEndTime: String = ""
-
-    fun getEventScreenSelectedStartDate(): String {
-        return eventScreenSelectedStartDate
-    }
-
-    fun getEventScreenSelectedEndDate(): String {
-        return eventScreenSelectedEndDate
-    }
-
-    fun getEventScreenSelectedStartTime(): String {
-        return eventScreenSelectedStartTime
-    }
-
-    fun getEventScreenSelectedEndTime(): String {
-        return eventScreenSelectedEndTime
-    }
-
-    fun setEventScreenSelectedStartDate(startDate: String) {
-        eventScreenSelectedStartDate = startDate
-    }
-
-    fun setEventScreenSelectedEndDate(endDate: String) {
-        eventScreenSelectedEndDate = endDate
-    }
-
-    fun setEventScreenSelectedStartTime(startTime: String) {
-        eventScreenSelectedStartTime = startTime
-    }
-
-    fun setEventScreenSelectedEndTime(endTime: String) {
-        eventScreenSelectedEndTime = endTime
-    }
-
+    val eventDetails : LiveData<NetworkResponse<EventDetailsResponse>>
+        get() = eventRepository.eventDetails
 
      fun createEvent(
         accountId: String,
@@ -83,6 +49,15 @@ class EventViewModal @Inject constructor(private val eventRepository: EventRepos
             eventRepository.updateEvent(accountId, eventId, startDateTime, endDateTime, description)
         }
 
+    }
+
+    fun eventDetails(
+        accountId: String,
+        eventId: String,
+    ) {
+        viewModelScope.launch {
+            eventRepository.getEventDetails(accountId, eventId)
+        }
     }
 
 

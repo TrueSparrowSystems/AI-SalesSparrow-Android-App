@@ -165,10 +165,11 @@ fun NavigationService(intent: Intent?) {
                     isAccountSelectionEnabled,
                     noteData.id,
                     noteData.text,
-                    noteData.shouldShowCrmSuggestion
+                    noteData.shouldShowCrmSuggestion,
+                    noteData.isNoteScreenEditable
                 )
             } else {
-                NotesScreen(accountName, accountId, isAccountSelectionEnabled, "", "", true)
+                NotesScreen(accountName, accountId, isAccountSelectionEnabled, "", "", true, true)
             }
         }
         composable(route = Screens.AccountDetailsScreen.route) {
@@ -204,6 +205,7 @@ fun NavigationService(intent: Intent?) {
                     taskData.crm_organization_user_id ?: "",
                     taskData.crm_organization_user_name ?: "",
                     taskData.id ?: "",
+                    taskData.isTaskScreenEditable ?: true
 
                     )
             } else {
@@ -215,6 +217,7 @@ fun NavigationService(intent: Intent?) {
                     "",
                     "",
                     "",
+                    true
                 )
             }
         }
@@ -253,7 +256,11 @@ fun NavigationService(intent: Intent?) {
                     startDateTime?.second ?: "",
                     endDateTime?.second ?: "",
                     eventData.eventDescription ?: "",
-                    eventData.eventId ?: ""
+                    eventData.eventId ?: "",
+                    {},
+                    { s: String, s1: String, s2: String, s3: String ->  {} },
+                    "",
+                    eventData.isEventScreenEditable ?: true
                 )
 
             } else {
@@ -264,7 +271,11 @@ fun NavigationService(intent: Intent?) {
                     "",
                     "",
                     "",
-                    ""
+                    "",
+                    {},
+                    { s: String, s1: String, s2: String, s3: String ->  {} },
+                    "",
+                    true
                 )
             }
 

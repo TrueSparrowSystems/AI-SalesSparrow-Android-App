@@ -23,7 +23,8 @@ data class Event(
     val description: String,
     val start_datetime: String,
     val end_datetime: String,
-    val last_modified_time: String
+    val last_modified_time: String,
+    val isEventScreenEditable : Boolean = true
 )
 
 
@@ -33,5 +34,5 @@ data class EventDetailsObject(
     val eventStartDate: String,
     val eventEndDate: String,
     val eventDescription: String,
-    val dummy: String? = ""
+    val isEventScreenEditable: Boolean = true
 ) : Parcelable

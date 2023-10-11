@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.truesparrow.sales.api.ApiService
 import com.truesparrow.sales.models.CreateAccountEventResponse
+import com.truesparrow.sales.models.EventDetailsResponse
 import com.truesparrow.sales.models.createAccountEventRequest
 import com.truesparrow.sales.util.NetworkResponse
 import org.json.JSONObject
@@ -19,6 +20,27 @@ class EventRepository @Inject constructor(private val apiService: ApiService) {
     private val _updateEventLiveData = MutableLiveData<NetworkResponse<Unit>>()
     val updateEventLiveData: LiveData<NetworkResponse<Unit>>
         get() = _updateEventLiveData
+
+    private val _eventDetails = MutableLiveData<NetworkResponse<EventDetailsResponse>>()
+    val eventDetails: LiveData<NetworkResponse<EventDetailsResponse>>
+        get() = _eventDetails
+
+    suspend fun getEventDetails(accountId: String, eventId: String) {
+        try {
+            _eventDetails.postValue(NetworkResponse.Loading())
+            val result = apiService.getEventDetails(accountId, eventId)
+            if (result.isSuccessful && result.body() != null) {
+                _eventDetails.postValue(NetworkResponse.Success(result.body()!!))
+            } else if (result.errorBody() != null) {
+                val errorObj = JSONObject(result.errorBody()!!.charStream().readText())
+                _eventDetails.postValue(NetworkResponse.Error(errorObj.getString("message")))
+            } else {
+                _eventDetails.postValue(NetworkResponse.Error("Error Fetching Event Details:}"))
+            }
+        } catch (e: Exception) {
+            _eventDetails.postValue(NetworkResponse.Error("Error Fetching Event Details"))
+        }
+    }
 
     suspend fun createEvent(
         accountId: String,

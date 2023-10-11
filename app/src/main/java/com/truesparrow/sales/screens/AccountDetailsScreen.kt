@@ -378,7 +378,13 @@ fun AccountDetails(
                     index = index++,
                     onClick = {
                         Log.i("AccountDetails", "NoteId: ${note.id}")
-                        NavigationService.navigateTo("note_details_screen/${accountId}/${accountName}/${note.id}")
+                        var noteData = NoteData(
+                            id = note.id,
+                            text = note.text_preview,
+                            shouldShowCrmSuggestion = false,
+                            isNoteScreenEditable = false
+                        )
+                        NavigationService.navigateToNotesScreen(accountId, accountName, false, noteData)
                     },
                     onDeleteMenuClick = { noteID ->
                         Log.i("AccountDetails onDeleteMenuClick", "NoteId: ${note.id}")
@@ -387,11 +393,11 @@ fun AccountDetails(
                     },
                     onEditMenuClick = {
                         Log.i("AccountDetails onEditMenuClick", "NoteId: ${note.id}")
-                        //TODO: fetch the full notes details and pass it to the screen, make api call to get the note details
                         var noteData = NoteData(
                             id = note.id,
                             text = note.text_preview,
-                            shouldShowCrmSuggestion = false
+                            shouldShowCrmSuggestion = false,
+                            isNoteScreenEditable = true
                         )
                         NavigationService.navigateToNotesScreen(accountId, accountName, false, noteData)
                     },
@@ -424,7 +430,16 @@ fun AccountDetails(
                     index = index++,
                     onClick = {
                         Log.i("AccountDetails", "TaskId: ${task.id}")
-//                        NavigationService.navigateTo("task_details_screen/${accountId}/${accountName}/${task.id}")
+                        var taskData = TaskData(
+                            creator_name = task.creator_name,
+                            crm_organization_user_name = task.crm_organization_user_name,
+                            description = task.description,
+                            due_date = task.due_date,
+                            id = task.id,
+                            crm_organization_user_id = task.crm_organization_user_id,
+                            isTaskScreenEditable = false
+                        )
+                        NavigationService.navigateToTaskScreen(accountId, accountName, taskData)
                     },
                     taskId = task.id,
                     onDeleteMenuClick = { task ->
@@ -440,7 +455,8 @@ fun AccountDetails(
                             description = task.description,
                             due_date = task.due_date,
                             id = task.id,
-                            crm_organization_user_id = task.crm_organization_user_id
+                            crm_organization_user_id = task.crm_organization_user_id,
+                            isTaskScreenEditable = true
                         )
                         NavigationService.navigateToTaskScreen(accountId, accountName, taskData)
                     },
@@ -462,6 +478,7 @@ fun AccountDetails(
         } else {
             var index = 0;
             events?.forEach { event ->
+                Log.i("AccountDetails", "Event: ${event.id} ${event.end_datetime} ")
                 EventCard(
                     firsName = event.creator_name.split(" ")[0],
                     lastName = event.creator_name.split(" ")[1],
@@ -474,7 +491,14 @@ fun AccountDetails(
                     index = index++,
                     onClick = {
                         Log.i("AccountDetails", "EventId: ${event.id}")
-                        NavigationService.navigateTo("event_details_screen/${accountId}/${accountName}/${event.id}")
+                        var eventData = EventDetailsObject(
+                            eventId = event.id,
+                            eventStartDate = event.start_datetime,
+                            eventEndDate = event.end_datetime,
+                            eventDescription = event.description,
+                            isEventScreenEditable = false
+                        )
+                        NavigationService.navigateToEventScreen(accountId, eventData)
                     },
                     eventId = event.id,
                     onDeleteMenuClick = { task ->
@@ -488,7 +512,8 @@ fun AccountDetails(
                             eventId = event.id,
                             eventStartDate = event.start_datetime,
                             eventEndDate = event.end_datetime,
-                            eventDescription = event.description
+                            eventDescription = event.description,
+                            isEventScreenEditable = true
                         )
                         NavigationService.navigateToEventScreen(accountId, eventData)
                     }
