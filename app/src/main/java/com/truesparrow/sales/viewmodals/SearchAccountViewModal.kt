@@ -44,7 +44,7 @@ class SearchAccountViewModel @Inject constructor(
             NavigationService.navigateToNotesScreen(accountId, accountName, true, null)
 
         } else {
-            NavigationService.navigateToNotesScreen(accountId, accountName, false, null)
+            NavigationService.navigateTo("account_details_screen/${accountId}/${accountName}")
         }
     }
 

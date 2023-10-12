@@ -88,7 +88,7 @@ fun EventSuggestionCard(
     createEventApiInProgress: Boolean = false,
     id: String = "",
     index: Int = 0,
-    noteViewModal: NotesViewModel,
+    noteViewModal: NotesViewModel ?= null
 ) {
 
     val context = LocalContext.current
@@ -110,7 +110,7 @@ fun EventSuggestionCard(
         { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
             selectedStartDateText = "$selectedDayOfMonth/${selectedMonth + 1}/$selectedYear"
             Log.i("EventScreen", "Selected Date ${convertToISO8601(selectedStartDateText, selectedStartTimeText)} $selectedStartDateText $selectedStartTimeText ")
-            noteViewModal.updateSuggestedEventById(
+            noteViewModal!!.updateSuggestedEventById(
                 id,
                 SuggestedEvents(
                     description = eventDescription,
@@ -127,7 +127,7 @@ fun EventSuggestionCard(
         context,
         { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
             selectedEndDateText = "$selectedDayOfMonth/${selectedMonth + 1}/$selectedYear"
-            noteViewModal.updateSuggestedEventById(
+            noteViewModal!!.updateSuggestedEventById(
                 id,
                 SuggestedEvents(
                     description = eventDescription,
@@ -145,7 +145,7 @@ fun EventSuggestionCard(
         { _, selectedHour: Int, selectedMinute: Int ->
             Log.i("EventScreen", "Selected Time $selectedHour:$selectedMinute")
             selectedStartTimeText = "$selectedHour:$selectedMinute"
-            noteViewModal.updateSuggestedEventById(
+            noteViewModal!!.updateSuggestedEventById(
                 id,
                 SuggestedEvents(
                     description = eventDescription,
@@ -162,7 +162,7 @@ fun EventSuggestionCard(
         context,
         { _, selectedHour: Int, selectedMinute: Int ->
             selectedEndTimeText = "$selectedHour:$selectedMinute"
-            noteViewModal.updateSuggestedEventById(
+            noteViewModal!!.updateSuggestedEventById(
                 id,
                 SuggestedEvents(
                     description = eventDescription,
@@ -216,7 +216,7 @@ fun EventSuggestionCard(
                         color = Color(0x33F6F7F8),
                         shape = RoundedCornerShape(size = 5.57143.dp)
                     )
-                    .padding(start = 5.dp, top = 5.dp, end = 5.dp, bottom = 5.dp)
+//                    .padding(start = 5.dp, top = 5.dp, end = 5.dp, bottom = 5.dp)
                     .clickable {
                         if (!isEventAdded) {
                             onEditEventClick(id)
@@ -603,24 +603,24 @@ fun EventSuggestionCard(
     }
 }
 
-//@Preview
-//@RequiresApi(Build.VERSION_CODES.O)
-//@Composable
-//fun EventSuggestionCardPreview() {
-//    EventSuggestionCard(
-//        startDate = "12/12/2021",
-//        endDate = "12/12/2021",
-//        startTime = "12:00",
-//        endTime = "12:00",
-//        eventDescription = "Event Description",
-//        eventId = "123",
-//        isEventAdded = false,
-//        onAddEventClick = { _, _, _, _, _, _, _ -> },
-//        onEditEventClick = {},
-//        onCancelEventClick = {},
-//        createEventApiInProgress = false,
-//        id = "123",
-//        index = 0,
-//        noteViewModal = NotesViewModel,
-//    )
-//}
+@Preview
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun EventSuggestionCardPreview() {
+    EventSuggestionCard(
+        startDate = "12/12/2021",
+        endDate = "12/12/2021",
+        startTime = "12:00",
+        endTime = "12:00",
+        eventDescription = "Event Description",
+        eventId = "123",
+        isEventAdded = false,
+        onAddEventClick = { _, _, _, _, _, _, _ -> },
+        onEditEventClick = {},
+        onCancelEventClick = {},
+        createEventApiInProgress = false,
+        id = "123",
+        index = 0,
+        noteViewModal = null,
+    )
+}

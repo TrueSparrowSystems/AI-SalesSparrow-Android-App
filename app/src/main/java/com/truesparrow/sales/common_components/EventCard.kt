@@ -68,6 +68,7 @@ fun EventCard(
     startDateTime: String = "",
     endDateTime: String = "",
     index: Number,
+    isEventAdded : Boolean = false
 ) {
     Log.i(
         "EventCard",
@@ -85,6 +86,7 @@ fun EventCard(
 
     try {
         formattedEndDate = convertTime(endDateTime)
+        Log.i("EventCard", "NotesCard: $formattedEndDate")
     } catch (e: Exception) {
         Log.i("EventCard", "NotesCard: $e")
     }
@@ -313,8 +315,42 @@ fun EventCard(
                     letterSpacing = 0.48.sp,
                 )
             )
+        }
 
-
+        if (isEventAdded) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(30.dp)
+                        .background(Color(0x3362E17D))
+                        .border(
+                            width = 1.dp,
+                            color = Color(0xFFE9E9E9),
+                            shape = RoundedCornerShape(size = 0.dp)
+                        )
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.success_toast_check),
+                        contentDescription = "Success",
+                        modifier = Modifier
+                            .height(18.dp)
+                            .width(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Event added", modifier = Modifier.semantics {
+                            testTagsAsResourceId = true
+                            testTag = "txt_create_note_task_added"
+                            contentDescription = "txt_create_note_task_added"
+                        }, style = TextStyle(
+                            fontSize = 12.sp, lineHeight = 24.sp, color = Color(0xFF444A62)
+                        )
+                    )
+                }
+            }
         }
 
 
@@ -335,6 +371,7 @@ fun EventCardPreview() {
         onClick = {},
         startDateTime = "2021-07-20T12:00:00Z",
         endDateTime = "2021-07-20T12:00:00Z",
-        index = 0
+        index = 0,
+         isEventAdded = true
     )
 }

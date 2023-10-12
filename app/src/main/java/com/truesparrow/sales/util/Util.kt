@@ -1,6 +1,7 @@
 package com.truesparrow.sales.util
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.ColorInt
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.ColorUtils
@@ -61,38 +62,54 @@ fun convertDateFormat(inputDate: String): String {
 }
 
 fun convertToISO8601(startDate: String, startTime: String): String {
-    // Parse the date and time strings
-    val datePattern = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    val timePattern = SimpleDateFormat("HH:mm", Locale.getDefault())
+    // Check for empty startTime
+    if (startTime.isEmpty()) {
+        return "" // Return an empty string when startTime is empty
+    }
 
-    val parsedDate = datePattern.parse(startDate)
-    val parsedTime = timePattern.parse(startTime)
+    try {
+        // Parse the date and time strings
+        val datePattern = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val timePattern = SimpleDateFormat("HH:mm", Locale.getDefault())
 
-    // Combine date and time
-    val combinedDateTime = Calendar.getInstance()
-    combinedDateTime.time = parsedDate
-    combinedDateTime.set(Calendar.HOUR_OF_DAY, parsedTime.hours)
-    combinedDateTime.set(Calendar.MINUTE, parsedTime.minutes)
-    combinedDateTime.set(Calendar.SECOND, 0)
+        val parsedDate = datePattern.parse(startDate)
+        val parsedTime = timePattern.parse(startTime)
 
-    // Set the timezone to UTC
-    combinedDateTime.timeZone = TimeZone.getTimeZone("UTC")
+        // Check for null values after parsing
+        if (parsedDate == null || parsedTime == null) {
+            return "" // Return an empty string if parsing fails
+        }
 
-    // Format as ISO 8601 without 'Z' at the end
-    val iso8601Pattern = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault())
-    iso8601Pattern.timeZone = TimeZone.getTimeZone("UTC")
+        // Combine date and time
+        val combinedDateTime = Calendar.getInstance()
+        combinedDateTime.time = parsedDate
+        combinedDateTime.set(Calendar.HOUR_OF_DAY, parsedTime.hours)
+        combinedDateTime.set(Calendar.MINUTE, parsedTime.minutes)
+        combinedDateTime.set(Calendar.SECOND, 0)
 
-    // Format the output to remove ':' in the timezone offset
-    val iso8601DateTime = iso8601Pattern.format(combinedDateTime.time)
-    return iso8601DateTime.substring(0, iso8601DateTime.length - 2)  +iso8601DateTime.substring(iso8601DateTime.length - 2)
+        // Set the timezone to UTC
+        combinedDateTime.timeZone = TimeZone.getTimeZone("UTC")
+
+        // Format as ISO 8601 without 'Z' at the end
+        val iso8601Pattern = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault())
+        iso8601Pattern.timeZone = TimeZone.getTimeZone("UTC")
+
+        // Format the output to remove ':' in the timezone offset
+        val iso8601DateTime = iso8601Pattern.format(combinedDateTime.time)
+        return iso8601DateTime.substring(0, iso8601DateTime.length - 2) + iso8601DateTime.substring(iso8601DateTime.length - 2)
+    } catch (e: Exception) {
+        // Handle any parsing exceptions
+        return ""
+    }
 }
 
 
-fun extractDateAndTime(input: String): Pair<String, String>? {
+
+
+fun extractDateAndTime(input: String): Pair<String, String> {
     try {
-        if (input == null) {
-            return Pair("", "")
-        }
+        Log.i("input", input);
+
         val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault())
         val date = dateFormat.parse(input)
 
@@ -104,7 +121,8 @@ fun extractDateAndTime(input: String): Pair<String, String>? {
 
         return Pair(formattedDate, formattedTime)
     } catch (e: ParseException) {
+        Log.i("error", e.toString());
         e.printStackTrace()
-        return null
+        return Pair("", "")
     }
 }
