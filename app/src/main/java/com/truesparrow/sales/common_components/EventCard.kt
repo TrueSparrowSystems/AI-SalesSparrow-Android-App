@@ -94,9 +94,11 @@ fun EventCard(
     var formattedTime: String = "";
     try {
         val parsedTime = parseTime(date)
+        Log.i("EventCard 1", "NotesCard: $parsedTime date: $date")
         formattedTime = parsedTime?.let { formatTime(it) }.toString()
+        Log.i("EventCard 1", "NotesCard: formattedTime: $formattedTime")
     } catch (e: Exception) {
-        Log.i("NotesCard", "NotesCard: $e")
+        Log.i("EventCard 1", "NotesCard: $e")
     }
 
     var formattedDueDate = convertDateFormat(startDateTime);

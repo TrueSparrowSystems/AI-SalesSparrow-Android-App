@@ -1,8 +1,9 @@
 package com.truesparrow.sales.screens
 
 import android.content.Intent
-import android.net.Uri
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,7 +29,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
@@ -56,30 +56,39 @@ import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LogInScreen(intent: Intent?) {
-    val context = LocalContext.current;
     val authenticationViewModal: AuthenticationViewModal = hiltViewModel();
 
 
     var isLogInProgress = remember { mutableStateOf(false) }
 
     val discconnectSalesForceResponse by authenticationViewModal.salesForceDisconnect.observeAsState()
-    
+
+    var isSalesForceConnectSuccess = remember {
+        mutableStateOf(false)
+    }
+
+    var salesForceConnectUrl = ""
+
     discconnectSalesForceResponse?.let {
         when (it) {
             is NetworkResponse.Success -> {
-                CustomToast(message = "Your account has been disconnected and detailed deleted  ", type = ToastType.Success)
+                CustomToast(
+                    message = "Your account has been disconnected and detailed deleted  ",
+                    type = ToastType.Success
+                )
                 Log.i("SalesSparow", " LogInScreen: ${it.data}")
             }
 
             is NetworkResponse.Loading -> {
-           
+
             }
 
             is NetworkResponse.Error -> {
-               
+
             }
         }
     };
@@ -90,9 +99,10 @@ fun LogInScreen(intent: Intent?) {
         when (it) {
             is NetworkResponse.Success -> {
                 isLogInProgress.value = false;
-                Log.i("SalesSparow", " LogInScreen: ${it.data}")
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.data?.url ?: ""));
-                context.startActivity(intent);
+                Log.i("SalesSparow", " LogInScreen: ${it.data?.url}")
+                isSalesForceConnectSuccess.value = true
+                salesForceConnectUrl = it.data?.url ?: ""
+
             }
 
             is NetworkResponse.Loading -> {
@@ -101,6 +111,7 @@ fun LogInScreen(intent: Intent?) {
 
             is NetworkResponse.Error -> {
                 isLogInProgress.value = false;
+                isSalesForceConnectSuccess.value = false
             }
         }
     };
@@ -117,7 +128,6 @@ fun LogInScreen(intent: Intent?) {
         }
 
     }
-
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -140,7 +150,10 @@ fun LogInScreen(intent: Intent?) {
                         spotColor = Color(0x1A000000),
                         ambientColor = Color(0x1A000000)
                     )
-                    .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp))
+                    .background(
+                        color = Color(0xFFFFFFFF),
+                        shape = RoundedCornerShape(size = 4.dp)
+                    )
                     .padding(top = 40.dp, bottom = 40.dp, start = 20.dp, end = 20.dp),
 
                 ) {
@@ -156,7 +169,8 @@ fun LogInScreen(intent: Intent?) {
                         }
                 )
                 Text(
-                    text = "Your Salesforce app with AI powered recommendations", style = TextStyle(
+                    text = "Your Salesforce app with AI powered recommendations",
+                    style = TextStyle(
                         fontSize = 16.sp,
                         lineHeight = 20.sp,
                         fontWeight = FontWeight(400),
@@ -320,6 +334,9 @@ fun LogInScreen(intent: Intent?) {
                     }
             )
         }
+    }
 
+    if (isSalesForceConnectSuccess.value) {
+        InAppWebViewScreen(url = salesForceConnectUrl ?: "")
     }
 }

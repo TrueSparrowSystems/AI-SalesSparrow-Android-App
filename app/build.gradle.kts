@@ -93,7 +93,7 @@ android {
         }
         create("staging") {
             applicationIdSuffix = ".dev"
-            versionCode = 10
+            versionCode = 11
             versionName = "1.0.0"
             resValue("string", "app_name", "Sales-Dev")
             buildConfigField(
@@ -243,6 +243,7 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("io.coil-kt:coil-gif:2.2.2")
+    implementation("androidx.webkit:webkit:1.8.0")
 }
 
 kapt {

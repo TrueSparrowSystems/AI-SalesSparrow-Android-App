@@ -88,7 +88,7 @@ fun EventSuggestionCard(
     createEventApiInProgress: Boolean = false,
     id: String = "",
     index: Int = 0,
-    noteViewModal: NotesViewModel ?= null
+    noteViewModal: NotesViewModel? = null
 ) {
 
     val context = LocalContext.current
@@ -109,7 +109,15 @@ fun EventSuggestionCard(
         context,
         { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
             selectedStartDateText = "$selectedDayOfMonth/${selectedMonth + 1}/$selectedYear"
-            Log.i("EventScreen", "Selected Date ${convertToISO8601(selectedStartDateText, selectedStartTimeText)} $selectedStartDateText $selectedStartTimeText ")
+            Log.i(
+                "EventScreen",
+                "Selected Date ${
+                    convertToISO8601(
+                        selectedStartDateText,
+                        selectedStartTimeText
+                    )
+                } $selectedStartDateText $selectedStartTimeText "
+            )
             noteViewModal!!.updateSuggestedEventById(
                 id,
                 SuggestedEvents(
@@ -231,7 +239,13 @@ fun EventSuggestionCard(
                         fontWeight = FontWeight(600),
                         color = Color(0xFF444A62),
                         letterSpacing = 0.64.sp,
-                    )
+                    ),
+                    modifier = Modifier
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = "txt_event_suggestion_description_${index}"
+                            contentDescription = "txt_event_suggestion_task_description_${index}"
+                        }
                 )
 
             }
@@ -271,6 +285,11 @@ fun EventSuggestionCard(
                         .width(138.dp)
                         .height(36.dp)
                         .padding(start = 14.dp, end = 8.dp, bottom = 10.dp)
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = "btn_event_suggestion_start_date_${index}"
+                            contentDescription = "btn_event_suggestion_start_date_${index}"
+                        }
                         .clickable {
                             startDatePicker.show()
                         }
@@ -312,6 +331,11 @@ fun EventSuggestionCard(
                         .width(138.dp)
                         .height(36.dp)
                         .padding(start = 14.dp, end = 8.dp, bottom = 10.dp)
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = "btn_event_suggestion_start_time_${index}"
+                            contentDescription = "btn_event_suggestion_start_time_${index}"
+                        }
                         .clickable {
                             startTimePicker.show()
                         }
@@ -372,6 +396,11 @@ fun EventSuggestionCard(
                         .width(138.dp)
                         .height(36.dp)
                         .padding(start = 14.dp, end = 8.dp, bottom = 10.dp)
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = "btn_event_suggestion_end_date_${index}"
+                            contentDescription = "btn_event_suggestion_end_date_${index}"
+                        }
                         .clickable {
                             endDatePicker.show()
                         }
@@ -469,14 +498,14 @@ fun EventSuggestionCard(
                             .semantics {
                                 testTagsAsResourceId = true
                                 testTag = if (createEventApiInProgress) {
-                                    "txt_create_note_adding_task"
+                                    "txt_create_event_adding_task_${index}"
                                 } else {
-                                    "btn_create_note_add_task"
+                                    "btn_create_event_add_task_${index}"
                                 }
                                 contentDescription = if (createEventApiInProgress) {
-                                    "txt_create_note_adding_task"
+                                    "txt_create_event_adding_task_${index}"
                                 } else {
-                                    "btn_create_note_add_task"
+                                    "btn_create_event_add_task_${index}"
                                 }
                             }
 
@@ -521,14 +550,14 @@ fun EventSuggestionCard(
                             ), modifier = Modifier.semantics {
                                 testTagsAsResourceId = true
                                 testTag = if (!createEventApiInProgress) {
-                                    "txt_create_note_add_task"
+                                    "txt_create_event_add_task_${index}"
                                 } else {
-                                    "txt_create_note_adding_task"
+                                    "txt_create_event_adding_task_${index}"
                                 }
                                 contentDescription = if (!createEventApiInProgress) {
-                                    "txt_create_note_add_task"
+                                    "txt_create_event_add_task_${index}"
                                 } else {
-                                    "txt_create_note_adding_task"
+                                    "txt_create_event_adding_task_${index}"
                                 }
                             })
                         }
@@ -539,8 +568,8 @@ fun EventSuggestionCard(
                         .border(1.dp, Color(0xFF5D678D), shape = RoundedCornerShape(4.dp))
                         .semantics {
                             testTagsAsResourceId = true
-                            testTag = "btn_create_note_cancel"
-                            contentDescription = "btn_create_note_cancel"
+                            testTag = "btn_create_event_cancel"
+                            contentDescription = "btn_create_event_cancel"
                         }
 
                     ) {
@@ -554,8 +583,8 @@ fun EventSuggestionCard(
                             .padding(8.dp)
                             .semantics {
                                 testTagsAsResourceId = true
-                                testTag = "txt_create_note_cancel"
-                                contentDescription = "txt_create_note_cancel"
+                                testTag = "txt_create_event_cancel"
+                                contentDescription = "txt_create_event_cancel"
                             }
                             .clickable {
                                 onCancelEventClick(id)
@@ -590,8 +619,8 @@ fun EventSuggestionCard(
                         Text(
                             text = "Event added", modifier = Modifier.semantics {
                                 testTagsAsResourceId = true
-                                testTag = "txt_create_note_task_added"
-                                contentDescription = "txt_create_note_task_added"
+                                testTag = "txt_create_event_task_added"
+                                contentDescription = "txt_create_event_task_added"
                             }, style = TextStyle(
                                 fontSize = 12.sp, lineHeight = 24.sp, color = Color(0xFF444A62)
                             )

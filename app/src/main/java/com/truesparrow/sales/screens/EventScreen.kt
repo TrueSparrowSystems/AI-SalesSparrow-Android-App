@@ -88,7 +88,7 @@ fun EventScreen(
     var updateEventApiIsSuccess by remember { mutableStateOf(false) }
     var updateEventApiInProgress by remember { mutableStateOf(false) }
 
-   var eventDescription = eventDescription
+    var eventDescription = eventDescription
     var eventDesc by remember { mutableStateOf(eventDescription) }
     val eventViewModal: EventViewModal = hiltViewModel()
 
@@ -476,6 +476,11 @@ fun EventScreen(
                         .width(138.dp)
                         .height(36.dp)
                         .padding(start = 14.dp, end = 8.dp, bottom = 10.dp)
+                        .semantics {
+                            testTag = "btn_start_date_event_screen"
+                            contentDescription = "btn_start_date_event_screen"
+                            testTagsAsResourceId = true
+                        }
                         .clickable {
                             if (isEventScreenEditable) {
                                 startDatePicker.show()
@@ -519,8 +524,13 @@ fun EventScreen(
                         .width(138.dp)
                         .height(36.dp)
                         .padding(start = 14.dp, end = 8.dp, bottom = 10.dp)
+                        .semantics {
+                            testTag = "btn_start_time_event_screen"
+                            contentDescription = "btn_start_time_event_screen"
+                            testTagsAsResourceId = true
+                        }
                         .clickable {
-                            if(isEventScreenEditable){
+                            if (isEventScreenEditable) {
                                 startTimePicker.show()
                             }
                         }
@@ -578,6 +588,11 @@ fun EventScreen(
                         .width(138.dp)
                         .height(36.dp)
                         .padding(start = 14.dp, end = 8.dp, bottom = 10.dp)
+                        .semantics {
+                            testTag = "btn_end_date_event_screen"
+                            contentDescription = "btn_end_date_event_screen"
+                            testTagsAsResourceId = true
+                        }
                         .clickable {
                             if (isEventScreenEditable) {
                                 endDatePicker.show()
@@ -621,8 +636,13 @@ fun EventScreen(
                         .width(138.dp)
                         .height(36.dp)
                         .padding(start = 14.dp, end = 8.dp, bottom = 10.dp)
+                        .semantics {
+                            testTag = "btn_end_time_event_screen"
+                            contentDescription = "btn_end_time_event_screen"
+                            testTagsAsResourceId = true
+                        }
                         .clickable {
-                            if (isEventScreenEditable){
+                            if (isEventScreenEditable) {
                                 endTimePicker.show()
                             }
                         }
@@ -668,7 +688,6 @@ fun EventScreen(
                     testTag = "et_create_event"
                     testTagsAsResourceId = true
                 })
-
     }
 
 }
