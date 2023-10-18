@@ -86,7 +86,7 @@ fun NotesScreen(
     noteId: String? = "",
     noteDescription: String = "",
     shouldShowCrmSuggestions: Boolean = false,
-    isNotesScreenEditable: Boolean = true
+    isNotesScreenEditable: Boolean = true,
 ) {
 
     val notesViewModel: NotesViewModel = hiltViewModel()
@@ -652,7 +652,7 @@ fun NotesScreen(
                     },
                     onAddEventClick = {
                         selectedEventId = ""
-                        NavigationService.navigateToEventScreen(accountId = accountId, null)
+                        NavigationService.navigateToEventScreen(accountId = accountId,accountName, null)
                     }
                 )
 
@@ -759,7 +759,7 @@ fun NotesScreen(
                                         eventDescription = description,
                                         isEventScreenEditable = true
                                     )
-                                    NavigationService.navigateToEventScreen(accountId, eventData)
+                                    NavigationService.navigateToEventScreen(accountId,accountName, eventData)
                                 },
                                 onDeleteMenuClick = {
                                     if (eventId != null) {
@@ -893,7 +893,7 @@ fun RecommendedSectionHeader(
                     },
                     onAddEventMenuClick = {
                         onAddEventClick()
-                        NavigationService.navigateToEventScreen(accountId, null)
+                        NavigationService.navigateToEventScreen(accountId,accountName, null)
                     }
                 )
             }

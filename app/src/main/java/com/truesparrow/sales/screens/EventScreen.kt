@@ -69,6 +69,7 @@ import java.util.Calendar
 @Composable
 fun EventScreen(
     accountId: String? = "",
+    accountName: String? = "",
     startDate: String = "",
     endDate: String = "",
     startTime: String = "",
@@ -78,7 +79,8 @@ fun EventScreen(
     onAddEventClick: (id: String) -> Unit = {},
     onCancelEventClick: (id: String, eventDescription: String, startDateTime: String, endDateTime: String) -> Unit = { _, _, _, _ -> },
     selectedEventId: String = "",
-    isEventScreenEditable: Boolean = true
+    isEventScreenEditable: Boolean = true,
+    shouldNavigateBackToAccountDetailsScreen: Boolean = false
 ) {
 
 
@@ -152,6 +154,9 @@ fun EventScreen(
         { _, selectedHour: Int, selectedMinute: Int ->
             Log.i("EventScreen", "Selected Time $selectedHour:$selectedMinute")
             selectedStartTimeText = "$selectedHour:$selectedMinute"
+            if (selectedEndTimeText.isEmpty()) {
+                selectedEndTimeText = "${selectedHour + 1}:$selectedMinute"
+            }
         }, hour, minute, false
     )
 
@@ -178,6 +183,8 @@ fun EventScreen(
                 CustomToast(message = "Event Added", type = ToastType.Success)
                 if (selectedEventId.isNotEmpty()) {
                     onAddEventClick(selectedEventId)
+                } else if (shouldNavigateBackToAccountDetailsScreen) {
+                    NavigationService.navigateBackToAccountDetailsScreen()
                 }
             }
 
@@ -202,7 +209,13 @@ fun EventScreen(
             is NetworkResponse.Success -> {
                 updateEventApiIsSuccess = true
                 updateEventApiInProgress = false
+
                 CustomToast(message = "Event Updated", type = ToastType.Success)
+                if (shouldNavigateBackToAccountDetailsScreen) {
+                    NavigationService.navigateBackToAccountDetailsScreen()
+                } else {
+                    NavigationService.navigateBackToAccountDetailsScreen()
+                }
             }
 
             is NetworkResponse.Loading -> {

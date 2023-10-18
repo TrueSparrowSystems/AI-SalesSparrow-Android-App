@@ -50,6 +50,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,7 +69,6 @@ import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
-import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 import com.truesparrow.sales.viewmodals.TasksViewModal
 import java.util.Calendar
 import java.util.Date
@@ -83,13 +83,16 @@ fun TaskScreen(
     crmUserId: String = "",
     crmUserName: String = "",
     taskId: String = "",
-    isTaskScreenEditable: Boolean = true
+    isTaskScreenEditable: Boolean = true,
+    shouldNavigateBackToAccountDetailsScreen: Boolean = false
 ) {
 
     var taskDesc = taskDesc
     var crmUserId = crmUserId
     var dueDate = dueDate
     var crmUserName = crmUserName
+
+    Log.i("TaskScreen", "Success $shouldNavigateBackToAccountDetailsScreen")
 
 
     var task by remember { mutableStateOf(taskDesc) }
@@ -146,6 +149,11 @@ fun TaskScreen(
                     duration = Toast.LENGTH_SHORT,
                     type = ToastType.Success
                 )
+                Log.i("TaskScreen", "Success ${response.data} $shouldNavigateBackToAccountDetailsScreen")
+                if (shouldNavigateBackToAccountDetailsScreen) {
+                    NavigationService.navigateBackToAccountDetailsScreen()
+                }
+                Log.i("TaskScreen", "Success ${response.data}")
             }
 
             is NetworkResponse.Error -> {
@@ -175,6 +183,10 @@ fun TaskScreen(
                 CustomToast(
                     message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
+                if (shouldNavigateBackToAccountDetailsScreen) {
+                    NavigationService.navigateBackToAccountDetailsScreen()
+                }
+                Log.i("TaskScreen", "Success ${response.data}")
             }
 
             is NetworkResponse.Error -> {
@@ -374,6 +386,8 @@ fun AddTaskContent(
                             fontWeight = FontWeight.Bold,
                             fontFamily = customFontFamily,
                         ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
 
                     Spacer(modifier = Modifier.width(20.dp))

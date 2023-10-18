@@ -74,20 +74,16 @@ object NavigationService {
     ) {
         val noteDataJson = noteData?.let { Gson().toJson(it) } ?: "null_placeholder"
 
-        navController.navigate("notes_screen/$accountId/$accountName/$isAccountSelectionEnabled/$noteDataJson") {
-            launchSingleTop = true
-        }
+        navController.navigate("notes_screen/$accountId/$accountName/$isAccountSelectionEnabled/$noteDataJson")
     }
 
     fun navigateToEventScreen(
         accountId: String,
+        accountName: String,
         eventData: EventDetailsObject?
     ) {
         val eventDataJson = eventData?.let { Gson().toJson(it) } ?: "null_placeholder"
-
-        navController.navigate("event_screen/$accountId/$eventDataJson") {
-            launchSingleTop = true
-        }
+        navController.navigate("event_screen/$accountId/$accountName/$eventDataJson", )
     }
 
     fun navigateToTaskScreen(
@@ -97,9 +93,7 @@ object NavigationService {
     ) {
         val taskDataJson = taskData?.let { Gson().toJson(it) } ?: "null_placeholder"
 
-        navController.navigate("task_screen/$accountId/$accountName/$taskDataJson") {
-            launchSingleTop = true
-        }
+        navController.navigate("task_screen/$accountId/$accountName/$taskDataJson")
     }
 
 
@@ -122,6 +116,12 @@ object NavigationService {
     fun navigateBack() {
         navController.popBackStack()
     }
+
+    fun navigateBackToAccountDetailsScreen() {
+        navController.popBackStack(Screens.AccountDetailsScreen.route, false)
+    }
+
+
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -205,7 +205,8 @@ fun NavigationService(intent: Intent?) {
                     taskData.crm_organization_user_id ?: "",
                     taskData.crm_organization_user_name ?: "",
                     taskData.id ?: "",
-                    taskData.isTaskScreenEditable ?: true
+                    taskData.isTaskScreenEditable ?: true,
+                    taskData.shouldNavigateBackToAccountDetailsScreen ?: false
 
                     )
             } else {
@@ -217,7 +218,8 @@ fun NavigationService(intent: Intent?) {
                     "",
                     "",
                     "",
-                    true
+                    true,
+                    false
                 )
             }
         }
@@ -251,6 +253,7 @@ fun NavigationService(intent: Intent?) {
             if (eventData != null) {
                 EventScreen(
                     accountId,
+                    accountName,
                     startDateTime?.first ?: "",
                     endDateTime?.first ?: "",
                     startDateTime?.second ?: "",
@@ -260,12 +263,14 @@ fun NavigationService(intent: Intent?) {
                     {},
                     { s: String, s1: String, s2: String, s3: String ->  {} },
                     "",
-                    eventData.isEventScreenEditable ?: true
+                    eventData.isEventScreenEditable ?: true,
+                    eventData.shouldNavigateBackToAccountDetailsScreen ?: false
                 )
 
             } else {
                 EventScreen(
                     accountId,
+                    accountName,
                     "",
                     "",
                     "",
@@ -275,7 +280,8 @@ fun NavigationService(intent: Intent?) {
                     {},
                     { s: String, s1: String, s2: String, s3: String ->  {} },
                     "",
-                    true
+                    true,
+                    false
                 )
             }
 

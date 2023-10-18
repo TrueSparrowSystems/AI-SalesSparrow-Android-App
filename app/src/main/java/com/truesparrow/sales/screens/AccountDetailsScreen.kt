@@ -437,7 +437,8 @@ fun AccountDetails(
                             due_date = task.due_date,
                             id = task.id,
                             crm_organization_user_id = task.crm_organization_user_id,
-                            isTaskScreenEditable = false
+                            isTaskScreenEditable = false,
+                            shouldNavigateBackToAccountDetailsScreen = true
                         )
                         NavigationService.navigateToTaskScreen(accountId, accountName, taskData)
                     },
@@ -456,7 +457,8 @@ fun AccountDetails(
                             due_date = task.due_date,
                             id = task.id,
                             crm_organization_user_id = task.crm_organization_user_id,
-                            isTaskScreenEditable = true
+                            isTaskScreenEditable = true,
+                            shouldNavigateBackToAccountDetailsScreen = true
                         )
                         NavigationService.navigateToTaskScreen(accountId, accountName, taskData)
                     },
@@ -496,9 +498,10 @@ fun AccountDetails(
                             eventStartDate = event.start_datetime,
                             eventEndDate = event.end_datetime,
                             eventDescription = event.description,
-                            isEventScreenEditable = false
+                            isEventScreenEditable = false,
+                            shouldNavigateBackToAccountDetailsScreen = true
                         )
-                        NavigationService.navigateToEventScreen(accountId, eventData)
+                        NavigationService.navigateToEventScreen(accountId,accountName, eventData)
                     },
                     eventId = event.id,
                     onDeleteMenuClick = { task ->
@@ -513,9 +516,10 @@ fun AccountDetails(
                             eventStartDate = event.start_datetime,
                             eventEndDate = event.end_datetime,
                             eventDescription = event.description,
-                            isEventScreenEditable = true
+                            isEventScreenEditable = true,
+                            shouldNavigateBackToAccountDetailsScreen = true
                         )
-                        NavigationService.navigateToEventScreen(accountId, eventData)
+                        NavigationService.navigateToEventScreen(accountId,accountName, eventData)
                     }
                 )
             }
@@ -661,7 +665,17 @@ fun TaskDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateToTaskScreen(accountId, accountName, null)
+                    val taskData = TaskData(
+                        creator_name = "",
+                        crm_organization_user_name = "",
+                        description = "",
+                        due_date = "",
+                        id = "",
+                        crm_organization_user_id = "",
+                        isTaskScreenEditable = true,
+                        shouldNavigateBackToAccountDetailsScreen = true
+                    )
+                    NavigationService.navigateToTaskScreen(accountId, accountName, taskData)
                 }
         )
     }
@@ -717,7 +731,16 @@ fun EventDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateToEventScreen(accountId, null)
+
+                    val eventData = EventDetailsObject(
+                        eventId = "",
+                        eventStartDate = "",
+                        eventEndDate = "",
+                        eventDescription = "",
+                        isEventScreenEditable = true,
+                        shouldNavigateBackToAccountDetailsScreen = true
+                    )
+                    NavigationService.navigateToEventScreen(accountId, accountName,eventData)
                 }
         )
     }
