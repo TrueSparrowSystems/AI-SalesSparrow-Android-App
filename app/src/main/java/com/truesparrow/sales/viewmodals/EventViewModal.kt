@@ -13,18 +13,19 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class EventViewModal @Inject constructor(private val eventRepository: EventRepository) : ViewModel(){
+class EventViewModal @Inject constructor(private val eventRepository: EventRepository) :
+    ViewModel() {
 
-    val eventsLiveData : LiveData<NetworkResponse<CreateAccountEventResponse>>
+    val eventsLiveData: LiveData<NetworkResponse<CreateAccountEventResponse>>
         get() = eventRepository.eventsLiveData
 
-    val updateEventLiveData : LiveData<NetworkResponse<Unit>>
+    val updateEventLiveData: LiveData<NetworkResponse<Unit>>
         get() = eventRepository.updateEventLiveData
 
-    val eventDetails : LiveData<NetworkResponse<EventDetailsResponse>>
+    val eventDetails: LiveData<NetworkResponse<EventDetailsResponse>>
         get() = eventRepository.eventDetails
 
-     fun createEvent(
+    fun createEvent(
         accountId: String,
         startDateTime: String,
         endDateTime: String,

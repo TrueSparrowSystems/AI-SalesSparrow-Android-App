@@ -142,6 +142,11 @@ fun EventScreen(
         }, year, month, dayOfMonth
     )
 
+
+    if (selectedStartDateText.isEmpty()) {
+        selectedStartDateText = "$dayOfMonth/${month + 1}/$year"
+    }
+
     val endDatePicker = DatePickerDialog(
         context,
         { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
@@ -149,16 +154,21 @@ fun EventScreen(
         }, year, month, dayOfMonth
     )
 
+    if (selectedEndDateText.isEmpty()) {
+        selectedEndDateText = "$dayOfMonth/${month + 1}/$year"
+    }
+
     val startTimePicker = TimePickerDialog(
         context,
         { _, selectedHour: Int, selectedMinute: Int ->
             Log.i("EventScreen", "Selected Time $selectedHour:$selectedMinute")
             selectedStartTimeText = "$selectedHour:$selectedMinute"
-            if (selectedEndTimeText.isEmpty()) {
-                selectedEndTimeText = "${selectedHour + 1}:$selectedMinute"
-            }
         }, hour, minute, false
     )
+
+    if (selectedStartTimeText.isEmpty()) {
+        selectedStartTimeText = "$hour:$minute"
+    }
 
     val endTimePicker = TimePickerDialog(
         context,
@@ -166,6 +176,10 @@ fun EventScreen(
             selectedEndTimeText = "$selectedHour:$selectedMinute"
         }, hour, minute, false
     )
+
+    if (selectedEndTimeText.isEmpty()) {
+        selectedEndTimeText = "${hour+1}:$minute"
+    }
 
 
 

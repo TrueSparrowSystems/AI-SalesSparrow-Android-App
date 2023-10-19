@@ -289,7 +289,15 @@ fun AddTaskContent(
     dueDateDay = dueDateCalendar.get(Calendar.DAY_OF_MONTH)
 
     dueDateCalendar.time = Date()
-    val selectedDueDate = remember { mutableStateOf(dueDate) }
+    var selectedDueDate = remember { mutableStateOf(dueDate) }
+
+   //assign today's date if due date is empty
+    if (selectedDueDate.value.isEmpty()) {
+        val formattedDay = String.format("%02d", dueDateDay)
+        val formattedMonth = String.format("%02d", dueDateMonth + 1)
+        selectedDueDate.value = "$dueDateYear-$formattedMonth-$formattedDay"
+        tasksViewModel.setTaskScreenSelectedDueDate(selectedDueDate.value)
+    }
 
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
