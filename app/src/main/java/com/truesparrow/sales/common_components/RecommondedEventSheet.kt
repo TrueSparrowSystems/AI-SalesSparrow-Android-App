@@ -25,9 +25,14 @@ fun RecommondedEventSheet(
     eventDescription: String = "",
     selectedEventId: String = "",
     onAddEventClick: (
-        id: String
-    ) -> Unit = { _ -> },
+        id: String,
+        eventId: String,
+        eventDescription: String,
+        startDateTime: String,
+        endDateTime: String,
+    ) -> Unit = { _ , _, _, _, _ -> },
     onCancelEventClick: (id: String, eventDescription: String, startDateTime: String, endDateTime: String) -> Unit = { _, _, _, _ -> },
+    eventId: String = "",
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -53,9 +58,11 @@ fun RecommondedEventSheet(
             endTime = endTime,
             eventDescription = eventDescription,
             selectedEventId = selectedEventId,
-            eventId = "",
+            eventId = eventId,
             onCancelEventClick = onCancelEventClick,
             onAddEventClick = onAddEventClick,
+            isEventScreenEditable = true,
+            shouldNavigateBackToAccountDetailsScreen = false,
         )
 
     }

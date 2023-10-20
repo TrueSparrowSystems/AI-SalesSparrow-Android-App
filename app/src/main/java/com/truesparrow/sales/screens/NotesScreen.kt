@@ -249,7 +249,9 @@ fun NotesScreen(
                 Log.i("log4--------------", "${currTask}")
 
                 CustomToast(
-                    message = "Task Added and assigned to ${currTask?.crm_user_name}", duration = Toast.LENGTH_SHORT, type = ToastType.Success
+                    message = "Task Added and assigned to ${currTask?.crm_user_name}",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Success
                 )
 
                 notesViewModel.updateTaskById(
@@ -531,6 +533,23 @@ fun NotesScreen(
                     )
                 )
             },
+            onAddTaskClick = { crmOrganizationUserId: String, crmOrganizationUserName: String, description: String, dueDate: String, id: String, taskId: String ->
+                Log.i(
+                    "onAddTaskClick",
+                    " crmOrganizationUserId ${crmOrganizationUserId} crmOrganizationUserName ${crmOrganizationUserName} description ${description} dueDate ${dueDate} id ${id} taskId ${taskId}"
+                )
+                notesViewModel.updateTaskById(
+                    id, Tasks(
+                        crm_user_id = crmOrganizationUserId,
+                        crm_user_name = crmOrganizationUserName,
+                        task_desc = description,
+                        due_date = dueDate,
+                        id = id,
+                        is_task_created = true,
+                        task_id = taskId
+                    )
+                )
+            },
         )
     }
 
@@ -550,12 +569,24 @@ fun NotesScreen(
             selectedEventId = event!!.id,
             endTime = endDateTime!!.second ?: "",
             eventDescription = event?.description ?: "",
+            onAddEventClick = { id: String, eventId: String, eventDescription: String, startDateTime: String, endDateTime: String ->
+                notesViewModel.updateSuggestedEventById(
+                    id, SuggestedEvents(
+                        start_datetime = startDateTime,
+                        end_datetime = endDateTime,
+                        description = eventDescription,
+                        id = id,
+                        is_event_created = true,
+                        event_id = eventId
+                    )
+                )
+                toggleEventSheet()
+            },
             onCancelEventClick = { id: String, eventDescription: String, startDateTime: String, endDateTime: String ->
                 Log.i(
                     "onCancelClick",
                     " id ${id} eventDescription ${eventDescription} startDateTime ${startDateTime} endDateTime ${endDateTime}"
                 )
-
                 notesViewModel.updateSuggestedEventById(
                     id, SuggestedEvents(
                         start_datetime = startDateTime,
@@ -565,11 +596,9 @@ fun NotesScreen(
                         is_event_created = false
                     )
                 )
-
                 toggleEventSheet()
-
-
             },
+            eventId = event!!.event_id ?: "",
         )
     }
 
@@ -774,17 +803,19 @@ fun NotesScreen(
                                 isEventAdded = it.is_event_created,
                                 onEditMenuClick = {
                                     var eventData = EventDetailsObject(
-                                        eventId = createEventResponse?.data?.event_id!!,
+                                        eventId = eventId ?: "",
                                         eventStartDate = startDateTime!!,
                                         eventEndDate = endDateTime!!,
                                         eventDescription = description,
                                         isEventScreenEditable = true
                                     )
-                                    NavigationService.navigateToEventScreen(
-                                        accountId,
-                                        accountName,
-                                        eventData
-                                    )
+                                    selectedEventId = id
+                                    toggleEventSheet()
+//                                    NavigationService.navigateToEventScreen(
+//                                        accountId,
+//                                        accountName,
+//                                        eventData
+//                                    )
                                 },
                                 onDeleteMenuClick = {
                                     if (eventId != null) {
@@ -847,6 +878,7 @@ fun NotesScreen(
                                     }
                                 })
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }

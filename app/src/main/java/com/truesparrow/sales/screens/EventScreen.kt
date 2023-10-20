@@ -76,7 +76,7 @@ fun EventScreen(
     endTime: String = "",
     eventDescription: String = "",
     eventId: String = "",
-    onAddEventClick: (id: String) -> Unit = {},
+    onAddEventClick: (id: String, eventId : String, eventDescription: String, startDateTime: String, endDateTime: String) -> Unit = {_, _,_,_,_ ->},
     onCancelEventClick: (id: String, eventDescription: String, startDateTime: String, endDateTime: String) -> Unit = { _, _, _, _ -> },
     selectedEventId: String = "",
     isEventScreenEditable: Boolean = true,
@@ -196,7 +196,11 @@ fun EventScreen(
                 createEventApiInProgress = false
                 CustomToast(message = "Event Added", type = ToastType.Success)
                 if (selectedEventId.isNotEmpty()) {
-                    onAddEventClick(selectedEventId)
+                    val iso8601StartDateTime =
+                        convertToISO8601(selectedStartDateText, selectedStartTimeText);
+                    val iso8601EndDateTime =
+                        convertToISO8601(selectedEndDateText, selectedEndTimeText);
+                    onAddEventClick(selectedEventId, it.data?.event_id ?: "", eventDesc, iso8601StartDateTime, iso8601EndDateTime)
                 } else if (shouldNavigateBackToAccountDetailsScreen) {
                     NavigationService.navigateBackToAccountDetailsScreen()
                 }
@@ -228,7 +232,15 @@ fun EventScreen(
                 if (shouldNavigateBackToAccountDetailsScreen) {
                     NavigationService.navigateBackToAccountDetailsScreen()
                 } else {
-                    NavigationService.navigateBackToAccountDetailsScreen()
+                    if (selectedEventId.isNotEmpty()){
+                        val iso8601StartDateTime =
+                            convertToISO8601(selectedStartDateText, selectedStartTimeText);
+                        val iso8601EndDateTime =
+                            convertToISO8601(selectedEndDateText, selectedEndTimeText);
+                        onAddEventClick(selectedEventId, eventId, eventDesc, iso8601StartDateTime, iso8601EndDateTime)
+                    } else {
+                        NavigationService.navigateBackToAccountDetailsScreen()
+                    }
                 }
             }
 

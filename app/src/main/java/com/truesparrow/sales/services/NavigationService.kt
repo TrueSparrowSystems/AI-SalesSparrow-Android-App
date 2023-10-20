@@ -83,7 +83,7 @@ object NavigationService {
         eventData: EventDetailsObject?
     ) {
         val eventDataJson = eventData?.let { Gson().toJson(it) } ?: "null_placeholder"
-        navController.navigate("event_screen/$accountId/$accountName/$eventDataJson", )
+        navController.navigate("event_screen/$accountId/$accountName/$eventDataJson")
     }
 
     fun navigateToTaskScreen(
@@ -208,7 +208,7 @@ fun NavigationService(intent: Intent?) {
                     taskData.isTaskScreenEditable ?: true,
                     taskData.shouldNavigateBackToAccountDetailsScreen ?: false
 
-                    )
+                )
             } else {
                 TaskScreen(
                     accountId,
@@ -260,8 +260,8 @@ fun NavigationService(intent: Intent?) {
                     endDateTime?.second ?: "",
                     eventData.eventDescription ?: "",
                     eventData.eventId ?: "",
-                    {},
-                    { s: String, s1: String, s2: String, s3: String ->  {} },
+                    { s: String, s1: String, s2: String, s3: String, s4: String -> {} },
+                    { s: String, s1: String, s2: String, s3: String -> {} },
                     "",
                     eventData.isEventScreenEditable ?: true,
                     eventData.shouldNavigateBackToAccountDetailsScreen ?: false
@@ -277,8 +277,8 @@ fun NavigationService(intent: Intent?) {
                     "",
                     "",
                     "",
-                    {},
-                    { s: String, s1: String, s2: String, s3: String ->  {} },
+                    { s: String, s1: String, s2: String, s3: String, s4: String -> {} },
+                    { s: String, s1: String, s2: String, s3: String -> {} },
                     "",
                     true,
                     false
