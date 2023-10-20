@@ -69,12 +69,8 @@ import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
 import com.truesparrow.sales.util.convertToISO8601
 import com.truesparrow.sales.util.extractDateAndTime
-import com.truesparrow.sales.viewmodals.AccountDetailsViewModal
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
-import com.truesparrow.sales.viewmodals.EventViewModal
 import com.truesparrow.sales.viewmodals.NotesViewModel
-import com.truesparrow.sales.viewmodals.TasksViewModal
-import kotlinx.coroutines.delay
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalComposeUiApi::class)
@@ -110,13 +106,12 @@ fun NotesScreen(
     val saveNoteRespose by notesViewModel.notesLiveData.observeAsState()
     val updateNoteRespose by notesViewModel.updateNoteLiveData.observeAsState()
 
-    val tasksViewModel: TasksViewModal = hiltViewModel()
+
     var createTaskApiInProgress by remember { mutableStateOf(false) }
     var createTaskApiIsSuccess by remember { mutableStateOf(false) }
     var createEventApiInProgress by remember { mutableStateOf(false) }
     var createEventApiIsSuccess by remember { mutableStateOf(false) }
 
-    val eventsViewModal: EventViewModal = hiltViewModel()
     var noteDescription = noteDescription
 
     var noteDesc by remember { mutableStateOf(noteDescription) }
@@ -125,13 +120,14 @@ fun NotesScreen(
 
     var isTasksListUpdated by remember { mutableStateOf(false) }
 
-    val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
+    val createTaskResponse by notesViewModel.tasksLiveData.observeAsState()
 
-    val accountDetailsViewModal: AccountDetailsViewModal = hiltViewModel()
+    val deleteTaskResponse by notesViewModel.deleteAccountTaskLiveData.observeAsState();
 
-    val deleteTaskResponse by accountDetailsViewModal.deleteAccountTaskLiveData.observeAsState();
+    val createEventResponse by notesViewModel.eventsLiveData.observeAsState();
 
-    val createEventResponse by eventsViewModal.eventsLiveData.observeAsState();
+    val deleteEventResponse by notesViewModel.deleteAccountEventLiveData.observeAsState();
+
     val openDeleteDialogForEvent = remember { mutableStateOf(false) }
     val openDeleteDialogForTask = remember { mutableStateOf(false) }
 
@@ -173,6 +169,24 @@ fun NotesScreen(
     }
 
 
+    deleteEventResponse?.let {
+        deleteEventResponse
+        when (deleteEventResponse) {
+            is NetworkResponse.Success -> {
+                CustomToast(message = "Event Deleted", type = ToastType.Success)
+            }
+
+            is NetworkResponse.Error -> {
+                CustomToast(message = "Something went wrong", type = ToastType.Error)
+            }
+
+            is NetworkResponse.Loading -> {
+            }
+
+            else -> {}
+        }
+    }
+
 
 
     deleteTaskResponse?.let {
@@ -198,8 +212,8 @@ fun NotesScreen(
             is NetworkResponse.Success -> {
                 createEventApiInProgress = false;
                 createEventApiIsSuccess = true
-                CustomToast(message = "Event Added", type = ToastType.Success)
                 val currEvent = notesViewModel.getSuggestedEventById(addEventId)
+                CustomToast(message = "Event Added", type = ToastType.Success)
                 Log.i("log4--------------", "${currEvent}")
                 notesViewModel.updateSuggestedEventById(
                     addEventId, SuggestedEvents(
@@ -231,11 +245,12 @@ fun NotesScreen(
             is NetworkResponse.Success -> {
                 createTaskApiInProgress = false;
                 createTaskApiIsSuccess = true
-                CustomToast(
-                    message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
-                )
                 val currTask = notesViewModel.getTaskById(addTaskId)
                 Log.i("log4--------------", "${currTask}")
+
+                CustomToast(
+                    message = "Task Added and assigned to ${currTask?.crm_user_name}", duration = Toast.LENGTH_SHORT, type = ToastType.Success
+                )
 
                 notesViewModel.updateTaskById(
                     addTaskId, Tasks(
@@ -413,7 +428,8 @@ fun NotesScreen(
                 val event = suggestedEvents!!.filter { it?.id == selectedEventId }
                 Log.i("event", "${event} ${selectedEventId} ${selectedEventId}")
                 event[0]?.event_id?.let {
-                    accountDetailsViewModal.deleteAccountEvent(
+                    Log.i("event id", "${it}")
+                    notesViewModel.deleteAccountEvent(
                         accountId = accountId,
                         eventId = it
                     )
@@ -442,7 +458,8 @@ fun NotesScreen(
                 val task = tasks!!.filter { it?.id == selectedTaskId }
                 Log.i("task", "${task} ${selectedTaskId}")
                 task[0]?.task_id?.let {
-                    accountDetailsViewModal.deleteAccountTask(
+                    Log.i("task id", "${it}")
+                    notesViewModel.deleteAccountTask(
                         accountId,
                         taskId = it
                     )
@@ -652,7 +669,11 @@ fun NotesScreen(
                     },
                     onAddEventClick = {
                         selectedEventId = ""
-                        NavigationService.navigateToEventScreen(accountId = accountId,accountName, null)
+                        NavigationService.navigateToEventScreen(
+                            accountId = accountId,
+                            accountName,
+                            null
+                        )
                     }
                 )
 
@@ -703,7 +724,7 @@ fun NotesScreen(
                             onAddTaskClick = { crmOrganizationUserId: String, description: String, dueDate: String, id: String ->
                                 addTaskId = id
                                 createTaskApiInProgress = true
-                                tasksViewModel.createTask(
+                                notesViewModel.createTask(
                                     accountId = accountId!!,
                                     crmOrganizationUserId = crmOrganizationUserId,
                                     description = description,
@@ -759,7 +780,11 @@ fun NotesScreen(
                                         eventDescription = description,
                                         isEventScreenEditable = true
                                     )
-                                    NavigationService.navigateToEventScreen(accountId,accountName, eventData)
+                                    NavigationService.navigateToEventScreen(
+                                        accountId,
+                                        accountName,
+                                        eventData
+                                    )
                                 },
                                 onDeleteMenuClick = {
                                     if (eventId != null) {
@@ -813,7 +838,7 @@ fun NotesScreen(
                                                 selectedEndDateText,
                                                 selectedEndTimeText
                                             );
-                                        eventsViewModal.createEvent(
+                                        notesViewModel.createEvent(
                                             accountId = accountId!!,
                                             description = eventDescription,
                                             startDateTime = iso8601StartDateTime,
@@ -893,7 +918,7 @@ fun RecommendedSectionHeader(
                     },
                     onAddEventMenuClick = {
                         onAddEventClick()
-                        NavigationService.navigateToEventScreen(accountId,accountName, null)
+                        NavigationService.navigateToEventScreen(accountId, accountName, null)
                     }
                 )
             }

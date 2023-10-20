@@ -1,17 +1,23 @@
 package com.truesparrow.sales.viewmodals
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.truesparrow.sales.models.CreateAccountEventResponse
+import com.truesparrow.sales.models.CreateAccountTaskResponse
 import com.truesparrow.sales.models.GetCrmActionsResponse
 import com.truesparrow.sales.models.NotesDetailResponse
 import com.truesparrow.sales.models.SaveNote
 import com.truesparrow.sales.models.SuggestedEvents
 import com.truesparrow.sales.models.Tasks
+import com.truesparrow.sales.repository.AccountDetailsRepository
+import com.truesparrow.sales.repository.EventRepository
 import com.truesparrow.sales.repository.NotesRepository
+import com.truesparrow.sales.repository.TasksRepository
 import com.truesparrow.sales.util.NetworkResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -21,7 +27,10 @@ import javax.inject.Inject
 @HiltViewModel
 
 class NotesViewModel @Inject constructor(
-    private val notesRepository: NotesRepository
+    private val notesRepository: NotesRepository,
+    private val tasksRepository: TasksRepository,
+    private val eventRepository: EventRepository,
+    private val accountDetailsRepository: AccountDetailsRepository
 ) : ViewModel() {
 
     val note = mutableStateOf("")
@@ -34,7 +43,6 @@ class NotesViewModel @Inject constructor(
 
     private val _suggestedEvents = MutableLiveData<List<SuggestedEvents>>()
     val suggestedEvents: MutableLiveData<List<SuggestedEvents>> = _suggestedEvents
-
 
     val updateNoteLiveData: LiveData<NetworkResponse<Unit>>
         get() = notesRepository.updateNoteLiveData
@@ -113,6 +121,20 @@ class NotesViewModel @Inject constructor(
     val getCrmActionsLiveData: LiveData<NetworkResponse<GetCrmActionsResponse>>
         get() = notesRepository.getCrmActions
 
+    val eventsLiveData: LiveData<NetworkResponse<CreateAccountEventResponse>>
+        get() = eventRepository.eventsLiveData
+
+    val tasksLiveData: LiveData<NetworkResponse<CreateAccountTaskResponse>>
+        get() = tasksRepository.tasksLiveData
+
+    val deleteAccountTaskLiveData: LiveData<NetworkResponse<Unit>>
+        get() = accountDetailsRepository.deletAccountTask
+
+    val deleteAccountEventLiveData: LiveData<NetworkResponse<Unit>>
+        get() = accountDetailsRepository.deletAccountEvent
+
+
+
 
     fun getNoteDetails(accountId: String, noteId: String) {
         Log.i("NotesDetails", "Account Id: $accountId Note Id: $noteId");
@@ -138,6 +160,7 @@ class NotesViewModel @Inject constructor(
     fun saveNote(accountId: String, text: String) {
         Log.i("res", "saveNote: $accountId, $text")
         viewModelScope.launch {
+            val response = notesRepository.saveNote(accountId = accountId, text = text)
             notesRepository.saveNote(
                 accountId = accountId,
                 text = text
@@ -148,6 +171,58 @@ class NotesViewModel @Inject constructor(
     fun getCrmActions(text: String) {
         viewModelScope.launch {
             notesRepository.getCrmActions(text)
+        }
+    }
+
+    fun createTask(
+        accountId: String, crmOrganizationUserId: String, description: String, dueDate: String
+    ) {
+        Log.i(
+            "Task",
+            "Account ID: $accountId, User ID: $crmOrganizationUserId, Description: $description, Due Date: $dueDate"
+        )
+
+        viewModelScope.launch {
+            tasksRepository.createTask(
+                accountId = accountId,
+                crmOrganizationUserId = crmOrganizationUserId,
+                description = description,
+                dueDate = dueDate
+            )
+        }
+    }
+
+    fun createEvent(
+        accountId: String,
+        startDateTime: String,
+        endDateTime: String,
+        description: String,
+    ) {
+        viewModelScope.launch {
+            Log.i("EventScreen", "$accountId $startDateTime $endDateTime $description")
+            eventRepository.createEvent(accountId, startDateTime, endDateTime, description)
+        }
+
+    }
+
+    fun deleteAccountTask(accountId: String, taskId: String) {
+        viewModelScope.launch {
+            accountDetailsRepository.deleteAccountTask(
+                accountId,
+                taskId
+            )
+        }
+    }
+
+    fun deleteAccountEvent(
+        accountId: String,
+        eventId: String
+    ) {
+        viewModelScope.launch {
+            accountDetailsRepository.deleteAccountEvent(
+                accountId,
+                eventId
+            )
         }
     }
 }

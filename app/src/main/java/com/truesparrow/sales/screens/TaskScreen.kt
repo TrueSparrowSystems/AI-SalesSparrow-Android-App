@@ -181,7 +181,7 @@ fun TaskScreen(
                 createTaskApiInProgress = false
                 createTaskApiIsSuccess = true
                 CustomToast(
-                    message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
+                    message = "Task Added and assigned to ${crmUserName}.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
                 if (shouldNavigateBackToAccountDetailsScreen) {
                     NavigationService.navigateBackToAccountDetailsScreen()
