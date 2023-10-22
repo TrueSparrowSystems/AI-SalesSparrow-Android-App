@@ -103,7 +103,7 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
             _deleteAccountNote.postValue(NetworkResponse.Loading())
             val response = apiService.deleteNote(accountId, noteId)
 
-            if (response.code() == 204) {
+            if (response.code() == 204 || response.code() == 200) {
                 Log.i("deleteAccountNote", "Success: ${response.body()}")
                 _deleteAccountNote.postValue(NetworkResponse.Success(Unit))
             } else if (response.errorBody() != null) {
@@ -125,7 +125,7 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
             _deleteAccountTask.postValue(NetworkResponse.Loading())
             val response = apiService.deleteTask(accountId, taskId)
 
-            if (response.code() == 204) {
+            if (response.code() == 204 || response.code() == 200) {
                 Log.i("deleteAccountTask", "Success: ${response.body()}")
                 _deleteAccountTask.postValue(NetworkResponse.Success(Unit))
             } else if (response.errorBody() != null) {
@@ -147,7 +147,7 @@ class AccountDetailsRepository @Inject constructor(private val apiService: ApiSe
             _deleteAccountEvent.postValue(NetworkResponse.Loading())
             val response = apiService.deleteEvent(accountId, eventId)
 
-            if (response.code() == 204) {
+            if (response.code() == 204 || response.code() == 200) {
                 Log.i("deleteAccountEvent", "Success: ${response.body()}")
                 _deleteAccountEvent.postValue(NetworkResponse.Success(Unit))
             } else if (response.errorBody() != null) {

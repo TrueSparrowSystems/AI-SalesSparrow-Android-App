@@ -68,7 +68,8 @@ fun EventCard(
     startDateTime: String = "",
     endDateTime: String = "",
     index: Number,
-    isEventAdded : Boolean = false
+    isEventAdded: Boolean = false,
+    shouldShowEditOption: Boolean? = true,
 ) {
     Log.i(
         "EventCard",
@@ -96,6 +97,9 @@ fun EventCard(
         val parsedTime = parseTime(date)
         Log.i("EventCard 1", "NotesCard: $parsedTime date: $date")
         formattedTime = parsedTime?.let { formatTime(it) }.toString()
+        if (formattedTime == "null") {
+            formattedTime = "Just Now"
+        }
         Log.i("EventCard 1", "NotesCard: formattedTime: $formattedTime")
     } catch (e: Exception) {
         Log.i("EventCard 1", "NotesCard: $e")
@@ -168,6 +172,7 @@ fun EventCard(
             }
 
             Row {
+                // if formattedTime is null or empty then add a just now
                 Text(
                     text = formattedTime,
                     style = TextStyle(
@@ -207,6 +212,7 @@ fun EventCard(
                         onDismissRequest = { expanded = false },
                         editMenuTestTag = editMenuTestTag,
                         deleteMenuTestTag = deleteMenuTestTag,
+                        shouldShowEditOption = shouldShowEditOption,
                         onEditMenuClick = {
                             Log.i("NotesCard", "NotesCard: $eventId")
                             onEditMenuClick(eventId)
@@ -374,6 +380,6 @@ fun EventCardPreview() {
         startDateTime = "2021-07-20T12:00:00Z",
         endDateTime = "2021-07-20T12:00:00Z",
         index = 0,
-         isEventAdded = true
+        isEventAdded = true
     )
 }

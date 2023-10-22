@@ -739,6 +739,7 @@ fun NotesScreen(
                                 selectedTaskId = id
                                 toggleSheet()
                             },
+                            shouldShowEditOption = false,
                             onCancelTaskClick = { taskId ->
                                 Log.i("NotesScreen oncancel", "NotesScreen: $taskId")
                                 Log.i("NotesScreen oncancel", "NotesScreen: ${tasks!!.size} $tasks")
@@ -749,7 +750,7 @@ fun NotesScreen(
                                     "NotesScreen: ${updatedTasks!!.size} $updatedTasks"
                                 )
                             },
-                            createTaskApiInProgress = createTaskApiInProgress,
+                            createTaskApiInProgress = createTaskApiInProgress && addTaskId == task.id,
                             onAddTaskClick = { crmOrganizationUserId: String, description: String, dueDate: String, id: String ->
                                 addTaskId = id
                                 createTaskApiInProgress = true
@@ -801,6 +802,7 @@ fun NotesScreen(
                                 onClick = { },
                                 index = index++,
                                 isEventAdded = it.is_event_created,
+                                shouldShowEditOption = false,
                                 onEditMenuClick = {
                                     var eventData = EventDetailsObject(
                                         eventId = eventId ?: "",
@@ -847,7 +849,7 @@ fun NotesScreen(
                                         suggestedEvents!!.filter { it?.id != eventId }
                                     notesViewModel.setSuggestedEvents(updatedEvents)
                                 },
-                                createEventApiInProgress = createEventApiInProgress,
+                                createEventApiInProgress = createEventApiInProgress && addEventId == it.id,
                                 noteViewModal = notesViewModel,
                                 onAddEventClick = { accountId,
                                                     eventDescription,

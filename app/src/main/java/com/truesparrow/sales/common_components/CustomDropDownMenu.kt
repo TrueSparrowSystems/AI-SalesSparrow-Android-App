@@ -39,7 +39,8 @@ fun CustomDropDownMenu(
     onDeleteMenuClick: () -> Unit,
     onEditMenuClick: () -> Unit,
     deleteMenuTestTag: String? = "",
-    editMenuTestTag: String? = ""
+    editMenuTestTag: String? = "",
+    shouldShowEditOption : Boolean? = true,
 ) {
 
     DropdownMenu(
@@ -58,32 +59,34 @@ fun CustomDropDownMenu(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
 
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.background(
-                            color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 5.dp)
-                        ).clickable {
-                            onEditMenuClick()
-                        }.semantics {
-                            testTag = editMenuTestTag!!
-                            testTagsAsResourceId = true
-                        }
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.edit),
-                            contentDescription = "delete_tasks",
-                            contentScale = ContentScale.None
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Text(
-                            text = "Edit", style = TextStyle(
-                                fontSize = 16.sp,
-                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                                fontWeight = FontWeight(600),
-                                color = Color(0xFF545A71),
+                    if(shouldShowEditOption!!) {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.background(
+                                color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 5.dp)
+                            ).clickable {
+                                onEditMenuClick()
+                            }.semantics {
+                                testTag = editMenuTestTag!!
+                                testTagsAsResourceId = true
+                            }
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.edit),
+                                contentDescription = "delete_tasks",
+                                contentScale = ContentScale.None
                             )
-                        )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = "Edit", style = TextStyle(
+                                    fontSize = 16.sp,
+                                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                                    fontWeight = FontWeight(600),
+                                    color = Color(0xFF545A71),
+                                )
+                            )
+                        }
                     }
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,

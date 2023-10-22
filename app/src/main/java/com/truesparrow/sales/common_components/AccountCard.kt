@@ -70,7 +70,10 @@ fun AccountCard(
     ) {
         Column(Modifier.padding(14.dp)) {
             CustomText(
-                text = "ACCOUNT", Typography.titleSmall, color = eastBay.copy(alpha = 0.7f), modifier = Modifier
+                text = "ACCOUNT",
+                Typography.titleSmall,
+                color = eastBay.copy(alpha = 0.7f),
+                modifier = Modifier
                     .semantics {
                         testTag = "txt_account_detail_account_text"
                         contentDescription = "txt_account_detail_account_text"
@@ -94,10 +97,11 @@ fun AccountCard(
                         text = website,
                         color = port_gore,
                         style = Typography.labelMedium,
-                        modifier = Modifier.clickable {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(website))
-                            context.startActivity(intent);
-                        }
+                        modifier = Modifier
+                            .clickable {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(website))
+                                context.startActivity(intent);
+                            }
                             .semantics {
                                 testTag = accountListCardWebsiteTestTag
                                 testTagsAsResourceId = true
@@ -119,11 +123,13 @@ fun AccountCard(
                         text = contactName,
                         color = port_gore,
                         style = Typography.labelMedium,
-                        modifier = Modifier.clickable {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(website))
-                            Log.i("SalesSparow", "handleDeepLink authCode: $intent")
-                            context.startActivity(intent);
-                        }
+                        modifier = Modifier
+                            .clickable {
+                                if(website.isNotEmpty() && website != "null" && website.contains("http" ) || website.contains("https" )) {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(website))
+                                    context.startActivity(intent);
+                                };
+                            }
                             .semantics {
                                 testTagsAsResourceId = true
                                 testTag = accountListContactNameTestTag
