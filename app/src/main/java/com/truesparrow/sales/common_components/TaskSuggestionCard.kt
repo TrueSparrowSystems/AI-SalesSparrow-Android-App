@@ -461,6 +461,11 @@ fun TaskSuggestionCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             if (!isTaskAdded) {
+                val buttonColor = if (dueDate.value.isNotEmpty() && crmUserName.isNotEmpty()) {
+                    Color(0xFF212653)
+                } else {
+                    Color(0xFF212653).copy(alpha = 0.7f)
+                }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically
@@ -473,13 +478,14 @@ fun TaskSuggestionCard(
                             id
                         )
                     },
+                        enabled = dueDate.value.isNotEmpty() && crmUserName.isNotEmpty(),
                         contentPadding = PaddingValues(all = 8.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent, contentColor = Color.White
                         ),
                         modifier = Modifier
                             .background(
-                                color = Color(0xFF212653), shape = RoundedCornerShape(size = 5.dp)
+                                color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
                             )
                             .height(32.dp)
                             .clip(shape = RoundedCornerShape(size = 5.dp))

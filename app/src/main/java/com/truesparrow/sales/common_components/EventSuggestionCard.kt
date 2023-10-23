@@ -470,6 +470,11 @@ fun EventSuggestionCard(
             Spacer(modifier = Modifier.height(10.dp))
 
             if (!isEventAdded) {
+                val buttonColor = if (selectedEndDateText.isNotEmpty() && selectedStartDateText.isNotEmpty() && selectedStartTimeText.isNotEmpty() && selectedEndTimeText.isNotEmpty() && eventDescription.isNotEmpty()) {
+                    Color(0xFF212653)
+                } else {
+                    Color(0xFF212653).copy(alpha = 0.7f)
+                }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically
@@ -485,13 +490,14 @@ fun EventSuggestionCard(
                             id
                         )
                     },
+                        enabled = selectedEndDateText.isNotEmpty() && selectedStartDateText.isNotEmpty() && selectedStartTimeText.isNotEmpty() && selectedEndTimeText.isNotEmpty() && eventDescription.isNotEmpty(),
                         contentPadding = PaddingValues(all = 8.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent, contentColor = Color.White
                         ),
                         modifier = Modifier
                             .background(
-                                color = Color(0xFF212653), shape = RoundedCornerShape(size = 5.dp)
+                                color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
                             )
                             .height(32.dp)
                             .clip(shape = RoundedCornerShape(size = 5.dp))
