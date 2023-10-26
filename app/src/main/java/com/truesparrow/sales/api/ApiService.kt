@@ -1,5 +1,6 @@
 package com.truesparrow.sales.api
 
+import com.truesparrow.sales.models.AccountEventsResponse
 import com.truesparrow.sales.models.AccountFeedResponse
 import com.truesparrow.sales.models.SalesForceConnectRequest
 import com.truesparrow.sales.models.RedirectUrl
@@ -8,19 +9,24 @@ import com.truesparrow.sales.models.CurrentUserResponse
 import com.truesparrow.sales.models.AccountListResponse
 import com.truesparrow.sales.models.AccountNotesResponse
 import com.truesparrow.sales.models.AccountTasksResponse
+import com.truesparrow.sales.models.CreateAccountEventResponse
 import com.truesparrow.sales.models.CreateAccountTaskRequest
 import com.truesparrow.sales.models.CreateAccountTaskResponse
 import com.truesparrow.sales.models.CrmOrganisationUsersResponse
+import com.truesparrow.sales.models.EventDetailsResponse
 import com.truesparrow.sales.models.GetCrmActionRequest
 import com.truesparrow.sales.models.GetCrmActionsResponse
 import com.truesparrow.sales.models.NotesDetailResponse
 import com.truesparrow.sales.models.SaveNoteRequest
+import com.truesparrow.sales.models.TaskDetailsResponse
+import com.truesparrow.sales.models.createAccountEventRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -61,6 +67,14 @@ interface ApiService {
     suspend fun deleteNote(
         @Path(value = "account_id") accountId: String,
         @Path(value = "note_id") noteId: String
+    ): Response<Unit>
+
+    @PUT("v1/accounts/{account_id}/notes/{note_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: SaveNoteResponse.json")
+    suspend fun updateNote(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "note_id") noteId: String,
+        @Body request: SaveNoteRequest
     ): Response<Unit>
 
     @GET("v1/accounts/{account_id}/notes/{note_id}")
@@ -110,6 +124,21 @@ interface ApiService {
         @Body request: CreateAccountTaskRequest
     ): Response<CreateAccountTaskResponse>
 
+    @PUT("v1/accounts/{account_id}/tasks/{task_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: CreateAccountTaskResponse.json")
+    suspend fun updateTask(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "task_id") taskId: String,
+        @Body request: CreateAccountTaskRequest
+    ): Response<Unit>
+
+    @GET("v1/accounts/{account_id}/tasks/{task_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: TaskDetailsResponse.json")
+    suspend fun getTaskDetails(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "task_id") noteId: String
+    ): Response<TaskDetailsResponse>
+
     @GET("./v1/accounts/feed")
     @Headers("$MOCK_RESPONSE_HEADER: AccountFeedResponse.json")
     suspend fun getAccountFeed(
@@ -121,4 +150,38 @@ interface ApiService {
         @Query("pagination_identifier") paginationIdentifier: String
     ): Response<AccountFeedResponse>
 
+    @GET("v1/accounts/{account_id}/events")
+    @Headers("$MOCK_RESPONSE_HEADER: AccountsEventResponse.json")
+    suspend fun getAccountEvents(
+        @Path(value = "account_id", encoded = true) accountId: String
+    ): Response<AccountEventsResponse>
+
+    @POST("v1/accounts/{account_id}/events")
+    @Headers("$MOCK_RESPONSE_HEADER: CreateAccountTaskResponse.json")
+    suspend fun createAccountEvents(
+        @Path(value = "account_id", encoded = true) accountId: String,
+        @Body request: createAccountEventRequest
+    ): Response<CreateAccountEventResponse>
+
+    @DELETE("v1/accounts/{account_id}/events/{event_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: DeleteAccountTaskResponse.json")
+    suspend fun deleteEvent(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "event_id") eventId: String
+    ): Response<Unit>
+
+    @PUT("v1/accounts/{account_id}/events/{event_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: CreateAccountTaskResponse.json")
+    suspend fun updateEvent(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "event_id") eventId: String,
+        @Body request: createAccountEventRequest
+    ): Response<Unit>
+
+    @GET("v1/accounts/{account_id}/events/{event_id}")
+    @Headers("$MOCK_RESPONSE_HEADER: EventDetailsResponse.json")
+    suspend fun getEventDetails(
+        @Path(value = "account_id") accountId: String,
+        @Path(value = "event_id") noteId: String
+    ): Response<EventDetailsResponse>
 }

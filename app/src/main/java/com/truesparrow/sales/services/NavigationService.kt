@@ -2,6 +2,7 @@ package com.truesparrow.sales.services
 
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -11,8 +12,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
+import com.google.gson.Gson
 import com.truesparrow.sales.BuildConfig
+import com.truesparrow.sales.models.EventDetailsObject
+import com.truesparrow.sales.models.NoteData
+import com.truesparrow.sales.models.NoteDetailsObject
+import com.truesparrow.sales.models.TaskData
 import com.truesparrow.sales.screens.AccountDetails
+import com.truesparrow.sales.screens.EventScreen
 import com.truesparrow.sales.screens.HomeScreen
 import com.truesparrow.sales.screens.SplashScreen
 import com.truesparrow.sales.screens.LogInScreen
@@ -21,8 +28,8 @@ import com.truesparrow.sales.screens.NotesScreen
 import com.truesparrow.sales.screens.SettingsScreen
 import com.truesparrow.sales.screens.TaskScreen
 import com.truesparrow.sales.util.Screens
+import com.truesparrow.sales.util.extractDateAndTime
 import com.truesparrow.sales.viewmodals.AuthenticationViewModal
-import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 
 
 object NavigationService {
@@ -59,6 +66,37 @@ object NavigationService {
         }
     }
 
+    fun navigateToNotesScreen(
+        accountId: String,
+        accountName: String,
+        isAccountSelectionEnabled: Boolean,
+        noteData: NoteData?
+    ) {
+        val noteDataJson = noteData?.let { Gson().toJson(it) } ?: "null_placeholder"
+
+        navController.navigate("notes_screen/$accountId/$accountName/$isAccountSelectionEnabled/$noteDataJson")
+    }
+
+    fun navigateToEventScreen(
+        accountId: String,
+        accountName: String,
+        eventData: EventDetailsObject?
+    ) {
+        val eventDataJson = eventData?.let { Gson().toJson(it) } ?: "null_placeholder"
+        navController.navigate("event_screen/$accountId/$accountName/$eventDataJson")
+    }
+
+    fun navigateToTaskScreen(
+        accountId: String,
+        accountName: String,
+        taskData: TaskData?
+    ) {
+        val taskDataJson = taskData?.let { Gson().toJson(it) } ?: "null_placeholder"
+
+        navController.navigate("task_screen/$accountId/$accountName/$taskDataJson")
+    }
+
+
     fun navigateWithPopUpClearingAllStack(screenName: String) {
         navController.navigate(screenName) {
             popUpTo(0)
@@ -78,6 +116,12 @@ object NavigationService {
     fun navigateBack() {
         navController.popBackStack()
     }
+
+    fun navigateBackToAccountDetailsScreen() {
+        navController.popBackStack(Screens.AccountDetailsScreen.route, false)
+    }
+
+
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -108,7 +152,25 @@ fun NavigationService(intent: Intent?) {
             val accountName = it.arguments?.getString("accountName") ?: ""
             val isAccountSelectionEnabled =
                 it.arguments?.getString("isAccountSelectionEnabled")?.toBoolean() ?: false
-            NotesScreen(accountName, accountId, isAccountSelectionEnabled)
+            val noteDataJson = it.arguments?.getString("noteData") ?: ""
+            val noteData = if (noteDataJson != "null_placeholder") Gson().fromJson(
+                noteDataJson,
+                NoteDetailsObject::class.java
+            ) else null
+
+            if (noteData != null) {
+                NotesScreen(
+                    accountName,
+                    accountId,
+                    isAccountSelectionEnabled,
+                    noteData.id,
+                    noteData.text,
+                    noteData.shouldShowCrmSuggestion,
+                    noteData.isNoteScreenEditable
+                )
+            } else {
+                NotesScreen(accountName, accountId, isAccountSelectionEnabled, "", "", true, true)
+            }
         }
         composable(route = Screens.AccountDetailsScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
@@ -128,8 +190,103 @@ fun NavigationService(intent: Intent?) {
         composable(route = Screens.TaskScreen.route) {
             val accountId = it.arguments?.getString("accountId") ?: ""
             val accountName = it.arguments?.getString("accountName") ?: ""
-            TaskScreen(accountId,accountName)
+            val taskDataJson = it.arguments?.getString("taskData") ?: ""
+            val taskData = if (taskDataJson != "null_placeholder") Gson().fromJson(
+                taskDataJson,
+                TaskData::class.java
+            ) else null
+
+            if (taskData != null) {
+                TaskScreen(
+                    accountId,
+                    accountName,
+                    taskData.description ?: "",
+                    taskData.due_date ?: "",
+                    taskData.crm_organization_user_id ?: "",
+                    taskData.crm_organization_user_name ?: "",
+                    taskData.id ?: "",
+                    taskData.isTaskScreenEditable ?: true,
+                    taskData.shouldNavigateBackToAccountDetailsScreen ?: false
+
+                )
+            } else {
+                TaskScreen(
+                    accountId,
+                    accountName,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    true,
+                    false
+                )
+            }
         }
+
+        composable(route = Screens.EventScreen.route) {
+            val accountId = it.arguments?.getString("accountId") ?: ""
+            val accountName = it.arguments?.getString("accountName") ?: ""
+            val eventDataJson = it.arguments?.getString("eventData") ?: ""
+            val eventData = if (eventDataJson != "null_placeholder") Gson().fromJson(
+                eventDataJson,
+                EventDetailsObject::class.java
+            ) else null
+
+            var startDateTime =
+                if (eventDataJson != "null_placeholder") extractDateAndTime(eventData!!.eventStartDate) else Pair(
+                    "",
+                    ""
+                )
+            var endDateTime =
+                if (eventDataJson != "null_placeholder") extractDateAndTime(eventData!!.eventEndDate) else Pair(
+                    "",
+                    ""
+                )
+
+
+            Log.i(
+                "EventScreen",
+                "accountId: $accountId, accountName: $accountName eventData: $eventData  $startDateTime $endDateTime "
+            )
+
+            if (eventData != null) {
+                EventScreen(
+                    accountId,
+                    accountName,
+                    startDateTime?.first ?: "",
+                    endDateTime?.first ?: "",
+                    startDateTime?.second ?: "",
+                    endDateTime?.second ?: "",
+                    eventData.eventDescription ?: "",
+                    eventData.eventId ?: "",
+                    { s: String, s1: String, s2: String, s3: String, s4: String -> {} },
+                    { s: String, s1: String, s2: String, s3: String -> {} },
+                    "",
+                    eventData.isEventScreenEditable ?: true,
+                    eventData.shouldNavigateBackToAccountDetailsScreen ?: false
+                )
+
+            } else {
+                EventScreen(
+                    accountId,
+                    accountName,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    { s: String, s1: String, s2: String, s3: String, s4: String -> {} },
+                    { s: String, s1: String, s2: String, s3: String -> {} },
+                    "",
+                    true,
+                    false
+                )
+            }
+
+        }
+
     }
 }
 

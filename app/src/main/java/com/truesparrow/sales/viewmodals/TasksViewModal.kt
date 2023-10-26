@@ -10,11 +10,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.truesparrow.sales.models.CreateAccountTaskResponse
 import com.truesparrow.sales.models.Task
+import com.truesparrow.sales.models.TaskDetailsResponse
 import com.truesparrow.sales.repository.TasksRepository
 import com.truesparrow.sales.util.NetworkResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 @HiltViewModel
 
 class TasksViewModal @Inject constructor(
@@ -24,35 +26,41 @@ class TasksViewModal @Inject constructor(
     val tasksLiveData: LiveData<NetworkResponse<CreateAccountTaskResponse>>
         get() = tasksRepository.tasksLiveData
 
+    val updateTaskLiveData: LiveData<NetworkResponse<Unit>>
+        get() = tasksRepository.updateTaskLiveData
+
+    val taskDetails: LiveData<NetworkResponse<TaskDetailsResponse>>
+        get() = tasksRepository.taskDetails
+
 
     private var tasksScreenSelectedUserName: String = "Select"
 
-   private var tasksScreenSelectedUserId: String= ""
+    private var tasksScreenSelectedUserId: String = ""
 
     private var taskScreenSelectedDueDate: String = ""
 
 
-    fun getTasksScreenSelectedUserName() : String{
+    fun getTasksScreenSelectedUserName(): String {
         return tasksScreenSelectedUserName
     }
 
-    fun getTasksScreenSelectedUserId() : String{
+    fun getTasksScreenSelectedUserId(): String {
         return tasksScreenSelectedUserId
     }
 
-    fun getTaskScreenSelectedDueDate() : String{
+    fun getTaskScreenSelectedDueDate(): String {
         return taskScreenSelectedDueDate
     }
 
-    fun setTasksScreenSelectedUserId(userId: String){
+    fun setTasksScreenSelectedUserId(userId: String) {
         tasksScreenSelectedUserId = userId
     }
 
-    fun setTasksScreenSelectedUserName(userName: String){
+    fun setTasksScreenSelectedUserName(userName: String) {
         tasksScreenSelectedUserName = userName
     }
 
-    fun setTaskScreenSelectedDueDate(dueDate: String){
+    fun setTaskScreenSelectedDueDate(dueDate: String) {
         taskScreenSelectedDueDate = dueDate
     }
 
@@ -60,7 +68,10 @@ class TasksViewModal @Inject constructor(
     fun createTask(
         accountId: String, crmOrganizationUserId: String, description: String, dueDate: String
     ) {
-        Log.i("Task", "Account ID: $accountId, User ID: $crmOrganizationUserId, Description: $description, Due Date: $dueDate")
+        Log.i(
+            "Task",
+            "Account ID: $accountId, User ID: $crmOrganizationUserId, Description: $description, Due Date: $dueDate"
+        )
 
         viewModelScope.launch {
             tasksRepository.createTask(
@@ -68,6 +79,36 @@ class TasksViewModal @Inject constructor(
                 crmOrganizationUserId = crmOrganizationUserId,
                 description = description,
                 dueDate = dueDate
+            )
+        }
+    }
+
+    fun updateTask(
+        accountId: String,
+        taskId: String,
+        crmOrganizationUserId: String,
+        description: String,
+        dueDate: String
+    ) {
+        viewModelScope.launch {
+            tasksRepository.updateTask(
+                accountId = accountId,
+                taskId = taskId,
+                crmOrganizationUserId = crmOrganizationUserId,
+                description = description,
+                dueDate = dueDate
+            )
+        }
+    }
+
+    fun taskDetails(
+        accountId: String,
+        taskId: String,
+    ) {
+        viewModelScope.launch {
+            tasksRepository.getTaskDetails(
+                accountId = accountId,
+                taskId = taskId,
             )
         }
     }

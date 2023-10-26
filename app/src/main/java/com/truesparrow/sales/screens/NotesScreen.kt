@@ -3,6 +3,7 @@ package com.truesparrow.sales.screens
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -47,94 +48,211 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.truesparrow.sales.R
 import com.truesparrow.sales.common_components.AccountListBottomSheet
+import com.truesparrow.sales.common_components.CustomAlertDialog
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.CustomToast
 import com.truesparrow.sales.common_components.EditableTextField
+import com.truesparrow.sales.common_components.EventCard
+import com.truesparrow.sales.common_components.EventSuggestionCard
 import com.truesparrow.sales.common_components.RecommandedTaskSheet
+import com.truesparrow.sales.common_components.RecommondedEventSheet
 import com.truesparrow.sales.common_components.SearchNameBottomSheet
 import com.truesparrow.sales.common_components.TaskSuggestionCard
 import com.truesparrow.sales.common_components.ToastType
 import com.truesparrow.sales.common_components.UpdateTaskDropDownMenu
+import com.truesparrow.sales.models.EventDetailsObject
+import com.truesparrow.sales.models.SuggestedEvents
 import com.truesparrow.sales.models.Tasks
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
-import com.truesparrow.sales.viewmodals.AccountDetailsViewModal
+import com.truesparrow.sales.util.convertToISO8601
+import com.truesparrow.sales.util.extractDateAndTime
+import com.truesparrow.sales.viewmodals.AuthenticationViewModal
 import com.truesparrow.sales.viewmodals.NotesViewModel
-import com.truesparrow.sales.viewmodals.TasksViewModal
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NotesScreen(
     accountName: String? = null,
     accountId: String? = null,
     isAccountSelectionEnabled: Boolean = false,
+    noteId: String? = "",
+    noteDescription: String = "",
+    shouldShowCrmSuggestions: Boolean = false,
+    isNotesScreenEditable: Boolean = true,
 ) {
 
     val notesViewModel: NotesViewModel = hiltViewModel()
+    val authenticationViewModal: AuthenticationViewModal = hiltViewModel()
     var selectedTaskId by remember { mutableStateOf("") }
+    var selectedEventId by remember { mutableStateOf("") }
     var addTaskId by remember { mutableStateOf("") }
-
+    var addEventId by remember { mutableStateOf("") }
+    val currentUser = authenticationViewModal.currentUserLiveData?.observeAsState()?.value
 
     var saveNoteApiInProgress by remember { mutableStateOf(false) }
     var saveNoteApiIsSuccess by remember { mutableStateOf(false) }
+    var updateNoteApiInProgress by remember { mutableStateOf(false) }
+    var updateNoteApiIsSuccess by remember { mutableStateOf(false) }
+
 
     val getCrmActionsResponse by notesViewModel.getCrmActionsLiveData.observeAsState()
     var getCrmActionLoading by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
     val saveNoteRespose by notesViewModel.notesLiveData.observeAsState()
+    val updateNoteRespose by notesViewModel.updateNoteLiveData.observeAsState()
 
-    val tasksViewModel: TasksViewModal = hiltViewModel()
+
     var createTaskApiInProgress by remember { mutableStateOf(false) }
     var createTaskApiIsSuccess by remember { mutableStateOf(false) }
+    var createEventApiInProgress by remember { mutableStateOf(false) }
+    var createEventApiIsSuccess by remember { mutableStateOf(false) }
 
-    var noteDesc by remember { mutableStateOf("") }
+    var noteDescription = noteDescription
+
+    var noteDesc by remember { mutableStateOf(noteDescription) }
 
     var tasks = notesViewModel.tasks.observeAsState()?.value
+
     var isTasksListUpdated by remember { mutableStateOf(false) }
 
-    val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
+    val createTaskResponse by notesViewModel.tasksLiveData.observeAsState()
 
-    val accountDetailsViewModal: AccountDetailsViewModal = hiltViewModel()
+    val deleteTaskResponse by notesViewModel.deleteAccountTaskLiveData.observeAsState();
 
-    val deleteTaskResponse by accountDetailsViewModal.deleteAccountTaskLiveData.observeAsState();
+    val createEventResponse by notesViewModel.eventsLiveData.observeAsState();
 
-    var selectedCrmUserName  = remember {
-        mutableStateOf( "")
+    val deleteEventResponse by notesViewModel.deleteAccountEventLiveData.observeAsState();
+
+    val openDeleteDialogForEvent = remember { mutableStateOf(false) }
+    val openDeleteDialogForTask = remember { mutableStateOf(false) }
+
+
+    var selectedCrmUserName = remember {
+        mutableStateOf("")
     }
 
     var selectedCrmUserId = remember {
-        mutableStateOf( "")
+        mutableStateOf("")
+    }
+
+    var suggestedEvents = notesViewModel.suggestedEvents.observeAsState()?.value
+
+    if (noteId != null && accountId != null) {
+        if (noteId.isNotEmpty()) {
+            LaunchedEffect(key1 = noteId) {
+                notesViewModel.getNoteDetails(accountId, noteId)
+            }
+        }
+    }
+
+    val noteDetailsResponse by notesViewModel.noteDetailsLiveData.observeAsState()
+
+    noteDetailsResponse?.let {
+        when (it) {
+            is NetworkResponse.Success -> {
+                val noteDetails = it.data?.note_detail
+                noteDescription = noteDetails?.text ?: ""
+            }
+
+            is NetworkResponse.Error -> {
+                CustomToast(message = "Something went wrong", type = ToastType.Error)
+            }
+
+            is NetworkResponse.Loading -> {
+            }
+        }
     }
 
 
-    deleteTaskResponse?.let {deleteTaskResponse
-        when(deleteTaskResponse){
+    deleteEventResponse?.let {
+        deleteEventResponse
+        when (deleteEventResponse) {
             is NetworkResponse.Success -> {
-                CustomToast(message = "Task Deleted", type = ToastType.Success)
+                CustomToast(message = "Event Deleted", type = ToastType.Success)
             }
-            is NetworkResponse.Error ->{
-                CustomToast(message =  "Something went wrong", type = ToastType.Error)
+
+            is NetworkResponse.Error -> {
+                CustomToast(message = "Something went wrong", type = ToastType.Error)
             }
+
             is NetworkResponse.Loading -> {
             }
+
             else -> {}
         }
     }
 
+
+
+    deleteTaskResponse?.let {
+        deleteTaskResponse
+        when (deleteTaskResponse) {
+            is NetworkResponse.Success -> {
+                CustomToast(message = "Task Deleted", type = ToastType.Success)
+            }
+
+            is NetworkResponse.Error -> {
+                CustomToast(message = "Something went wrong", type = ToastType.Error)
+            }
+
+            is NetworkResponse.Loading -> {
+            }
+
+            else -> {}
+        }
+    }
+
+    createEventResponse?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                createEventApiInProgress = false;
+                createEventApiIsSuccess = true
+                val currEvent = notesViewModel.getSuggestedEventById(addEventId)
+                CustomToast(message = "Event Added", type = ToastType.Success)
+                Log.i("log4--------------", "${currEvent}")
+                notesViewModel.updateSuggestedEventById(
+                    addEventId, SuggestedEvents(
+                        start_datetime = currEvent?.start_datetime ?: "",
+                        end_datetime = currEvent?.end_datetime ?: "",
+                        description = currEvent?.description ?: "",
+                        id = addEventId,
+                        is_event_created = true,
+                        event_id = response.data?.event_id
+                    )
+                )
+
+            }
+
+            is NetworkResponse.Error -> {
+                createEventApiInProgress = false;
+                CustomToast(message = "Something went wrong", type = ToastType.Error)
+            }
+
+            is NetworkResponse.Loading -> {
+                createEventApiInProgress = true;
+            }
+        }
+    }
+
     createTaskResponse?.let { response ->
-        Log.i("response====","${createTaskResponse}")
+        Log.i("response====", "${createTaskResponse}")
         when (response) {
             is NetworkResponse.Success -> {
                 createTaskApiInProgress = false;
                 createTaskApiIsSuccess = true
-                CustomToast(
-                    message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
-                )
                 val currTask = notesViewModel.getTaskById(addTaskId)
-                Log.i("log4--------------","${currTask}")
+                Log.i("log4--------------", "${currTask}")
+
+                CustomToast(
+                    message = "Task Added and assigned to ${currTask?.crm_user_name}",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Success
+                )
 
                 notesViewModel.updateTaskById(
                     addTaskId, Tasks(
@@ -183,11 +301,25 @@ fun NotesScreen(
                     )
                 })
 
-                Log.i("newTasks","$newTasks")
+                val newEvents = (it.data?.add_event_suggestions?.map { event ->
+                    val id = "temp_event_${index++}_${System.currentTimeMillis()}"
+                    SuggestedEvents(
+                        start_datetime = event?.start_datetime ?: "",
+                        end_datetime = event?.end_datetime ?: "",
+                        description = event?.description ?: "",
+                        id = id,
+                        is_event_created = false,
+                        event_id = ""
+                    )
+                })
+
+
+                Log.i("newTasks", "$newTasks")
                 if (!isTasksListUpdated) {
                     isTasksListUpdated = true
-                    Log.i("Heelo","Hello")
+                    Log.i("Heelo", "Hello")
                     notesViewModel.setTasks(newTasks ?: emptyList())
+                    notesViewModel.setSuggestedEvents(newEvents ?: emptyList())
                 } else {
                 }
             }
@@ -216,7 +348,9 @@ fun NotesScreen(
                     type = ToastType.Success
                 )
                 LaunchedEffect(true) {
-                    notesViewModel.getCrmActions(noteDesc);
+                    if (shouldShowCrmSuggestions) {
+                        notesViewModel.getCrmActions(noteDesc);
+                    }
                 }
             }
 
@@ -238,6 +372,37 @@ fun NotesScreen(
         }
     }
 
+    updateNoteRespose?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                updateNoteApiInProgress = false;
+                updateNoteApiIsSuccess = true;
+                Log.i("NotesScreen", "Success : ${response.data}")
+                CustomToast(
+                    message = "Note is updated to your Salesforce Account",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Success
+                )
+            }
+
+            is NetworkResponse.Error -> {
+                updateNoteApiInProgress = false;
+                CustomToast(
+                    message = response.message
+                        ?: "Failed to update the note to your Salesforce Account",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Error
+                )
+
+            }
+
+            is NetworkResponse.Loading -> {
+                updateNoteApiInProgress = true;
+                Log.d("NotesScreen", "Loading")
+            }
+        }
+    }
+
     var searchNameBottomSheetVisible by remember { mutableStateOf(false) }
 
     val toggleSearchNameBottomSheet: () -> Unit = {
@@ -247,9 +412,77 @@ fun NotesScreen(
 
     var RecommTaksBottomSheetVisible by remember { mutableStateOf(false) }
 
+    var RecommEventBottomSheetVisible by remember { mutableStateOf(false) }
+
     val toggleSheet: () -> Unit = {
         RecommTaksBottomSheetVisible = !RecommTaksBottomSheetVisible
     }
+
+    val toggleEventSheet: () -> Unit = {
+        RecommEventBottomSheetVisible = !RecommEventBottomSheetVisible
+    }
+
+    CustomAlertDialog(
+        title = "Delete Event",
+        message = "Are you sure you want to delete this event?",
+        onConfirmButtonClick = {
+            if (accountId != null) {
+                val event = suggestedEvents!!.filter { it?.id == selectedEventId }
+                Log.i("event", "${event} ${selectedEventId} ${selectedEventId}")
+                event[0]?.event_id?.let {
+                    Log.i("event id", "${it}")
+                    notesViewModel.deleteAccountEvent(
+                        accountId = accountId,
+                        eventId = it
+                    )
+                }
+                var updatedSuggestedEvents = suggestedEvents!!.filter { it?.id != selectedEventId }
+                notesViewModel.setSuggestedEvents(updatedSuggestedEvents)
+                selectedEventId = ""
+                openDeleteDialogForEvent.value = false
+            }
+        },
+        onDismissRequest = {
+            openDeleteDialogForEvent.value = false
+        },
+        showConfirmationDialog = openDeleteDialogForEvent.value,
+        titleTestTag = "txt_notes_screen_delete_event_title",
+        messageTestTag = "txt_notes_screen_delete_event_message",
+        confirmButtonTestTag = "btn_notes_screen_delete_event_confirm",
+        dismissButtonTestTag = "btn_notes_screen_delete_event_cancel"
+    )
+
+    CustomAlertDialog(
+        title = "Delete Task",
+        message = "Are you sure you want to delete this task?",
+        onConfirmButtonClick = {
+            if (accountId != null) {
+                val task = tasks!!.filter { it?.id == selectedTaskId }
+                Log.i("task", "${task} ${selectedTaskId}")
+                task[0]?.task_id?.let {
+                    Log.i("task id", "${it}")
+                    notesViewModel.deleteAccountTask(
+                        accountId,
+                        taskId = it
+                    )
+                }
+
+                var updatedTask = tasks!!.filter { it?.id != selectedTaskId }
+
+                notesViewModel.setTasks(updatedTask)
+                selectedTaskId = ""
+                openDeleteDialogForTask.value = false
+            }
+        },
+        onDismissRequest = {
+            openDeleteDialogForTask.value = false
+        },
+        showConfirmationDialog = openDeleteDialogForTask.value,
+        titleTestTag = "txt_notes_screen_delete_task_title",
+        messageTestTag = "txt_notes_screen_delete_task_message",
+        confirmButtonTestTag = "btn_notes_screen_delete_task_confirm",
+        dismissButtonTestTag = "btn_notes_screen_delete_task_cancel"
+    )
 
     if (searchNameBottomSheetVisible) {
         SearchNameBottomSheet(
@@ -257,10 +490,9 @@ fun NotesScreen(
             accountId = accountId!!,
             accountName = accountName!!,
             id = selectedTaskId,
-            onUpdateUserName = {
-                userId, userName ->
-                    selectedCrmUserId.value = userId
-                    selectedCrmUserName.value = userName
+            onUpdateUserName = { userId, userName ->
+                selectedCrmUserId.value = userId
+                selectedCrmUserName.value = userName
 
             }
         )
@@ -301,6 +533,72 @@ fun NotesScreen(
                     )
                 )
             },
+            onAddTaskClick = { crmOrganizationUserId: String, crmOrganizationUserName: String, description: String, dueDate: String, id: String, taskId: String ->
+                Log.i(
+                    "onAddTaskClick",
+                    " crmOrganizationUserId ${crmOrganizationUserId} crmOrganizationUserName ${crmOrganizationUserName} description ${description} dueDate ${dueDate} id ${id} taskId ${taskId}"
+                )
+                notesViewModel.updateTaskById(
+                    id, Tasks(
+                        crm_user_id = crmOrganizationUserId,
+                        crm_user_name = crmOrganizationUserName,
+                        task_desc = description,
+                        due_date = dueDate,
+                        id = id,
+                        is_task_created = true,
+                        task_id = taskId
+                    )
+                )
+            },
+        )
+    }
+
+    if (RecommEventBottomSheetVisible) {
+        val event = suggestedEvents?.find { it.id == selectedEventId }
+        var startDateTime = extractDateAndTime(event!!.start_datetime)
+        var endDateTime = extractDateAndTime(event!!.end_datetime)
+        Log.i("event==", "${event}")
+        Log.i("Ids test", "${selectedEventId}")
+
+        RecommondedEventSheet(
+            toggleEventSheet,
+            accountId = accountId,
+            startDate = startDateTime!!.first ?: "",
+            endDate = endDateTime!!.first ?: "",
+            startTime = startDateTime!!.second ?: "",
+            selectedEventId = event!!.id,
+            endTime = endDateTime!!.second ?: "",
+            eventDescription = event?.description ?: "",
+            onAddEventClick = { id: String, eventId: String, eventDescription: String, startDateTime: String, endDateTime: String ->
+                notesViewModel.updateSuggestedEventById(
+                    id, SuggestedEvents(
+                        start_datetime = startDateTime,
+                        end_datetime = endDateTime,
+                        description = eventDescription,
+                        id = id,
+                        is_event_created = true,
+                        event_id = eventId
+                    )
+                )
+                toggleEventSheet()
+            },
+            onCancelEventClick = { id: String, eventDescription: String, startDateTime: String, endDateTime: String ->
+                Log.i(
+                    "onCancelClick",
+                    " id ${id} eventDescription ${eventDescription} startDateTime ${startDateTime} endDateTime ${endDateTime}"
+                )
+                notesViewModel.updateSuggestedEventById(
+                    id, SuggestedEvents(
+                        start_datetime = startDateTime,
+                        end_datetime = endDateTime,
+                        description = eventDescription,
+                        id = id,
+                        is_event_created = false
+                    )
+                )
+                toggleEventSheet()
+            },
+            eventId = event!!.event_id ?: "",
         )
     }
 
@@ -311,40 +609,48 @@ fun NotesScreen(
     ) {
         Header(
             note = noteDesc,
-            accountName = accountName,
+            noteId = noteId,
             accountId = accountId!!,
             saveNoteApiInProgress = saveNoteApiInProgress,
             saveNoteApiIsSuccess = saveNoteApiIsSuccess,
+            updateNoteApiInProgress = updateNoteApiInProgress,
+            updateNoteApiIsSuccess = updateNoteApiIsSuccess,
+            isNotesScreenEditable = isNotesScreenEditable,
         )
         NotesHeader(
             accountName = accountName, isAccountSelectionEnabled = isAccountSelectionEnabled
         )
 
-        EditableTextField(note = noteDesc,
-            onValueChange = {
-                noteDesc = it
-            },
-            placeholderText = "Add A Note",
-            readOnly = saveNoteApiIsSuccess,
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics {
-                    contentDescription = "et_create_note"
-                    testTag = "et_create_note"
-                    testTagsAsResourceId = true
-                })
+        if (noteDetailsResponse is NetworkResponse.Loading) {
+            Loader()
+        } else {
+            EditableTextField(note = noteDesc,
+                onValueChange = {
+                    noteDesc = it
+                },
+                placeholderText = "Add A Note",
+                readOnly = !isNotesScreenEditable || saveNoteApiIsSuccess || updateNoteApiIsSuccess,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics {
+                        contentDescription = "et_create_note"
+                        testTag = "et_create_note"
+                        testTagsAsResourceId = true
+                    })
+        }
+
+
 
         Log.i("After posting values", "values")
         if (getCrmActionLoading) {
             RecommendedSectionHeader(
                 heading = "Getting recommendations",
                 shouldShowPlusIcon = false,
-                crmUserId = "",
-                crmUserName = "",
                 accountId = accountId!!,
                 accountName = accountName!!,
                 testId = "txt_create_note_getting_recommendations",
-                onPlusIconClick = {}
+                onAddEventClick = {},
+                onAddTaskClick = {}
             )
             Spacer(modifier = Modifier.height(30.dp))
             Column(
@@ -370,31 +676,38 @@ fun NotesScreen(
                     )
                 )
             }
-        } else if (tasks?.isEmpty() == true) {
+        } else if (tasks?.isEmpty() == true && suggestedEvents?.isEmpty() == true) {
             EmptyScreen(
                 emptyText = "You are all set, no recommendation for now!",
                 shouldShowIcon = true,
                 height = 95.dp,
-                testId = ""
+                testId = "note_screen_empty_screen"
             )
         } else {
             Log.i("NotesScreen re com", "NotesScreen: ${tasks?.size} $tasks")
-            if (tasks?.isNotEmpty() == true) {
+            if (tasks?.isNotEmpty() == true || suggestedEvents?.isNotEmpty() == true) {
                 RecommendedSectionHeader(
                     heading = "We have some recommendations ",
                     shouldShowPlusIcon = true,
-                    crmUserName = "",
-                    crmUserId = "",
                     accountId = accountId!!,
                     accountName = accountName!!,
                     testId = "txt_create_note_recommendations",
-                    onPlusIconClick = {
+                    onAddTaskClick = {
                         selectedTaskId = ""
                         toggleSheet()
+                    },
+                    onAddEventClick = {
+                        selectedEventId = ""
+                        NavigationService.navigateToEventScreen(
+                            accountId = accountId,
+                            accountName,
+                            null
+                        )
                     }
                 )
 
                 Spacer(modifier = Modifier.height(30.dp))
+                var index = 0;
                 tasks?.forEach { task ->
                     Column(
                         modifier = Modifier
@@ -402,6 +715,7 @@ fun NotesScreen(
                             .fillMaxWidth()
                             .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
                     ) {
+                        Log.i("tasks rerendering", "${task.task_desc}")
                         TaskSuggestionCard(
                             id = task?.id!!,
                             accountId = accountId!!,
@@ -412,15 +726,12 @@ fun NotesScreen(
                             dDate = task.due_date ?: "",
                             isTaskAdded = task.is_task_created,
                             shouldShowOptions = task.is_task_created,
-                            onDeleteTaskClick = { id->
-                                selectedTaskId  = id
-                                val task = tasks!!.filter { it?.id == id }
-                                task[0].task_id?.let { accountDetailsViewModal.deleteAccountTask(accountId , taskId = it) }
-                                var updatedTask =  tasks!!.filter { it?.id != id }
-                                notesViewModel.setTasks(updatedTask)
+                            onDeleteTaskClick = { id ->
+                                selectedTaskId = id
+                                openDeleteDialogForTask.value = true
                             },
                             onSelectUSerClick = { id ->
-                                Log.i("onSelectUSerClick:" , "${id}")
+                                Log.i("onSelectUSerClick:", "${id}")
                                 selectedTaskId = id
                                 toggleSearchNameBottomSheet()
                             },
@@ -428,30 +739,150 @@ fun NotesScreen(
                                 selectedTaskId = id
                                 toggleSheet()
                             },
+                            shouldShowEditOption = false,
                             onCancelTaskClick = { taskId ->
                                 Log.i("NotesScreen oncancel", "NotesScreen: $taskId")
                                 Log.i("NotesScreen oncancel", "NotesScreen: ${tasks!!.size} $tasks")
                                 val updatedTasks = tasks!!.filter { it?.id != taskId }
                                 notesViewModel.setTasks(updatedTasks)
-                                Log.i("NotesScreen oncancel", "NotesScreen: ${updatedTasks!!.size} $updatedTasks")
+                                Log.i(
+                                    "NotesScreen oncancel",
+                                    "NotesScreen: ${updatedTasks!!.size} $updatedTasks"
+                                )
                             },
-                            createTaskApiInProgress = createTaskApiInProgress,
+                            createTaskApiInProgress = createTaskApiInProgress && addTaskId == task.id,
                             onAddTaskClick = { crmOrganizationUserId: String, description: String, dueDate: String, id: String ->
                                 addTaskId = id
                                 createTaskApiInProgress = true
-                                tasksViewModel.createTask(
+                                notesViewModel.createTask(
                                     accountId = accountId!!,
                                     crmOrganizationUserId = crmOrganizationUserId,
                                     description = description,
                                     dueDate = dueDate,
                                 )
                             },
-                            noteViewModal = notesViewModel
+                            noteViewModal = notesViewModel,
+                            index = index++,
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
+
+                suggestedEvents?.forEach {
+                    var startDateTime = extractDateAndTime(it!!.start_datetime)
+                    var endDateTime = extractDateAndTime(it!!.end_datetime)
+                    Log.i(
+                        "event desc rerendering",
+                        "${it.description} ${startDateTime} ${endDateTime}"
+                    )
+                    Column(
+                        modifier = Modifier
+                            .dashedBorder(1.dp, 5.dp, Color(0x80545A71))
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
+                    ) {
+                        if (it.is_event_created) {
+                            val startDateTime = it.start_datetime;
+                            val endDateTime = it.end_datetime;
+                            val description = it.description;
+                            val eventId = it.event_id;
+                            val id = it.id
+                            EventCard(
+                                firsName = currentUser?.data?.current_user?.name?.split(" ")?.get(0)
+                                    ?: " ",
+                                lastName = currentUser?.data?.current_user?.name?.split(" ")?.get(1)
+                                    ?: " ",
+                                username = currentUser?.data?.current_user?.name ?: "",
+                                notes = it.description,
+                                date = it.start_datetime,
+                                startDateTime = it.start_datetime,
+                                endDateTime = it.end_datetime,
+                                dueDate = it.start_datetime,
+                                onClick = { },
+                                index = index++,
+                                isEventAdded = it.is_event_created,
+                                shouldShowEditOption = false,
+                                onEditMenuClick = {
+                                    var eventData = EventDetailsObject(
+                                        eventId = eventId ?: "",
+                                        eventStartDate = startDateTime!!,
+                                        eventEndDate = endDateTime!!,
+                                        eventDescription = description,
+                                        isEventScreenEditable = true
+                                    )
+                                    selectedEventId = id
+                                    toggleEventSheet()
+//                                    NavigationService.navigateToEventScreen(
+//                                        accountId,
+//                                        accountName,
+//                                        eventData
+//                                    )
+                                },
+                                onDeleteMenuClick = {
+                                    if (eventId != null) {
+                                        Log.i("NotesScreen ondelete", "NotesScreen: $eventId")
+                                        selectedEventId = id
+                                        openDeleteDialogForEvent.value = true
+                                    }
+
+                                },
+                            )
+                        } else {
+                            EventSuggestionCard(
+                                index = index++,
+                                id = it?.id!!,
+                                accountId = accountId!!,
+                                startDate = startDateTime!!.first ?: "",
+                                endDate = endDateTime!!.first ?: "",
+                                startTime = startDateTime!!.second ?: "",
+                                endTime = endDateTime!!.second ?: "",
+                                eventDescription = it.description,
+                                isEventAdded = it.is_event_created,
+                                onDeleteEventClick = {},
+                                onEditEventClick = { id ->
+                                    selectedEventId = id
+                                    toggleEventSheet()
+                                },
+                                onCancelEventClick = { eventId ->
+                                    val updatedEvents =
+                                        suggestedEvents!!.filter { it?.id != eventId }
+                                    notesViewModel.setSuggestedEvents(updatedEvents)
+                                },
+                                createEventApiInProgress = createEventApiInProgress && addEventId == it.id,
+                                noteViewModal = notesViewModel,
+                                onAddEventClick = { accountId,
+                                                    eventDescription,
+                                                    selectedStartDateText,
+                                                    selectedEndDateText,
+                                                    selectedStartTimeText,
+                                                    selectedEndTimeText,
+                                                    id ->
+                                    addEventId = id
+                                    if (selectedStartDateText.isNotEmpty() && selectedEndDateText.isNotEmpty() && selectedStartTimeText.isNotEmpty() && selectedEndTimeText.isNotEmpty()) {
+                                        createEventApiInProgress = true
+                                        val iso8601StartDateTime =
+                                            convertToISO8601(
+                                                selectedStartDateText,
+                                                selectedStartTimeText
+                                            );
+                                        val iso8601EndDateTime =
+                                            convertToISO8601(
+                                                selectedEndDateText,
+                                                selectedEndTimeText
+                                            );
+                                        notesViewModel.createEvent(
+                                            accountId = accountId!!,
+                                            description = eventDescription,
+                                            startDateTime = iso8601StartDateTime,
+                                            endDateTime = iso8601EndDateTime,
+                                        )
+                                    }
+                                })
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
             }
         }
     }
@@ -463,12 +894,11 @@ fun NotesScreen(
 fun RecommendedSectionHeader(
     heading: String,
     accountName: String,
-    crmUserName: String,
-    crmUserId: String,
     accountId: String,
     shouldShowPlusIcon: Boolean,
     testId: String,
-    onPlusIconClick : () -> Unit
+    onAddTaskClick: () -> Unit = {},
+    onAddEventClick: () -> Unit = {},
 ) {
     var recommendedPopup by remember { mutableStateOf(false) }
 
@@ -513,12 +943,18 @@ fun RecommendedSectionHeader(
                             recommendedPopup = true
                         })
                 Spacer(modifier = Modifier.height(5.dp))
-                UpdateTaskDropDownMenu(expanded = recommendedPopup,
+                UpdateTaskDropDownMenu(
+                    expanded = recommendedPopup,
                     onDismissRequest = { recommendedPopup = false },
                     onAddTaskMenuClick = {
-                        onPlusIconClick()
-                        NavigationService.navigateTo("task_screen/${accountId}/${accountName}")
-                    })
+                        onAddTaskClick()
+                        NavigationService.navigateToTaskScreen(accountId, accountName, null)
+                    },
+                    onAddEventMenuClick = {
+                        onAddEventClick()
+                        NavigationService.navigateToEventScreen(accountId, accountName, null)
+                    }
+                )
             }
         }
     }
@@ -618,10 +1054,13 @@ fun NotesHeader(accountName: String?, isAccountSelectionEnabled: Boolean) {
 @Composable
 fun Header(
     note: String,
-    accountName: String?,
+    noteId: String?,
     accountId: String,
     saveNoteApiInProgress: Boolean,
     saveNoteApiIsSuccess: Boolean,
+    updateNoteApiInProgress: Boolean,
+    updateNoteApiIsSuccess: Boolean,
+    isNotesScreenEditable: Boolean,
 ) {
     val notesViewModel: NotesViewModel = hiltViewModel()
 
@@ -663,83 +1102,95 @@ fun Header(
         } else {
             Color(0xFF212653).copy(alpha = 0.7f)
         }
-        Button(onClick = {
-            notesViewModel.saveNote(
-                accountId = accountId!!,
-                text = note,
-            )
-        },
-
-            enabled = note.isNotEmpty() && accountId.isNotEmpty() && !(saveNoteApiInProgress || saveNoteApiIsSuccess),
-            contentPadding = PaddingValues(all = 8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent, contentColor = Color.White
-            ),
-            modifier = Modifier
-                .background(
-                    color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
-                )
-                .width(92.dp)
-                .height(46.dp)
-                .clip(shape = RoundedCornerShape(size = 5.dp))
-                .semantics {
-                    testTagsAsResourceId = true
-                    testTag = "btn_save_note"
-                    contentDescription = "btn_save_note"
+        if (isNotesScreenEditable) {
+            Button(onClick = {
+                if (noteId.isNullOrBlank()) {
+                    notesViewModel.saveNote(
+                        accountId = accountId!!,
+                        text = note,
+                    )
+                } else {
+                    notesViewModel.updateNote(
+                        accountId = accountId!!,
+                        text = note,
+                        noteId = noteId
+                    )
                 }
+            },
 
+                enabled = note.isNotEmpty() && accountId.isNotEmpty() && !(saveNoteApiInProgress || saveNoteApiIsSuccess || updateNoteApiInProgress || updateNoteApiIsSuccess),
+                contentPadding = PaddingValues(all = 8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent, contentColor = Color.White
+                ),
+                modifier = Modifier
+                    .background(
+                        color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
+                    )
+                    .width(92.dp)
+                    .height(46.dp)
+                    .clip(shape = RoundedCornerShape(size = 5.dp))
+                    .semantics {
+                        testTagsAsResourceId = true
+                        testTag = "btn_save_note"
+                        contentDescription = "btn_save_note"
+                    }
 
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically
 
             ) {
-                val imageLoader = ImageLoader.Builder(LocalContext.current).components {
-                    if (Build.VERSION.SDK_INT >= 28) {
-                        add(ImageDecoderDecoder.Factory())
-                    } else {
-                        add(GifDecoder.Factory())
-                    }
-                }.build()
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(
+                        4.dp,
+                        Alignment.CenterHorizontally
+                    ),
+                    verticalAlignment = Alignment.CenterVertically
 
-                Image(painter = if (saveNoteApiInProgress) {
-                    rememberAsyncImagePainter(R.drawable.loader, imageLoader)
-                } else if (saveNoteApiIsSuccess) {
-                    painterResource(id = R.drawable.check)
-                } else {
-                    painterResource(id = R.drawable.cloud)
-                },
-                    contentDescription = "cloud",
-                    colorFilter = ColorFilter.tint(Color.White),
-                    modifier = Modifier
-                        .width(width = 17.dp)
-                        .height(height = 12.dp)
-                        .semantics {
-                            testTagsAsResourceId = true
-                            testTag = "cloud"
-                        })
-                Text(text = if (saveNoteApiInProgress) {
-                    "Saving..."
-                } else if (saveNoteApiIsSuccess) {
-                    "Saved"
-                } else {
-                    "Save"
-                }, color = Color.White, style = TextStyle(
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFFFFFFFF),
-                    letterSpacing = 0.48.sp,
-                ), modifier = Modifier.semantics {
-                    testTagsAsResourceId = true
-                    testTag =
-                        if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
-                    contentDescription =
-                        if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
-                })
+                ) {
+                    val imageLoader = ImageLoader.Builder(LocalContext.current).components {
+                        if (Build.VERSION.SDK_INT >= 28) {
+                            add(ImageDecoderDecoder.Factory())
+                        } else {
+                            add(GifDecoder.Factory())
+                        }
+                    }.build()
+
+                    Image(painter = if (saveNoteApiInProgress || updateNoteApiInProgress) {
+                        rememberAsyncImagePainter(R.drawable.loader, imageLoader)
+                    } else if (saveNoteApiIsSuccess || updateNoteApiIsSuccess) {
+                        painterResource(id = R.drawable.check)
+                    } else {
+                        painterResource(id = R.drawable.cloud)
+                    },
+                        contentDescription = "cloud",
+                        colorFilter = ColorFilter.tint(Color.White),
+                        modifier = Modifier
+                            .width(width = 17.dp)
+                            .height(height = 12.dp)
+                            .semantics {
+                                testTagsAsResourceId = true
+                                testTag = "cloud"
+                            })
+                    Text(text = if (saveNoteApiInProgress || updateNoteApiInProgress) {
+                        "Saving..."
+                    } else if (saveNoteApiIsSuccess || updateNoteApiIsSuccess) {
+                        "Saved"
+                    } else {
+                        "Save"
+                    }, color = Color.White, style = TextStyle(
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                        fontWeight = FontWeight(500),
+                        color = Color(0xFFFFFFFF),
+                        letterSpacing = 0.48.sp,
+                    ), modifier = Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag =
+                            if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
+                        contentDescription =
+                            if (saveNoteApiIsSuccess) "txt_create_note_saved" else "txt_create_note_save"
+                    })
+                }
             }
         }
     }
-
 }

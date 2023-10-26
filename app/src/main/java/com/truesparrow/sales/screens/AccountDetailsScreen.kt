@@ -56,11 +56,16 @@ import com.truesparrow.sales.common_components.AccountCard
 import com.truesparrow.sales.common_components.CustomAlertDialog
 import com.truesparrow.sales.common_components.CustomTextWithImage
 import com.truesparrow.sales.common_components.CustomToast
+import com.truesparrow.sales.common_components.EventCard
 import com.truesparrow.sales.common_components.NotesCard
 import com.truesparrow.sales.common_components.TasksCard
 import com.truesparrow.sales.common_components.ToastType
+import com.truesparrow.sales.models.Event
+import com.truesparrow.sales.models.EventDetailsObject
 import com.truesparrow.sales.models.Note
+import com.truesparrow.sales.models.NoteData
 import com.truesparrow.sales.models.Task
+import com.truesparrow.sales.models.TaskData
 import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.viewmodals.AccountDetailsViewModal
@@ -77,11 +82,14 @@ fun AccountDetails(
     val accountDetailsViewModal: AccountDetailsViewModal = hiltViewModel()
     var isAccountNoteDetailsLoading by remember { mutableStateOf(false) };
     var isAccountTaskDetailsLoading by remember { mutableStateOf(false) };
+    var isAccountEventsDetailsLoading by remember { mutableStateOf(false) };
     val openDialogForNote = remember { mutableStateOf(false) }
     val openDialogForTask = remember { mutableStateOf(false) }
+    val openDialogForEvent = remember { mutableStateOf(false) }
 
     var notes = accountDetailsViewModal.notes.observeAsState()?.value
     var tasks = accountDetailsViewModal.tasks.observeAsState()?.value
+    var events = accountDetailsViewModal.events.observeAsState()?.value
 
     val accountNotesResponse by accountDetailsViewModal.accountDetailsLiveData.observeAsState()
 
@@ -91,12 +99,18 @@ fun AccountDetails(
 
     val deleteAccountTaskResponse by accountDetailsViewModal.deleteAccountTaskLiveData.observeAsState()
 
+    val accountEventsResponse by accountDetailsViewModal.accountEventsLiveData.observeAsState()
+
+    val deleteAccountEventResponse by accountDetailsViewModal.deleteAccountEventLiveData.observeAsState()
+
     val noteId = remember { mutableStateOf("") }
     val taskId = remember { mutableStateOf("") }
+    val eventId = remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = accountId) {
         accountDetailsViewModal.getAccountNotes(accountId = accountId)
         accountDetailsViewModal.getAccountTasks(accountId = accountId)
+        accountDetailsViewModal.getAccountEvents(accountId = accountId)
     }
 
     accountNotesResponse?.let {
@@ -143,7 +157,8 @@ fun AccountDetails(
                         description = taskDetails?.description ?: "",
                         due_date = taskDetails?.due_date ?: "",
                         id = taskDetails?.id ?: "",
-                        last_modified_time = taskDetails?.last_modified_time ?: ""
+                        last_modified_time = taskDetails?.last_modified_time ?: "",
+                        crm_organization_user_id = taskDetails?.crm_organization_user_id ?: ""
                     )
                 }
                 accountDetailsViewModal.setTasks(newTasks ?: emptyList())
@@ -157,6 +172,37 @@ fun AccountDetails(
 
             is NetworkResponse.Loading -> {
                 isAccountTaskDetailsLoading = true
+                Log.i("AccountDetails", "Loading")
+            }
+        }
+    }
+
+    accountEventsResponse?.let {
+        when (it) {
+            is NetworkResponse.Success -> {
+                isAccountEventsDetailsLoading = false
+                val newEvents = it.data?.event_ids?.map { eventId ->
+                    val eventDetails = it.data?.event_map_by_id?.get(eventId)
+                    Event(
+                        creator_name = eventDetails?.creator_name ?: "",
+                        description = eventDetails?.description ?: "",
+                        end_datetime = eventDetails?.end_datetime ?: "",
+                        id = eventDetails?.id ?: "",
+                        last_modified_time = eventDetails?.last_modified_time ?: "",
+                        start_datetime = eventDetails?.start_datetime ?: ""
+                    )
+                }
+                accountDetailsViewModal.setEvents(newEvents ?: emptyList())
+                Log.i("AccountDetails", "Success: ${it.data}")
+            }
+
+            is NetworkResponse.Error -> {
+                isAccountEventsDetailsLoading = false
+                Log.i("AccountDetails", "Failure: ${it.message}")
+            }
+
+            is NetworkResponse.Loading -> {
+                isAccountEventsDetailsLoading = true
                 Log.i("AccountDetails", "Loading")
             }
         }
@@ -206,6 +252,27 @@ fun AccountDetails(
         }
     }
 
+    deleteAccountEventResponse?.let {
+        when(it){
+            is NetworkResponse.Success -> {
+                Log.i("AccountDetails deleteAccount Success", "Success: ${it.data}")
+                LaunchedEffect(key1 = accountId) {
+                    accountDetailsViewModal.getAccountEvents(accountId = accountId)
+                }
+                CustomToast(message = "Event Deleted", type = ToastType.Success)
+            }
+
+            is NetworkResponse.Error -> {
+                CustomToast(message = it.message ?: "Something went wrong", type = ToastType.Error)
+                Log.i("AccountDetails deleteAccount Error", "Failure: ${it.message}")
+            }
+
+            is NetworkResponse.Loading -> {
+                Log.i("AccountDetails deleteAccount Loading", "Loading")
+            }
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -227,7 +294,11 @@ fun AccountDetails(
             onDismissRequest = {
                 openDialogForNote.value = false
             },
-            showConfirmationDialog = openDialogForNote.value
+            showConfirmationDialog = openDialogForNote.value,
+            titleTestTag = "txt_account_detail_delete_note_title",
+            messageTestTag = "txt_account_detail_delete_note_message",
+            confirmButtonTestTag = "btn_account_detail_delete_note_confirm",
+            dismissButtonTestTag = "btn_account_detail_delete_note_cancel"
         )
 
         CustomAlertDialog(
@@ -243,7 +314,31 @@ fun AccountDetails(
             onDismissRequest = {
                 openDialogForTask.value = false
             },
-            showConfirmationDialog = openDialogForTask.value
+            showConfirmationDialog = openDialogForTask.value,
+            titleTestTag = "txt_account_detail_delete_task_title",
+            messageTestTag = "txt_account_detail_delete_task_message",
+            confirmButtonTestTag = "btn_account_detail_delete_task_confirm",
+            dismissButtonTestTag = "btn_account_detail_delete_task_cancel"
+        )
+
+        CustomAlertDialog(
+            title = "Delete Event",
+            message = "Are you sure you want to delete this event?",
+            onConfirmButtonClick = {
+                accountDetailsViewModal.deleteAccountEvent(
+                    accountId = accountId,
+                    eventId = eventId.value
+                )
+                openDialogForEvent.value = false
+            },
+            onDismissRequest = {
+                openDialogForEvent.value = false
+            },
+            showConfirmationDialog = openDialogForEvent.value,
+            titleTestTag = "txt_account_detail_delete_event_title",
+            messageTestTag = "txt_account_detail_delete_event_message",
+            confirmButtonTestTag = "btn_account_detail_delete_event_confirm",
+            dismissButtonTestTag = "btn_account_detail_delete_event_cancel"
         )
 
         AccountDetailsHeader()
@@ -268,7 +363,7 @@ fun AccountDetails(
         } else if (notes?.isEmpty() == true || notes == null) {
             EmptyScreen(
                 "Add notes and sync with your salesforce account",
-                testId = "txt_account_detail_add_note_text"
+                testId = "txt_account_detail_note_empty_screen"
             )
         } else {
             var index = 0;
@@ -283,14 +378,31 @@ fun AccountDetails(
                     index = index++,
                     onClick = {
                         Log.i("AccountDetails", "NoteId: ${note.id}")
-                        NavigationService.navigateTo("note_details_screen/${accountId}/${accountName}/${note.id}")
+                        var noteData = NoteData(
+                            id = note.id,
+                            text = note.text_preview,
+                            shouldShowCrmSuggestion = false,
+                            isNoteScreenEditable = false
+                        )
+                        NavigationService.navigateToNotesScreen(accountId, accountName, false, noteData)
                     },
                     onDeleteMenuClick = { noteID ->
                         Log.i("AccountDetails onDeleteMenuClick", "NoteId: ${note.id}")
                         noteId.value = noteID
                         openDialogForNote.value = true
-                    }
-
+                    },
+                    onEditMenuClick = {
+                        Log.i("AccountDetails onEditMenuClick", "NoteId: ${note.id}")
+                        var noteData = NoteData(
+                            id = note.id,
+                            text = note.text_preview,
+                            shouldShowCrmSuggestion = false,
+                            isNoteScreenEditable = true
+                        )
+                        NavigationService.navigateToNotesScreen(accountId, accountName, false, noteData)
+                    },
+                    editMenuTestTag = "btn_account_detail_edit_note_${index}",
+                    deleteMenuTestTag = "btn_account_detail_delete_note_${index}"
                 )
             }
         }
@@ -300,8 +412,12 @@ fun AccountDetails(
         if (isAccountTaskDetailsLoading) {
             Loader()
         } else if (tasks?.isEmpty() == true || tasks == null) {
-            EmptyScreen("Add tasks, set due dates and assign to your team", testId = "")
+            EmptyScreen(
+                "Add tasks, set due dates and assign to your team",
+                testId = "txt_account_detail_task_empty_screen"
+            )
         } else {
+            var index = 0;
             tasks?.forEach { task ->
                 TasksCard(
                     firsName = task.creator_name.split(" ")[0],
@@ -311,21 +427,103 @@ fun AccountDetails(
                     date = task.last_modified_time,
                     assignedTaskUserName = task.crm_organization_user_name,
                     dueDate = task.due_date,
+                    index = index++,
                     onClick = {
                         Log.i("AccountDetails", "TaskId: ${task.id}")
-                        NavigationService.navigateTo("task_details_screen/${accountId}/${accountName}/${task.id}")
+                        var taskData = TaskData(
+                            creator_name = task.creator_name,
+                            crm_organization_user_name = task.crm_organization_user_name,
+                            description = task.description,
+                            due_date = task.due_date,
+                            id = task.id,
+                            crm_organization_user_id = task.crm_organization_user_id,
+                            isTaskScreenEditable = false,
+                            shouldNavigateBackToAccountDetailsScreen = true
+                        )
+                        NavigationService.navigateToTaskScreen(accountId, accountName, taskData)
                     },
                     taskId = task.id,
                     onDeleteMenuClick = { task ->
                         Log.i("AccountDetails onDeleteMenuClick", "TaskId: $task")
                         taskId.value = task
                         openDialogForTask.value = true
-                    }
+                    },
+                    onEditMenuClick = {
+                        Log.i("AccountDetails onEditMenuClick", "TaskId: $task")
+                        var taskData = TaskData(
+                            creator_name = task.creator_name,
+                            crm_organization_user_name = task.crm_organization_user_name,
+                            description = task.description,
+                            due_date = task.due_date,
+                            id = task.id,
+                            crm_organization_user_id = task.crm_organization_user_id,
+                            isTaskScreenEditable = true,
+                            shouldNavigateBackToAccountDetailsScreen = true
+                        )
+                        NavigationService.navigateToTaskScreen(accountId, accountName, taskData)
+                    },
+                    editMenuTestTag = "btn_account_detail_edit_task_${index}",
+                    deleteMenuTestTag = "btn_account_detail_delete_task_${index}"
                 )
             }
         }
 
+        EventDetailsHeader(accountId, accountName = accountName)
 
+        if (isAccountEventsDetailsLoading) {
+            Loader()
+        } else if (events?.isEmpty() == true || events == null) {
+            EmptyScreen(
+                emptyText = "Setup events, meetings and loop in your team",
+                testId = "txt_account_detail_event_empty_screen"
+            )
+        } else {
+            var index = 0;
+            events?.forEach { event ->
+                Log.i("AccountDetails", "Event: ${event.id} ${event.end_datetime} ")
+                EventCard(
+                    firsName = event.creator_name.split(" ")[0],
+                    lastName = event.creator_name.split(" ")[1],
+                    username = event.creator_name,
+                    notes = event.description,
+                    date = event.last_modified_time,
+                    startDateTime = event.start_datetime,
+                    endDateTime = event.end_datetime,
+                    dueDate = event.start_datetime,
+                    index = index++,
+                    onClick = {
+                        Log.i("AccountDetails", "EventId: ${event.id}")
+                        var eventData = EventDetailsObject(
+                            eventId = event.id,
+                            eventStartDate = event.start_datetime,
+                            eventEndDate = event.end_datetime,
+                            eventDescription = event.description,
+                            isEventScreenEditable = false,
+                            shouldNavigateBackToAccountDetailsScreen = true
+                        )
+                        NavigationService.navigateToEventScreen(accountId,accountName, eventData)
+                    },
+                    eventId = event.id,
+                    onDeleteMenuClick = { task ->
+                        Log.i("AccountDetails onDeleteMenuClick", "EventId: $task")
+                        eventId.value = task
+                        openDialogForEvent.value = true
+                    },
+                    onEditMenuClick = { task ->
+                        Log.i("AccountDetails onEditMenuClick", "EventId: $task")
+                        var eventData = EventDetailsObject(
+                            eventId = event.id,
+                            eventStartDate = event.start_datetime,
+                            eventEndDate = event.end_datetime,
+                            eventDescription = event.description,
+                            isEventScreenEditable = true,
+                            shouldNavigateBackToAccountDetailsScreen = true
+                        )
+                        NavigationService.navigateToEventScreen(accountId,accountName, eventData)
+                    }
+                )
+            }
+        }
     }
 }
 
@@ -383,11 +581,6 @@ fun EmptyScreen(
             .padding(0.75.dp)
             .fillMaxWidth()
             .height(height)
-            .semantics {
-                testTagsAsResourceId = true
-                testTag = testId
-                contentDescription = testId
-            }
             .padding(start = 14.dp, top = 12.dp, end = 14.dp, bottom = 12.dp)
     ) {
 
@@ -411,11 +604,17 @@ fun EmptyScreen(
                 color = Color(0xFF545A71),
                 textAlign = TextAlign.Center,
                 letterSpacing = 0.48.sp,
-            )
+            ),
+           modifier = Modifier.semantics {
+                testTagsAsResourceId = true
+                testTag = testId
+                contentDescription = testId
+            }
         )
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TaskDetailsHeader(
     accountId: String,
@@ -432,14 +631,25 @@ fun TaskDetailsHeader(
             imageContentDescription = "buildings",
             imageModifier = Modifier
                 .width(17.dp)
-                .height(17.dp),
+                .height(17.dp)
+                .semantics {
+                    testTag = "img_account_detail_task_icon"
+                    contentDescription = "img_account_detail_task_icon"
+                    testTagsAsResourceId = true
+                },
             text = "Tasks",
             textStyle = TextStyle(
                 fontSize = 16.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_regular)),
                 fontWeight = FontWeight(600),
                 color = Color(0xFF212653),
-            )
+            ),
+            textModifier = Modifier
+                .semantics {
+                    testTag = "txt_account_detail_task_title"
+                    contentDescription = "txt_account_detail_task_title"
+                    testTagsAsResourceId = true
+                }
         )
         Image(
             painter = painterResource(id = R.drawable.add_icon),
@@ -447,11 +657,90 @@ fun TaskDetailsHeader(
             modifier = Modifier
                 .width(20.dp)
                 .height(20.dp)
+                .semantics {
+                    testTag = "btn_account_detail_add_task"
+                    testTagsAsResourceId = true
+                }
                 .clickable(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("task_screen/${accountId}/${accountName}")
+                    val taskData = TaskData(
+                        creator_name = "",
+                        crm_organization_user_name = "",
+                        description = "",
+                        due_date = "",
+                        id = "",
+                        crm_organization_user_id = "",
+                        isTaskScreenEditable = true,
+                        shouldNavigateBackToAccountDetailsScreen = true
+                    )
+                    NavigationService.navigateToTaskScreen(accountId, accountName, taskData)
+                }
+        )
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun EventDetailsHeader(
+    accountId: String,
+    accountName: String,
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        CustomTextWithImage(
+            imageId = R.drawable.events,
+            imageContentDescription = "buildings",
+            imageModifier = Modifier
+                .width(17.dp)
+                .height(17.dp)
+                .semantics {
+                    testTag = "img_account_detail_event_icon"
+                    contentDescription = "img_account_detail_event_icon"
+                    testTagsAsResourceId = true
+                },
+            text = "Events",
+            textStyle = TextStyle(
+                fontSize = 16.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                fontWeight = FontWeight(600),
+                color = Color(0xFF212653),
+            ),
+            textModifier = Modifier
+                .semantics {
+                    testTag = "txt_account_detail_event_title"
+                    contentDescription = "txt_account_detail_event_title"
+                    testTagsAsResourceId = true
+                }
+        )
+        Image(
+            painter = painterResource(id = R.drawable.add_icon),
+            contentDescription = "add_tasks",
+            modifier = Modifier
+                .width(20.dp)
+                .height(20.dp)
+                .semantics {
+                    testTag = "btn_account_detail_add_event"
+                    testTagsAsResourceId = true
+                }
+                .clickable(
+                    interactionSource = MutableInteractionSource(),
+                    indication = null
+                ) {
+
+                    val eventData = EventDetailsObject(
+                        eventId = "",
+                        eventStartDate = "",
+                        eventEndDate = "",
+                        eventDescription = "",
+                        isEventScreenEditable = true,
+                        shouldNavigateBackToAccountDetailsScreen = true
+                    )
+                    NavigationService.navigateToEventScreen(accountId, accountName,eventData)
                 }
         )
     }
@@ -462,7 +751,7 @@ fun TaskDetailsHeader(
 fun NotesDetailsHeader(
     accountId: String,
     accountName: String,
-    isAccountSelectionEnabled: Boolean? = false
+    isAccountSelectionEnabled: Boolean = false
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -487,7 +776,7 @@ fun NotesDetailsHeader(
                 fontWeight = FontWeight(600),
                 color = Color(0xFF212653),
             ),
-            textModifier =Modifier
+            textModifier = Modifier
                 .semantics {
                     testTag = "txt_account_detail_notes_title"
                     contentDescription = "txt_account_detail_notes_title"
@@ -508,7 +797,7 @@ fun NotesDetailsHeader(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    NavigationService.navigateTo("notes_screen/${accountId}/${accountName}/${isAccountSelectionEnabled}")
+                    NavigationService.navigateToNotesScreen(accountId, accountName, isAccountSelectionEnabled, null)
                 }
         )
     }

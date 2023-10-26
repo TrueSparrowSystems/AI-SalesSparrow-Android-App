@@ -76,8 +76,8 @@ fun RecommandedTaskContainer(
     crmUserName: String?,
     taskDesc: String?,
     dueDate: String?,
-    onCancelClick: (crmOrganizationUserId: String, crmOrganizationUserName: String, description: String, dueDate: String, id: String) -> Unit
-
+    onCancelClick: (crmOrganizationUserId: String, crmOrganizationUserName: String, description: String, dueDate: String, id: String) -> Unit,
+    onAddTaskClick: (crmOrganizationUserId: String, crmOrganizationUserName: String, description: String, dueDate: String, id: String, taskId: String) -> Unit
 ) {
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
@@ -92,6 +92,7 @@ fun RecommandedTaskContainer(
 
 
     val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
+    val selectedDueDate = remember { mutableStateOf(dueDate) }
 
     createTaskResponse?.let { response ->
         when (response) {
@@ -102,6 +103,15 @@ fun RecommandedTaskContainer(
                     CustomToast(
                         message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                     )
+                    onAddTaskClick(
+                        currTask?.crm_user_id ?: "",
+                        currTask?.crm_user_name ?: "",
+                        taskDescription!!,
+                        selectedDueDate.value!!,
+                        id,
+                        createTaskResponse?.data?.task_id ?: ""
+                    )
+                    bottomSheetVisible()
                 }
                 Log.i("Task", "Task Created Successfully")
 
@@ -135,7 +145,7 @@ fun RecommandedTaskContainer(
     dueDateDay = dueDateCalendar.get(Calendar.DAY_OF_MONTH)
 
     dueDateCalendar.time = Date()
-    val selectedDueDate = remember { mutableStateOf(dueDate) }
+
 
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->

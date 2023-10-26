@@ -9,6 +9,7 @@ plugins {
     id("com.google.firebase.crashlytics")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id ("kotlin-parcelize")
 }
 
 
@@ -46,8 +47,8 @@ android {
     productFlavors {
 
         create("production") {
-            versionCode = 4
-            versionName = "1.0.0"
+            versionCode = 5
+            versionName = "1.0.1"
             resValue("string", "app_name", "SalesSparrow")
             buildConfigField(
                 "String",
@@ -92,7 +93,7 @@ android {
         }
         create("staging") {
             applicationIdSuffix = ".dev"
-            versionCode = 6
+            versionCode = 14
             versionName = "1.0.0"
             resValue("string", "app_name", "Sales-Dev")
             buildConfigField(
@@ -242,6 +243,7 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.2.2")
     implementation("io.coil-kt:coil-gif:2.2.2")
+    implementation("androidx.webkit:webkit:1.8.0")
 }
 
 kapt {
