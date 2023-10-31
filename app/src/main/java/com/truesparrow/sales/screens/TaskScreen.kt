@@ -28,12 +28,14 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -43,10 +45,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -64,26 +69,109 @@ import com.truesparrow.sales.services.NavigationService
 import com.truesparrow.sales.ui.theme.customFontFamily
 import com.truesparrow.sales.util.NetworkResponse
 import com.truesparrow.sales.util.NoRippleInteractionSource
-import com.truesparrow.sales.viewmodals.GlobalStateViewModel
 import com.truesparrow.sales.viewmodals.TasksViewModal
 import java.util.Calendar
 import java.util.Date
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TaskScreen(
     accountId: String? = null,
     accountName: String? = null,
+    taskDesc: String = "",
+    dueDate: String = "",
+    crmUserId: String = "",
+    crmUserName: String = "",
+    taskId: String = "",
+    isTaskScreenEditable: Boolean = true,
+    shouldNavigateBackToAccountDetailsScreen: Boolean = false
 ) {
 
-    var taskDesc = ""
-    var crmUserId = ""
-    var dueDate = ""
+    var taskDesc = taskDesc
+    var crmUserId = crmUserId
+    var dueDate = dueDate
+    var crmUserName = crmUserName
+
+    Log.i("TaskScreen", "Success $shouldNavigateBackToAccountDetailsScreen")
 
 
     var task by remember { mutableStateOf(taskDesc) }
     val tasksViewModel: TasksViewModal = hiltViewModel()
+    if (taskId.isNotEmpty()) {
+        tasksViewModel.setTasksScreenSelectedUserName(crmUserName)
+        tasksViewModel.setTasksScreenSelectedUserId(crmUserId)
+        tasksViewModel.setTaskScreenSelectedDueDate(dueDate)
+        LaunchedEffect(key1 = taskId) {
+            if (accountId != null) {
+                tasksViewModel.taskDetails(accountId, taskId)
+            }
+        }
+    }
+
     var createTaskApiInProgress by remember { mutableStateOf(false) }
     var createTaskApiIsSuccess by remember { mutableStateOf(false) }
+    var updateTaskApiInProgress by remember { mutableStateOf(false) }
+    var updateTaskApiIsSuccess by remember { mutableStateOf(false) }
+
+    val updateTaskResponse by tasksViewModel.updateTaskLiveData.observeAsState()
+    val taskDetailsApiResponse by tasksViewModel.taskDetails.observeAsState()
+
+    taskDetailsApiResponse?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                Log.i("TaskScreen", "Success ${response.data?.task_detail?.description}")
+                val taskDetails = response.data?.task_detail
+                taskDesc = taskDetails?.description ?: ""
+            }
+
+            is NetworkResponse.Error -> {
+                CustomToast(
+                    message = response.message ?: "Something went wrong",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Error
+                )
+
+            }
+
+            is NetworkResponse.Loading -> {
+                Log.d("TaskScreen", "Loading")
+            }
+        }
+    }
+
+    updateTaskResponse?.let { response ->
+        when (response) {
+            is NetworkResponse.Success -> {
+                updateTaskApiInProgress = false
+                updateTaskApiIsSuccess = true
+                CustomToast(
+                    message = "Task Updated.",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Success
+                )
+                Log.i("TaskScreen", "Success ${response.data} $shouldNavigateBackToAccountDetailsScreen")
+                if (shouldNavigateBackToAccountDetailsScreen) {
+                    NavigationService.navigateBackToAccountDetailsScreen()
+                }
+                Log.i("TaskScreen", "Success ${response.data}")
+            }
+
+            is NetworkResponse.Error -> {
+                updateTaskApiInProgress = false
+                CustomToast(
+                    message = response.message ?: "Failed to update the task",
+                    duration = Toast.LENGTH_SHORT,
+                    type = ToastType.Error
+                )
+
+            }
+
+            is NetworkResponse.Loading -> {
+                updateTaskApiInProgress = true
+                Log.d("TaskScreen", "Loading")
+            }
+        }
+    }
 
     val createTaskResponse by tasksViewModel.tasksLiveData.observeAsState()
 
@@ -93,8 +181,12 @@ fun TaskScreen(
                 createTaskApiInProgress = false
                 createTaskApiIsSuccess = true
                 CustomToast(
-                    message = "Task Added.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
+                    message = "Task Added and assigned to ${crmUserName}.", duration = Toast.LENGTH_SHORT, type = ToastType.Success
                 )
+                if (shouldNavigateBackToAccountDetailsScreen) {
+                    NavigationService.navigateBackToAccountDetailsScreen()
+                }
+                Log.i("TaskScreen", "Success ${response.data}")
             }
 
             is NetworkResponse.Error -> {
@@ -118,35 +210,47 @@ fun TaskScreen(
         AddTaskHeader(
             createTaskApiInProgress = createTaskApiInProgress,
             createTasksApiIsSuccess = createTaskApiIsSuccess,
+            updateTaskApiInProgress = updateTaskApiInProgress,
+            updateTaskApiIsSuccess = updateTaskApiIsSuccess,
             accountId = accountId,
-            dueDate = dueDate,
-            taskDesc = task
+            taskId = taskId,
+            taskDesc = task,
+            isTaskScreenEditable = isTaskScreenEditable
         )
+        if (taskDetailsApiResponse is NetworkResponse.Loading) {
+            Loader()
+        }
         Spacer(modifier = Modifier.height(20.dp))
         AddTaskContent(
             accountId = accountId,
             accountName = accountName,
             dueDate = dueDate,
+            crmUserName = crmUserName,
         )
         Spacer(modifier = Modifier.height(20.dp))
         EditableTextField(note = task, placeholderText =
         "Add task", onValueChange = {
             task = it
-        }, modifier = Modifier
+        },
+            readOnly = !isTaskScreenEditable  || createTaskApiIsSuccess  || updateTaskApiIsSuccess,
+            modifier = Modifier
             .fillMaxWidth()
             .semantics {
-                contentDescription = "et_create_note"
-                testTag = "et_create_note"
+                contentDescription = "et_create_task"
+                testTag = "et_create_task"
+                testTagsAsResourceId = true
             })
 
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AddTaskContent(
     dueDate: String,
     accountId: String? = null,
-    accountName: String? = null
+    accountName: String? = null,
+    crmUserName: String? = "",
 ) {
 
 
@@ -185,7 +289,15 @@ fun AddTaskContent(
     dueDateDay = dueDateCalendar.get(Calendar.DAY_OF_MONTH)
 
     dueDateCalendar.time = Date()
-    val selectedDueDate = remember { mutableStateOf(dueDate) }
+    var selectedDueDate = remember { mutableStateOf(dueDate) }
+
+   //assign today's date if due date is empty
+    if (selectedDueDate.value.isEmpty()) {
+        val formattedDay = String.format("%02d", dueDateDay)
+        val formattedMonth = String.format("%02d", dueDateMonth + 1)
+        selectedDueDate.value = "$dueDateYear-$formattedMonth-$formattedDay"
+        tasksViewModel.setTaskScreenSelectedDueDate(selectedDueDate.value)
+    }
 
     val mDatePickerDialog = DatePickerDialog(
         dueDateContext, { _: DatePicker, mYear: Int, mMonth: Int, mDayOfMonth: Int ->
@@ -208,12 +320,17 @@ fun AddTaskContent(
             Text(
                 text = "Assign to",
                 color = Color(0xff545A71),
-                modifier = Modifier.width(64.dp),
+                modifier = Modifier
+                    .width(64.dp)
+                    .semantics {
+                        testTag = "txt_assign_to"
+                        testTagsAsResourceId = true
+                        contentDescription = "txt_assign_to"
+                    },
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontFamily = customFontFamily,
-
-                    )
+                ),
             )
         }
         Row(
@@ -235,7 +352,13 @@ fun AddTaskContent(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 interactionSource = NoRippleInteractionSource(),
                 modifier = Modifier.semantics {
-                    contentDescription = ""
+                    testTag = "btn_select_user"
+                    testTagsAsResourceId = true
+                    contentDescription = if (crmUserId == "1") {
+                        "btn_select_user"
+                    } else {
+                        "btn_select_user_${crmUserName}"
+                    }
                 }) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -253,7 +376,7 @@ fun AddTaskContent(
                                 color = Color(0xFF000000),
                                 letterSpacing = 0.21.sp,
                             ),
-                            userAvatarTestId = "user_avatar_note_details"
+                            userAvatarTestId = "user_avatar_task_screen_$crmUserName"
                         )
                     }
 
@@ -271,6 +394,8 @@ fun AddTaskContent(
                             fontWeight = FontWeight.Bold,
                             fontFamily = customFontFamily,
                         ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
 
                     Spacer(modifier = Modifier.width(20.dp))
@@ -296,12 +421,17 @@ fun AddTaskContent(
             Text(
                 text = "Due",
                 color = Color(0xff545A71),
-                modifier = Modifier.width(64.dp),
+                modifier = Modifier
+                    .width(64.dp)
+                    .semantics {
+                        testTag = "txt_due"
+                        testTagsAsResourceId = true
+                        contentDescription = "txt_due"
+                    },
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontFamily = customFontFamily,
-
-                    )
+                )
             )
         }
         Row(
@@ -324,6 +454,17 @@ fun AddTaskContent(
                 modifier = Modifier
                     .width(180.dp)
                     .semantics {
+                        testTag = "btn_select_due_date" + selectedDueDate.value
+                            .replace("-", "/")
+                            .ifEmpty {
+                                dueDate
+                                    .replace("-", "/")
+                                    .ifEmpty {
+                                        "Select"
+                                    }
+                            }
+
+                        testTagsAsResourceId = true
                         contentDescription = "btn_select_account"
                     }) {
                 Row(
@@ -359,13 +500,17 @@ fun AddTaskContent(
 }
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AddTaskHeader(
     createTaskApiInProgress: Boolean,
     createTasksApiIsSuccess: Boolean,
+    updateTaskApiInProgress: Boolean,
+    updateTaskApiIsSuccess: Boolean,
     accountId: String? = null,
     taskDesc: String,
-    dueDate: String
+    taskId: String = "",
+    isTaskScreenEditable: Boolean = true
 ) {
 
     val tasksViewModel: TasksViewModal = hiltViewModel()
@@ -377,7 +522,11 @@ fun AddTaskHeader(
     ) {
 
         Text(
-            text = "Cancel",
+            text = if (createTasksApiIsSuccess) {
+                "Done"
+            } else {
+                "Cancel"
+            },
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_regular)),
@@ -390,7 +539,11 @@ fun AddTaskHeader(
                     indication = null,
                     onClick = { NavigationService.navigateBack() })
                 .semantics {
-                    contentDescription = if (createTasksApiIsSuccess) "" else ""
+                    testTagsAsResourceId = true
+                    testTag =
+                        if (createTasksApiIsSuccess) "btn_done_create_task" else "btn_cancel_create_task"
+                    contentDescription =
+                        if (createTasksApiIsSuccess) "btn_done_create_task" else "btn_cancel_create_task"
                 },
         )
 
@@ -400,82 +553,105 @@ fun AddTaskHeader(
             Color(0xFF212653)
         }
 
-        Button(onClick = {
-            tasksViewModel.createTask(
-                accountId = accountId!!,
-                crmOrganizationUserId = tasksViewModel.getTasksScreenSelectedUserId(),
-                description = taskDesc,
-                dueDate = tasksViewModel.getTaskScreenSelectedDueDate(),
-            )
-        },
-            enabled = true,
-            contentPadding = PaddingValues(all = 8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent, contentColor = Color.White
-            ),
-            modifier = Modifier
-                .background(
-                    color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
-                )
-                .width(112.dp)
-                .height(46.dp)
-                .clip(shape = RoundedCornerShape(size = 5.dp))
-                .semantics {
-                    contentDescription = ""
+        if (isTaskScreenEditable) {
+            Button(onClick = {
+                if (taskId.isNotEmpty()) {
+                    tasksViewModel.updateTask(
+                        accountId = accountId!!,
+                        taskId = taskId,
+                        crmOrganizationUserId = tasksViewModel.getTasksScreenSelectedUserId(),
+                        description = taskDesc,
+                        dueDate = tasksViewModel.getTaskScreenSelectedDueDate(),
+                    )
+                } else {
+                    tasksViewModel.createTask(
+                        accountId = accountId!!,
+                        crmOrganizationUserId = tasksViewModel.getTasksScreenSelectedUserId(),
+                        description = taskDesc,
+                        dueDate = tasksViewModel.getTaskScreenSelectedDueDate(),
+                    )
                 }
-
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically
+            },
+                enabled = true,
+                contentPadding = PaddingValues(all = 8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent, contentColor = Color.White
+                ),
+                modifier = Modifier
+                    .background(
+                        color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
+                    )
+                    .width(112.dp)
+                    .height(46.dp)
+                    .clip(shape = RoundedCornerShape(size = 5.dp))
+                    .semantics {
+                        testTagsAsResourceId = true
+                        testTag = "btn_save_task"
+                        contentDescription = "btn_save_task"
+                    }
 
             ) {
-                val imageLoader = ImageLoader.Builder(LocalContext.current).components {
-                    if (Build.VERSION.SDK_INT >= 28) {
-                        add(ImageDecoderDecoder.Factory())
-                    } else {
-                        add(GifDecoder.Factory())
-                    }
-                }.build()
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(
+                        4.dp,
+                        Alignment.CenterHorizontally
+                    ),
+                    verticalAlignment = Alignment.CenterVertically
 
-
-                if (createTaskApiInProgress || createTasksApiIsSuccess) {
-                    Image(
-                        painter = if (createTaskApiInProgress) {
-                            rememberAsyncImagePainter(R.drawable.loader, imageLoader)
+                ) {
+                    val imageLoader = ImageLoader.Builder(LocalContext.current).components {
+                        if (Build.VERSION.SDK_INT >= 28) {
+                            add(ImageDecoderDecoder.Factory())
                         } else {
-                            painterResource(id = R.drawable.check)
-                        },
-                        contentDescription = "Loader",
-                        colorFilter = ColorFilter.tint(Color.White),
-                        modifier = Modifier
-                            .width(width = 12.dp)
-                            .height(height = 12.dp)
-                    )
+                            add(GifDecoder.Factory())
+                        }
+                    }.build()
 
+
+                    if (createTaskApiInProgress || createTasksApiIsSuccess || updateTaskApiInProgress || updateTaskApiIsSuccess) {
+                        Image(
+                            painter = if (createTaskApiInProgress) {
+                                rememberAsyncImagePainter(R.drawable.loader, imageLoader)
+                            } else {
+                                painterResource(id = R.drawable.check)
+                            },
+                            contentDescription = "Loader",
+                            colorFilter = ColorFilter.tint(Color.White),
+                            modifier = Modifier
+                                .width(width = 12.dp)
+                                .height(height = 12.dp)
+                                .semantics {
+                                    testTagsAsResourceId = true
+                                    testTag = "task_screen_cloud"
+                                }
+                        )
+
+                    }
+                    Text(text = if (createTaskApiInProgress || updateTaskApiInProgress) {
+                        "Saving Task..."
+                    } else if (createTasksApiIsSuccess || updateTaskApiIsSuccess) {
+                        "Saved"
+                    } else {
+                        "Save Task"
+                    }, color = Color.White, style = TextStyle(
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                        fontWeight = FontWeight(500),
+                        color = Color(0xFFFFFFFF),
+                        letterSpacing = 0.48.sp,
+                    ), modifier = Modifier.semantics {
+                        if (createTasksApiIsSuccess) "txt_create_task_saved" else "txt_create_task_save"
+                        contentDescription =
+                            if (createTasksApiIsSuccess) "txt_create_task_saved" else "txt_create_task_save"
+                    })
                 }
-                Text(text = if (createTaskApiInProgress) {
-                    "Saving Task..."
-                } else if (createTasksApiIsSuccess) {
-                    "Saved"
-                } else {
-                    "Save Task"
-                }, color = Color.White, style = TextStyle(
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFFFFFFFF),
-                    letterSpacing = 0.48.sp,
-                ), modifier = Modifier.semantics {
-                    contentDescription = if (createTasksApiIsSuccess) "" else ""
-                })
             }
         }
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun TaskScreenPreview() {
-//    TaskScreen()
-//}
+@Preview(showBackground = true)
+@Composable
+fun TaskScreenPreview() {
+    TaskScreen()
+}

@@ -82,13 +82,17 @@ fun SettingsScreen() {
             onDismissRequest = {
                 openDialogForSalesForceDisconnect.value = false
             },
-            showConfirmationDialog = openDialogForSalesForceDisconnect.value
+            showConfirmationDialog = openDialogForSalesForceDisconnect.value,
+            titleTestTag = "setting_screen_disconnect_salesforce_title",
+            messageTestTag = "setting_screen_disconnect_salesforce_message",
+            confirmButtonTestTag = "setting_screen_disconnect_salesforce_confirm_button",
+            dismissButtonTestTag = "setting_screen_disconnect_salesforce_dismiss_button"
         )
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
-            ) {
+        ) {
             if (currentUser != null) {
                 UserAvatar(
                     id = currentUser.id ?: "121",
@@ -110,7 +114,12 @@ fun SettingsScreen() {
                             fontWeight = FontWeight(500),
                             color = Color(0xFF545A71),
                             letterSpacing = 0.56.sp,
-                        )
+                        ),
+                        modifier = Modifier.semantics {
+                            testTagsAsResourceId = true
+                            testTag = "txt_user_account_detail_user_name"
+                            contentDescription = "txt_user_account_detail_user_name"
+                        }
                     )
                 }
             }
@@ -154,6 +163,11 @@ fun SettingsScreen() {
                         .clickable {
                             openDialogForSalesForceDisconnect.value = true
                         }
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = "btn_user_account_detail_disconnect_salesforce"
+                            contentDescription = "btn_user_account_detail_disconnect_salesforce"
+                        }
                 ) {
                     Switch(
                         checked = switchCheckedState,
@@ -166,7 +180,12 @@ fun SettingsScreen() {
                             fontFamily = FontFamily(Font(R.font.nunito_regular)),
                             fontWeight = FontWeight(600),
                             color = Color(0xFF545A71),
-                        )
+                        ),
+                        modifier = Modifier.semantics {
+                            testTagsAsResourceId = true
+                            testTag = "txt_user_account_detail_disconnect_salesforce"
+                            contentDescription = "txt_user_account_detail_disconnect_salesforce"
+                        }
                     )
 
                 }
@@ -196,15 +215,16 @@ fun SettingsScreen() {
                 .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
                 .semantics {
                     testTagsAsResourceId = true
-                     testTag = "btn_user_account_detail_logout"
+                    testTag = "btn_user_account_detail_logout"
                     contentDescription = "btn_user_account_detail_logout"
-                    }
+                }
                 .clickable(
-                    interactionSource =  MutableInteractionSource(),
+                    interactionSource = MutableInteractionSource(),
                     indication = null,
                     onClick = {
-                    authenticationViewModal.logout()
-                },  )
+                        authenticationViewModal.logout()
+                    },
+                )
         ) {
             Image(painterResource(id = R.drawable.sign_out), contentDescription = "sign_out")
             Spacer(modifier = Modifier.padding(start = 8.dp))
@@ -215,7 +235,12 @@ fun SettingsScreen() {
                     fontFamily = FontFamily(Font(R.font.nunito_regular)),
                     fontWeight = FontWeight(600),
                     color = Color(0xFF545A71),
-                )
+                ),
+                modifier = Modifier.semantics {
+                    testTagsAsResourceId = true
+                    testTag = "txt_user_account_detail_logout"
+                    contentDescription = "txt_user_account_detail_logout"
+                }
             )
 
         }
@@ -240,7 +265,12 @@ fun SettingsScreen() {
                         fontWeight = FontWeight(600),
                         color = Color(0xFF545A71),
                         textAlign = TextAlign.Center,
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag = "txt_user_account_detail_app_version"
+                        contentDescription = "txt_user_account_detail_app_version"
+                    }
                 )
 
 
@@ -252,13 +282,19 @@ fun SettingsScreen() {
                         fontWeight = FontWeight(600),
                         color = Color(0xFF545A71),
                         textAlign = TextAlign.Center
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag = "txt_user_account_detail_app_name"
+                        contentDescription = "txt_user_account_detail_app_name"
+                    }
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SettingHeader() {
     Image(
@@ -269,15 +305,21 @@ fun SettingHeader() {
             .width(32.dp)
             .height(32.dp)
             .clickable(
-                interactionSource =  MutableInteractionSource(),
+                interactionSource = MutableInteractionSource(),
                 indication = null,
                 onClick = {
                     NavigationService.navigateBack()
                 }
             )
+            .semantics {
+                testTagsAsResourceId = true
+                testTag = "btn_user_account_detail_close"
+                contentDescription = "btn_user_account_detail_close"
+            }
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DisconnectingSalesforceText(modifier: Modifier = Modifier) {
     Text(
@@ -306,6 +348,11 @@ fun DisconnectingSalesforceText(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
+            .semantics {
+                testTagsAsResourceId = true
+                testTag = "txt_user_account_detail_disconnect_salesforce_message"
+                contentDescription = "txt_user_account_detail_disconnect_salesforce_message"
+            }
     )
 }
 

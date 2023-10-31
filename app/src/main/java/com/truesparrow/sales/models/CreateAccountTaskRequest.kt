@@ -5,3 +5,9 @@ data class CreateAccountTaskRequest(
     val description: String,
     val due_date: String
 )
+
+data class createAccountEventRequest(
+    val start_datetime: String,
+    val end_datetime: String,
+    val description: String
+)

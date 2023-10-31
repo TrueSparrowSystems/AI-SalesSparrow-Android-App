@@ -26,7 +26,8 @@ fun RecommandedTaskSheet(
     accountName : String?,
     accountId : String?,
     id : String?,
-    onCancelClick :(crmOrganizationUserId: String, crmOrganizationUserName: String, description: String, dueDate: String, id :String) -> Unit
+    onCancelClick :(crmOrganizationUserId: String, crmOrganizationUserName: String, description: String, dueDate: String, id :String) -> Unit,
+    onAddTaskClick : (crmOrganizationUserId: String, crmOrganizationUserName: String, description: String, dueDate: String, id :String, taskId: String) -> Unit,
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     Log.i("Tag===", "Task: $taskDesc, Due Date: $dueDate, User ID: $crmUserId, User Name: $crmUserName")
@@ -53,7 +54,8 @@ fun RecommandedTaskSheet(
             taskDesc = taskDesc,
             dueDate = dueDate,
             onSelectUSerClick = onSelectUSerClick,
-            onCancelClick = onCancelClick
+            onCancelClick = onCancelClick,
+            onAddTaskClick = onAddTaskClick,
         )
     }
 }

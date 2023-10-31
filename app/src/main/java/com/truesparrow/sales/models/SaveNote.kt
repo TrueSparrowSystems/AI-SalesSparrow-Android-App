@@ -13,3 +13,13 @@ data class Tasks(
     val is_task_created: Boolean,
     val task_id: String ? = ""
 )
+
+data class SuggestedEvents(
+    val description: String,
+    val start_datetime: String,
+    val end_datetime: String,
+    val id: String,
+    val is_event_created: Boolean,
+    val event_id: String ? = ""
+)
+

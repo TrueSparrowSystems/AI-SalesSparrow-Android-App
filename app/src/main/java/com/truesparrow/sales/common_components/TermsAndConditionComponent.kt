@@ -41,7 +41,7 @@ fun TermsAndConditionComponent(
         }
         pushStringAnnotation(
             tag = "terms",
-            annotation = "https://www.truesparrow.com"
+            annotation = "https://drive.google.com/file/d/1kccg9XL2D0QEtCV09Bn8icStNX1PAF5E/view"
         )
         withStyle(
             style = SpanStyle(
@@ -68,7 +68,7 @@ fun TermsAndConditionComponent(
         }
         pushStringAnnotation(
             tag = "privacy",
-            annotation = "https://www.truesparrow.com"
+            annotation = "https://drive.google.com/file/d/1kccg9XL2D0QEtCV09Bn8icStNX1PAF5E/view"
         )
         withStyle(
             style = SpanStyle(
@@ -90,14 +90,14 @@ fun TermsAndConditionComponent(
         onClick = { offset ->
             annotedString.getStringAnnotations(tag = "terms", start = offset, end = offset)
                 .firstOrNull()?.let {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse( "https://truesparrow.com/terms"));
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse( "https://drive.google.com/file/d/1pOQOLw_yt1aF9QXHlJag2YgaFmwtMf3Y/view"));
                     context.startActivity(intent);
                     Log.d("terms URL", it.item)
                 }
 
             annotedString.getStringAnnotations(tag = "privacy", start = offset, end = offset)
                 .firstOrNull()?.let {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse( "https://truesparrow.com/privacy"));
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse( "https://drive.google.com/file/d/1kccg9XL2D0QEtCV09Bn8icStNX1PAF5E/view"));
                     context.startActivity(intent);
                     Log.d("policy URL", it.item)
                 }

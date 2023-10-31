@@ -39,7 +39,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.truesparrow.sales.R
@@ -58,7 +57,11 @@ fun NotesCard(
     noteId: String = "",
     onClick: () -> Unit,
     onDeleteMenuClick: (noteId: String) -> Unit = {},
-    index : Number
+    onEditMenuClick: (noteId: String) -> Unit = {},
+    editMenuTestTag: String = "",
+    deleteMenuTestTag: String = "",
+    index : Number,
+
 ) {
     var formattedTime: String = "";
     try {
@@ -83,7 +86,7 @@ fun NotesCard(
             )
             .semantics {
                 testTagsAsResourceId = true
-                testTag = "NotesCardTestId"
+                testTag = "note_card_${index}"
             }
             .fillMaxWidth()
             .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 4.dp))
@@ -124,8 +127,8 @@ fun NotesCard(
                         letterSpacing = 0.56.sp,
                     ),
                     modifier = Modifier.semantics {
-                    testTag = "${username}_${index}"
-                    contentDescription = "${username}_${index}"
+                    testTag = "note_details_${username}_${index}"
+                    contentDescription = "note_details_${username}_${index}"
                     testTagsAsResourceId = true
                 }
                 )
@@ -171,7 +174,13 @@ fun NotesCard(
                         onDeleteMenuClick = {
                             Log.i("NotesCard", "NotesCard: $noteId")
                             onDeleteMenuClick(noteId)
-                        }
+                        },
+                        onEditMenuClick = {
+                            Log.i("NotesCard", "NotesCard: $noteId")
+                            onEditMenuClick(noteId)
+                        },
+                        editMenuTestTag = editMenuTestTag,
+                        deleteMenuTestTag = deleteMenuTestTag
                     )
                 }
 

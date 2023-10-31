@@ -80,12 +80,17 @@ fun TaskSuggestionCard(
     shouldShowOptions: Boolean = false,
     onCancelTaskClick: (id: String) -> Unit,
     onAddTaskClick: (
-        crmOrganizationUserId: String, description: String, dueDate: String, id : String
+        crmOrganizationUserId: String, description: String, dueDate: String, id: String
     ) -> Unit,
     createTaskApiInProgress: Boolean = false,
     isTaskAdded: Boolean = false,
-    noteViewModal: NotesViewModel
-) {
+    noteViewModal: NotesViewModel,
+    deleteMenuTestTag: String = "",
+    editMenuTestTag: String = "",
+    index: Number,
+    shouldShowEditOption: Boolean? = true,
+
+    ) {
 
     var expanded by remember {
         mutableStateOf(false)
@@ -124,13 +129,13 @@ fun TaskSuggestionCard(
             val formattedDay = String.format("%02d", mDayOfMonth)
             dueDate.value = "$mYear-$formattedMonth-$formattedDay"
 
-            Log.i("log2--------------","${id}")
+            Log.i("log2--------------", "${id}")
             noteViewModal.updateTaskById(
                 id, Tasks(
                     crm_user_id = crmUserId,
                     crm_user_name = crmUserName,
                     task_desc = taskDesc,
-                    due_date =  dueDate.value ,
+                    due_date = dueDate.value,
                     id = id,
                     is_task_created = false
                 )
@@ -162,77 +167,95 @@ fun TaskSuggestionCard(
             modifier = Modifier.fillMaxWidth()
 
         ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()
-            ) {
+            if (isTaskAdded) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
-                    verticalAlignment = Alignment.CenterVertically
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    UserAvatar(
-                        id = "1",
-                        firstName = currentUserName!!.split(" ")[0],
-                        lastName = currentUserName!!.split(" ")[1],
-                        size = 18.dp,
-                        textStyle = TextStyle(
-                            fontSize = 5.24.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(700),
-                            color = Color(0xFF000000),
-                            letterSpacing = 0.21.sp,
-                        ),
-                        userAvatarTestId = "user_avatar_note_details"
-                    )
-                    Text(
-                        text = currentUserName, style = TextStyle(
-                            fontSize = 14.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(500),
-                            color = Color(0xFF545A71),
-                            letterSpacing = 0.56.sp,
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        UserAvatar(
+                            id = "1",
+                            firstName = currentUserName!!.split(" ")[0],
+                            lastName = currentUserName!!.split(" ")[1],
+                            size = 18.dp,
+                            textStyle = TextStyle(
+                                fontSize = 5.24.sp,
+                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                                fontWeight = FontWeight(700),
+                                color = Color(0xFF000000),
+                                letterSpacing = 0.21.sp,
+                            ),
+                            userAvatarTestId = "user_avatar_note_details"
                         )
-                    )
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Just Now", style = TextStyle(
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily(Font(R.font.nunito_regular)),
-                            fontWeight = FontWeight(300),
-                            color = Color(0xFF545A71),
-                            letterSpacing = 0.48.sp,
-                        )
-                    )
-
-                    if (shouldShowOptions) {
-                        Box {
-                            Image(painter = painterResource(id = R.drawable.setting_three_dots_outline),
-                                contentDescription = "menu",
-                                modifier = Modifier
-                                    .width(20.dp)
-                                    .height(20.dp)
-                                    .pointerInput(true) {
-                                        detectTapGestures(onPress = {
-                                            pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
-                                            expanded = true
-                                        })
-                                    })
-
-                            CustomDropDownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false },
-                                onDeleteMenuClick = {
-                                    onDeleteTaskClick(id)
-                                }
+                        Text(
+                            text = currentUserName, style = TextStyle(
+                                fontSize = 14.sp,
+                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                                fontWeight = FontWeight(500),
+                                color = Color(0xFF545A71),
+                                letterSpacing = 0.56.sp,
                             )
+                        )
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Just Now", style = TextStyle(
+                                fontSize = 12.sp,
+                                fontFamily = FontFamily(Font(R.font.nunito_regular)),
+                                fontWeight = FontWeight(300),
+                                color = Color(0xFF545A71),
+                                letterSpacing = 0.48.sp,
+                            ),
+                            modifier = Modifier.semantics {
+                                testTagsAsResourceId = true
+                                testTag = "txt_create_note_date_$index"
+                                contentDescription = "txt_create_note_date_$index"
+                            }
+                        )
+
+                        if (shouldShowOptions) {
+                            Box {
+                                Image(painter = painterResource(id = R.drawable.setting_three_dots_outline),
+                                    contentDescription = "menu",
+                                    modifier = Modifier
+                                        .width(20.dp)
+                                        .height(20.dp)
+                                        .semantics {
+                                            testTagsAsResourceId = true
+                                            testTag = "btn_suggested_task_more_menu_$index"
+                                            contentDescription =
+                                                "btn_suggested_task_more_menu_$index"
+                                        }
+                                        .pointerInput(true) {
+                                            detectTapGestures(onPress = {
+                                                pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
+                                                expanded = true
+                                            })
+                                        })
+
+                                CustomDropDownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false },
+                                    onDeleteMenuClick = {
+                                        onDeleteTaskClick(id)
+                                    },
+                                    onEditMenuClick = {},
+                                    deleteMenuTestTag = "btn_delete_task_$index",
+                                    editMenuTestTag = "btn_edit_task_$index",
+                                    shouldShowEditOption = shouldShowEditOption
+                                )
+                            }
                         }
                     }
-                }
 
+                }
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
@@ -268,7 +291,12 @@ fun TaskSuggestionCard(
                         fontWeight = FontWeight(600),
                         color = Color(0xFF444A62),
                         letterSpacing = 0.64.sp,
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag = "txt_create_note_task_desc_$index"
+                        contentDescription = "txt_create_note_task_desc_$index"
+                    }
                 )
             }
 
@@ -329,7 +357,7 @@ fun TaskSuggestionCard(
                                 color = Color(0xFF000000),
                                 letterSpacing = 0.21.sp,
                             ),
-                            userAvatarTestId = "user_avatar_note_details"
+                            userAvatarTestId = "user_avatar_task_${crmUserName}"
                         )
                     }
                     Text(text = crmUserName.ifEmpty {
@@ -433,6 +461,11 @@ fun TaskSuggestionCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             if (!isTaskAdded) {
+                val buttonColor = if (dueDate.value.isNotEmpty() && crmUserName.isNotEmpty()) {
+                    Color(0xFF212653)
+                } else {
+                    Color(0xFF212653).copy(alpha = 0.7f)
+                }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     verticalAlignment = Alignment.CenterVertically
@@ -445,13 +478,14 @@ fun TaskSuggestionCard(
                             id
                         )
                     },
+                        enabled = dueDate.value.isNotEmpty() && crmUserName.isNotEmpty(),
                         contentPadding = PaddingValues(all = 8.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent, contentColor = Color.White
                         ),
                         modifier = Modifier
                             .background(
-                                color = Color(0xFF212653), shape = RoundedCornerShape(size = 5.dp)
+                                color = buttonColor, shape = RoundedCornerShape(size = 5.dp)
                             )
                             .height(32.dp)
                             .clip(shape = RoundedCornerShape(size = 5.dp))
@@ -555,7 +589,7 @@ fun TaskSuggestionCard(
             }
         }
     }
-    if (isTaskAdded){
+    if (isTaskAdded) {
         Box(modifier = Modifier.fillMaxSize()) {
             Row(
                 horizontalArrangement = Arrangement.Center,
@@ -564,7 +598,11 @@ fun TaskSuggestionCard(
                     .fillMaxWidth()
                     .height(30.dp)
                     .background(Color(0x3362E17D))
-                    .border(width = 1.dp, color = Color(0xFFE9E9E9), shape = RoundedCornerShape(size = 0.dp))
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFE9E9E9),
+                        shape = RoundedCornerShape(size = 0.dp)
+                    )
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.success_toast_check),
